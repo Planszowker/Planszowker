@@ -1,0 +1,8 @@
+*.cbp
+*.depend
+*.layout
+Planszowker_server/obj/*
+Planszowker_server/bin/*
+Planszowker_client/obj/*
+Planszowker_client/bin/*
+SFML/*
