@@ -12,24 +12,34 @@ using namespace std;
 int main() {
   sf::UdpSocket socket;
 
-  sf::Packet pakiet;
-  sf::Uint32 ziu = 10203;
-  pakiet << ziu;
-  char data_to_send[] = "Siema ziuzielki :D";
+  sf::Packet packet;
+  packet << "Siema packietowe ziuzielki :D";
 
   if(socket.bind(sf::Socket::AnyPort) != sf::Socket::Done) {
     return -1;
   }
 
-  sf::IpAddress server = "localhost";
+  sf::IpAddress server;
+  cout << "Enter IP: ";
+  cin >> server;
+
   unsigned short port = 54000;
 
   while(true) {
-    if(socket.send(data_to_send, sizeof(data_to_send), server, port) != sf::Socket::Done) {
+    if(socket.send(packet, server, port) != sf::Socket::Done) {
       return -2;
     }
 
-    cout << "Wysylam dane...\n";
+    sf::IpAddress server_ip;
+    unsigned short server_port;
+    sf::Packet recvPacket;
+    socket.receive(recvPacket, server_ip, server_port);
+
+    string server_message;
+    while(recvPacket >> server_message)
+      cout << server_message;
+
+
 
     Sleep(1000);
   }
