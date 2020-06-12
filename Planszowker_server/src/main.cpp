@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ErrorLogger.hpp"
+#include "../inc/Client.h"
 
 using namespace std;
 

@@ -5,7 +5,8 @@
 #include <iostream>
 
 
-namespace Planszowker::common {
+namespace Planszowker::common
+{
 
 /*!
  *  \brief Enum class to hold priorities about thrown exceptions
@@ -61,7 +62,8 @@ private:
  *
  *  \see ExceptionThrower
  */
-class ErrorLogger {
+class ErrorLogger
+{
 public:
 
   /*!
