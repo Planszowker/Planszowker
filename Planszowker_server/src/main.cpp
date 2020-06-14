@@ -4,7 +4,9 @@
 #include <string>
 
 #include "ErrorLogger.hpp"
-#include "../inc/Client.h"
+#include "Client.h"
+#include "Config.h"
+#include "build_number.h"
 
 using namespace std;
 
@@ -24,6 +26,8 @@ int main() {
   unsigned short port;
 
   common::ErrorLogger errorLogger;
+
+  std::cout << " Version " << PLANSZOWKER_SERVER_VERSION_MAJOR << "." << PLANSZOWKER_SERVER_VERSION_MINOR << std::endl;
 
 
   // Try to create a socket for server, we will be connecting to this specific port,

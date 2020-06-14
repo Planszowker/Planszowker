@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLANSZOWKER_SERVER_CLIENT_H
+#define PLANSZOWKER_SERVER_CLIENT_H
 
 #include <SFML/Network.hpp>
 
@@ -39,3 +40,5 @@ private:
 };
 
 } // namespace
+
+#endif //PLANSZOWKER_SERVER_CLIENT_H

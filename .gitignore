@@ -1,13 +1,10 @@
 *.cbp
 *.depend
 *.layout
-Planszowker_server/obj/*
-Planszowker_server/bin/*
-Planszowker_client/obj/*
-Planszowker_client/bin/*
+*/obj
+*/bin
 SFML/*
 html/*
 latex/*
-*/.idea/*
-.idea/*
-*/cmake-build-debug/*
+*/.idea
+*/cmake-build-debug
