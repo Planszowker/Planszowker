@@ -8,3 +8,5 @@ Planszowker_client/bin/*
 SFML/*
 html/*
 latex/*
+*/.idea/*
+.idea/*
