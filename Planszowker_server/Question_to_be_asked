@@ -1,0 +1,6 @@
+Questions that HAVE TO be answered soon:
+
+* Should I use UDP or TCP/IP?
+    -> TCP/IP is more relevant for communication (it does have confirmation that we send the data)
+    -> TCP/IP is slower, but is speed a criteria?
+    -> UDP is fast, but we have no confirmation we have delivered our sent data
