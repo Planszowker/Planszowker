@@ -10,3 +10,4 @@ html/*
 latex/*
 */.idea/*
 .idea/*
+*/cmake-build-debug/*
