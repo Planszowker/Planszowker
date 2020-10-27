@@ -6,5 +6,6 @@
 SFML/*
 html/*
 latex/*
-*/.idea
+.idea/*
+*/.idea/*
 */cmake-build-debug

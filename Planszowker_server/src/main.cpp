@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "ErrorLogger.hpp"
+#include "ErrorLogger.h"
 #include "Client.h"
 #include "Config.h"
 #include "build_number.h"
@@ -92,5 +92,6 @@ int main() {
       }
     }
   }
-  return 0;
+
+  return EXIT_SUCCESS;
 }

@@ -1,4 +1,4 @@
-#include "../inc/ErrorLogger.hpp"
+#include "ErrorLogger.h"
 
 #include <iostream>
 #include <exception>

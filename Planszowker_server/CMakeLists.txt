@@ -13,19 +13,26 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_OUTPUT_FOLDER})
 
 # Set compiler specific settings
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 
 
 # Set SFML directories
-set(SFML_INCLUDE_DIR "C:/SFML/include")
-set(SFML_LIBRARY_DIR "C:/SFML/lib")
-set(SFML_DIR "C:/SFML/lib/cmake/SFML")
-set(SFML_STATIC_LIBRARIES TRUE) # For static linking
+if(WIN32)
+    #set(SFML_INCLUDE_DIR "/usr/lib/include")
+    #set(SFML_LIBRARY_DIR "/usr/lib")
+    #set(SFML_DIR "/usr/lib/")
+elseif(UNIX)
+    set(SFML_INCLUDE_DIR "/usr/lib/include")
+    set(SFML_LIBRARY_DIR "/usr/lib")
+    set(SFML_DIR "/usr/lib/")
+endif()
+#set(SFML_STATIC_LIBRARIES TRUE) # For static linking
 
 
 # Include project specific include folders
-include_directories(inc)
-include_directories(../common/inc)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../common/inc)
+
 
 
 # Configure project version
@@ -40,10 +47,11 @@ link_directories(SFML_LIBRARY_DIR) # Tell compiler where libraries are
 
 # Add sources
 add_executable(${PROJECT_NAME}
-        inc/Client.h
-        src/Client.cpp
-        ../common/src/ErrorLogger.cpp
-        src/main.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Client.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../common/src/ErrorLogger.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/NetworkHandler.cpp)
 
 
 # Set custom command for build number
@@ -57,8 +65,6 @@ add_custom_command(
         -DCACHE_DIR:PATH="${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_number.cmake"
 )
-
-message(${CMAKE_SOURCE_DIR})
 
 # Link project with SFML
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-network sfml-window sfml-system ${SFML_DEPENDENCIES})
