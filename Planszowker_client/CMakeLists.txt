@@ -30,13 +30,12 @@ endif()
 
 
 # Include project specific include folders
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../common/inc)
-
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/sources)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../common/)
 
 
 # Configure project version
-configure_file(inc/Config.h.in Config.h)
+configure_file(sources/Config/Config.h.in Config/Config.h)
 
 
 # Find SFML
@@ -47,11 +46,10 @@ link_directories(SFML_LIBRARY_DIR) # Tell compiler where libraries are
 
 # Add sources
 add_executable(${PROJECT_NAME}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Client.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../common/src/ErrorLogger.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Server.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/NetworkHandler.cpp)
+        sources/main.cpp
+        sources/Core/Core.cpp
+        sources/States/StatesHandler.cpp
+        )
 
 
 # Set custom command for build number
