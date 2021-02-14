@@ -1,4 +1,4 @@
-#include "../inc/Client.h"
+#include "../inc/ClientInfo.h"
 
 namespace Planszowker::server
 {

@@ -4,7 +4,7 @@
 #include <SFML/Network.hpp>
 
 
-namespace Planszowker::server
+namespace pla::common::
 {
 
 

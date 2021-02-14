@@ -3,8 +3,7 @@
 #include <iostream>
 #include <exception>
 
-
-namespace Planszowker::common {
+using namespace pla::common::err_logger;
 
 
 ExceptionThrower::ExceptionThrower(const std::string& message, const ExceptionPrio prio)

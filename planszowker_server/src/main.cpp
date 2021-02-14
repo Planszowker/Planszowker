@@ -5,12 +5,8 @@
 
 #include "ErrorLogger.h"
 #include "Client.h"
-#include "Config.h"
-#include "build_number.h"
 
-using namespace std;
-
-using namespace Planszowker;
+using namespace pla;
 
 ////////////
 // SERVER //

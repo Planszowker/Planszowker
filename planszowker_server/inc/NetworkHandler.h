@@ -4,7 +4,7 @@
 #include <SFML/Network.hpp>
 #include <vector>
 
-#include "Client.h"
+#include "ClientInfo.h"
 #include "ErrorLogger.h"
 
 

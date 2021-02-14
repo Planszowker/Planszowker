@@ -1,0 +1,1 @@
+MinGW not found at: C:\Program Files\CodeBlocks\MinGW Configure Disable profile

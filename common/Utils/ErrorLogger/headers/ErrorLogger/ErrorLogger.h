@@ -4,15 +4,13 @@
 #include <cstdlib>
 #include <iostream>
 
-
-namespace Planszowker::common
-{
+namespace pla::common::err_logger {
 
 /*!
  *  \brief Enum class to hold priorities about thrown exceptions
  *
- *  Warning WILL NOT terminate program\n
- *  Error WILL terminate program
+ *  Warning WILL NOT terminate program.\n
+ *  Error WILL terminate program.
  */
 enum class ExceptionPrio : unsigned int
 {

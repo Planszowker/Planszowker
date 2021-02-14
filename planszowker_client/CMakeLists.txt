@@ -1,6 +1,6 @@
 # Set project settings
 cmake_minimum_required(VERSION 3.8)
-set(PROJECT_NAME PLANSZOWKER_CLIENT)
+set(PROJECT_NAME MODBUS_ASCII_SLAVE)
 
 project(${PROJECT_NAME} VERSION 0.0)
 
