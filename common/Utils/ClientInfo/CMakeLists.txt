@@ -7,6 +7,8 @@ set(SOURCES
 add_library(${LIB_NAME} ${SOURCES})
 
 target_include_directories(${LIB_NAME}
-                           PRIVATE headers/ClientInfo
+                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                            PUBLIC headers
+
+                           PRIVATE headers/ClientInfo
                            )

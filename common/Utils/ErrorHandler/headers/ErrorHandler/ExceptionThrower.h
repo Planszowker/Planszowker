@@ -4,20 +4,9 @@
 #include <cstdlib>
 #include <iostream>
 
-namespace pla::common::err_logger {
+#include "ErrorHandlerDefs.h"
 
-/*!
- *  \brief Enum class to hold priorities about thrown exceptions
- *
- *  Warning WILL NOT terminate program.\n
- *  Error WILL terminate program.
- */
-enum class ExceptionPrio : unsigned int
-{
-  Warning = 0,      ///< Warning prio
-  Error = 1         ///< Critical error prio
-};
-
+namespace pla::common::err_handler {
 
 /*!
  *  \brief Class to throw custom exceptions with different priorities
@@ -54,30 +43,4 @@ private:
   std::string m_message;
 };
 
-
-/*!
- *  \brief Class to log out warnings and error using exceptions
- *
- *  \see ExceptionThrower
- */
-class ErrorLogger
-{
-public:
-
-  /*!
-   *  \brief Print warning and continue execution.
-   *
-   *  \param str Const reference for warning string.
-   */
-  void printWarning(const std::string& str);
-
-
-  /*!
-   *  \brief Print error and stop execution.
-   *
-   *  \param str Const reference for error string.
-   */
-  void printError(const std::string& str);
-};
-
-} // namespace
+} // namespaces

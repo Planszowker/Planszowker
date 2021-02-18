@@ -1,8 +1,6 @@
-#include "../inc/ClientInfo.h"
+#include "ClientInfo.h"
 
-namespace Planszowker::server
-{
-
+namespace pla::common::client_info {
 
 ClientInfo::ClientInfo(const sf::IpAddress& ipAddr, const unsigned short& port)
   : m_Ip(ipAddr), m_Port(port)
@@ -22,5 +20,4 @@ const unsigned short& ClientInfo::getPort()
   return m_Port;
 }
 
-
-} // namespace
+} // namespaces

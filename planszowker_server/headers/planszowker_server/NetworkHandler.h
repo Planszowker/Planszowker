@@ -1,15 +1,12 @@
-#ifndef PLANSZOWKER_SERVER_NETWORKHANDLER_H
-#define PLANSZOWKER_SERVER_NETWORKHANDLER_H
+#pragma once
 
 #include <SFML/Network.hpp>
-#include <vector>
+#include <unordered_map>
 
-#include "ClientInfo.h"
-#include "ErrorLogger.h"
+#include "ClientInfo/ClientInfo.h"
+#include "ErrorHandler/ErrorLogger.h"
 
-
-namespace Planszowker::server::network
-{
+namespace pla::server {
 
 /*!
  *  \brief Class for handling network. Should be used in another thread.
@@ -23,10 +20,8 @@ public:
 
   /*!
    *  \brief Constructor for NetworkHandler.
-   *
-   *  \param players How many players are required for specific game
    */
-   NetworkHandler(const unsigned short& players);
+   NetworkHandler();
 
   /*!
    *  \brief Method to run handling network in loop.
@@ -43,7 +38,7 @@ private:
    *
    *  \param port Port to bind a socket
    *
-   *  \see ErrorLogger, ExceptionThrower
+   *  \see ErrorHandler, ExceptionThrower
    */
   void _bindSocket(const unsigned short& port);
 
@@ -67,16 +62,13 @@ private:
   bool _addClient(sf::IpAddress& ipAddress, unsigned short& port);
 
 
-  sf::UdpSocket m_socket;                    ///< Socket used to connect to clients
-  sf::Packet m_packet;                       ///< Packet received
-  std::vector<server::ClientInfo> m_clients; ///< Vector to hold information about clients
+  sf::TcpListener m_listener; ///< TCP listener for new connections
+  sf::Packet m_packet; ///< Packet received
+  std::unordered_map<size_t, common::client_info::ClientInfo> m_clients; ///< Container to hold information about clients
 
-  common::ErrorLogger m_errorLogger;         ///< ErrorLogger for exceptions throwing
+  common::err_handler::ErrorLogger m_errorLogger; ///< ErrorHandler for exceptions throwing
 
   unsigned short m_playersRequired;
 };
 
-
-} // namespace
-
-#endif //PLANSZOWKER_SERVER_NETWORKHANDLER_H
+} // namespaces

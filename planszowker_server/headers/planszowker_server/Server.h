@@ -1,10 +1,8 @@
-#ifndef PLANSZOWKER_SERVER_SERVER_H
-#define PLANSZOWKER_SERVER_SERVER_H
+#pragma once
 
 #include <thread>
 
-namespace Planszowker::server
-{
+namespace pla::server {
 
 /*!
  *  \brief Server class. It is a main class used to create a server.
@@ -27,7 +25,4 @@ private:
   //std::thread
 };
 
-
-} // namespace
-
-#endif //PLANSZOWKER_SERVER_SERVER_H
+} // namespaces

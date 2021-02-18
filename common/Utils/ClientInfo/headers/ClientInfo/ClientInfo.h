@@ -1,12 +1,8 @@
-#ifndef PLANSZOWKER_SERVER_CLIENT_H
-#define PLANSZOWKER_SERVER_CLIENT_H
+#pragma once
 
 #include <SFML/Network.hpp>
 
-
-namespace pla::common::
-{
-
+namespace pla::common::client_info {
 
 class ClientInfo
 {
@@ -39,6 +35,4 @@ private:
   unsigned short m_Port;  ///< Used to store client's port.
 };
 
-} // namespace
-
-#endif //PLANSZOWKER_SERVER_CLIENT_H
+} // namespaces

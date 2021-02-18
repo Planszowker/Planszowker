@@ -4,7 +4,10 @@ project(${LIB_NAME})
 
 add_library(${LIB_NAME} INTERFACE)
 
+add_subdirectory(ClientInfo)
+add_subdirectory(ErrorHandler)
+
 target_link_libraries(${LIB_NAME}
-                      PUBLIC ErrorLogger
-                      PUBLIC ClientInfo
+                      INTERFACE ErrorHandler
+                      INTERFACE ClientInfo
                       )

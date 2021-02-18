@@ -1,10 +1,9 @@
-#include "ErrorLogger.h"
+#include "ExceptionThrower.h"
 
 #include <iostream>
 #include <exception>
 
-using namespace pla::common::err_logger;
-
+namespace pla::common::err_handler {
 
 ExceptionThrower::ExceptionThrower(const std::string& message, const ExceptionPrio prio)
 {
@@ -24,17 +23,4 @@ std::string& ExceptionThrower::getMessage() noexcept
   return m_message;
 }
 
-
-void ErrorLogger::printWarning(const std::string& str)
-{
-  throw ExceptionThrower(str, ExceptionPrio::Warning);
-}
-
-
-void ErrorLogger::printError(const std::string& str)
-{
-  throw ExceptionThrower(str, ExceptionPrio::Error);
-}
-
-
-} // namespace
+} // namespaces

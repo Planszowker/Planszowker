@@ -3,10 +3,12 @@
 #include <iostream>
 #include <string>
 
-#include "ErrorLogger.h"
-#include "Client.h"
+#include "ErrorHandler/ErrorLogger.h"
+#include "ErrorHandler/ExceptionThrower.h"
 
 using namespace pla;
+using namespace pla::common;
+using namespace pla::common::err_handler;
 
 ////////////
 // SERVER //
@@ -21,22 +23,22 @@ int main() {
   sf::IpAddress ip_sender;
   unsigned short port;
 
-  common::ErrorLogger errorLogger;
+  ErrorLogger errorLogger;
 
-  std::cout << " Version " << PLANSZOWKER_SERVER_VERSION_MAJOR << "." << PLANSZOWKER_SERVER_VERSION_MINOR << std::endl;
+  //std::cout << " Version " << PLANSZOWKER_SERVER_VERSION_MAJOR << "." << PLANSZOWKER_SERVER_VERSION_MINOR << std::endl;
 
 
   // Try to create a socket for server, we will be connecting to this specific port,
-  // so we need to know exactly **
+  // so we need to know exactly
   try
   {
     if(socket.bind(54000) != sf::Socket::Done)
       errorLogger.printError("Socket was NOT created successfully! Aborting...");
   }
-  catch (common::ExceptionThrower& e)
+  catch (ExceptionThrower& e)
   {
-    cout << "Critical Error! Terminating process... \n";
-    cout << "Error message: " << e.getMessage() << "\n";
+    std::cout << "Critical Error! Terminating process... \n";
+    std::cout << "Error message: " << e.getMessage() << "\n";
     return EXIT_FAILURE;
   }
 
@@ -49,7 +51,7 @@ int main() {
       sf::Socket::Status status = socket.receive(packet, ip_sender, port);
       if(status != sf::Socket::Done && status != sf::Socket::NotReady)
       {
-        cout << status << '\n';
+        std::cout << status << '\n';
         return -2;
       }
 
@@ -69,22 +71,22 @@ int main() {
         errorLogger.printError("Error reading packet!");
     }
 
-    // Catch exceptions thrown by ErrorLogger
+    // Catch exceptions thrown by ErrorHandler
     // Used to terminate program with stack unwinding after critical error
-    catch (common::ExceptionThrower& e)
+    catch (ExceptionThrower& e)
     {
       // If we receive and error we should terminate the program
       // No std::exit() or std::shutdown() guarantee stack unwinding, to we need to use standard return from main
-      if (e.getPrio() == common::ExceptionPrio::Error)
+      if (e.getPrio() == ExceptionPrio::Error)
       {
-        cout << "Critical Error! Terminating process... \n";
-        cout << "Error message: " << e.getMessage() << "\n";
+        std::cout << "Critical Error! Terminating process... \n";
+        std::cout << "Error message: " << e.getMessage() << "\n";
         return EXIT_FAILURE;
       }
       // If we received a warning, we should print out the message but not terminate the program
-      else if (e.getPrio() == common::ExceptionPrio::Warning)
+      else if (e.getPrio() == ExceptionPrio::Warning)
       {
-        cout << "Received warning! Warning message: " << e.getMessage() << "\n";
+        std::cout << "Received warning! Warning message: " << e.getMessage() << "\n";
       }
     }
   }

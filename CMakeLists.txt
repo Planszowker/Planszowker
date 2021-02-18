@@ -1,17 +1,18 @@
-# Set project settings
 cmake_minimum_required(VERSION 3.12)
-set(PROJECT_NAME PLANSZOWKER)
 
-project(${PROJECT_NAME} VERSION 0.0.0)
+project(Planszowker VERSION 0.0
+                    LANGUAGES CXX)
 
-set(SFML_DIR CACHE PATH "Path to SFML")
+include (cmake/search_paths.cmake)
+
+set(SFML_STATIC_LIBRARIES TRUE)
 
 # Set compiler specific settings
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 
-find_package(SFML 2.5.1 COMPONENTS graphics network window system REQUIRED)
+find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
 
 include_directories(common)
 
+add_subdirectory(common/Utils)
 add_subdirectory(planszowker_server)
