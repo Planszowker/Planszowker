@@ -27,6 +27,7 @@ void NetworkHandler::run(const unsigned short& port)
 {
   std::shared_ptr<sf::TcpSocket> tcpSocket = std::make_shared<sf::TcpSocket>();
 
+  // Blocks until new connection
   if(m_listener.accept(*tcpSocket) != sf::Socket::Done) {
     ErrorLogger::printWarning("Error accepting new TCP Socket!");
     return;
@@ -67,8 +68,8 @@ std::unordered_map<size_t, common::client_info::ClientInfo>& NetworkHandler::get
 }
 
 
-bool NetworkHandler::_queryClient(sf::TcpSocket &socket) {
-  return NetworkQuery::queryClient(socket);
+bool NetworkHandler::_removeClient(size_t clientId) {
+  m_clients.erase(clientId);
 }
 
 } // namespaces
