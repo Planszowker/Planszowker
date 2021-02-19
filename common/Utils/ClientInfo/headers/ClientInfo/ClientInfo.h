@@ -2,7 +2,19 @@
 
 #include <SFML/Network.hpp>
 
+#include <memory>
+
 namespace pla::common::client_info {
+
+/*!
+ *  \brief Enum class to hold current state of client
+ */
+enum class ClientStates : unsigned short
+{
+  Invalid, ///< Invalid state, should be deleted from database.
+  Valid, ///< Valid state, no extra action required.
+  WaitingForResponse ///< Waiting for response, if no response in given time, invalid the client.
+};
 
 class ClientInfo
 {
@@ -21,18 +33,51 @@ public:
    *
    *  \return Reference for client's IP address.
    */
-  const sf::IpAddress& getIpAddress();
+  [[nodiscard]] const sf::IpAddress& getIpAddress();
 
   /*!
    *  \brief Getter of client's port.
    *
    *  \return Reference for client's port.
    */
-  const unsigned short& getPort();
+  [[nodiscard]] const unsigned short& getPort() const;
+
+
+  /*!
+   *  \brief Getter of client's state
+   *
+   *  \return Current client's state
+   */
+  [[nodiscard]] ClientStates getClientState() const;
+
+  /*!
+   *  \brief Setter of client's state
+   *
+   *  \param state New client's state
+   */
+  void setClientState(const ClientStates& state);
+
+  /*!
+   *  \brief Getter of client's socket.
+   *
+   *  \return Reference for shared pointer for client's socket.
+   */
+  std::shared_ptr<sf::TcpSocket>& getClientSocket();
+
+  /*!
+   *  \brief Setter of client's socket.
+   *
+   *  \param socket Reference for shared pointer for client's socket.
+   */
+  void setClientSocket(std::shared_ptr<sf::TcpSocket>& socket);
 
 private:
-  sf::IpAddress m_Ip;     ///< Used to store client's IP address.
-  unsigned short m_Port;  ///< Used to store client's port.
+  sf::IpAddress m_Ip; ///< Used to store client's IP address.
+  unsigned short m_Port; ///< Used to store client's port.
+
+  std::shared_ptr<sf::TcpSocket> m_socket; ///< Client's socket.
+
+  ClientStates m_state;
 };
 
 } // namespaces

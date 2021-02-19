@@ -1,8 +1,7 @@
-set(LIB_NAME ErrorHandler)
+set(LIB_NAME Logger)
 
 set(SOURCES
-    ErrorLogger.cpp
-    ExceptionThrower.cpp
+    Logger.cpp
     )
 
 add_library(${LIB_NAME} ${SOURCES})
