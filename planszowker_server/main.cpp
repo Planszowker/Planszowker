@@ -23,6 +23,7 @@ int main() {
   //ErrorLogger errorLogger;
 
   NetworkHandler networkHandler;
+  networkHandler.run();
 
   return 0;
   /*

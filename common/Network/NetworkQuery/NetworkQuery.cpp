@@ -2,7 +2,7 @@
 
 namespace pla::common::network {
 
-static bool queryClient(sf::TcpSocket& socket, std::map<size_t, common::client_info::ClientInfo>)
+bool NetworkQuery::queryClient(sf::TcpSocket& socket)
 {
   // Send ACK? packet to client.
   // [TODO]: If client is still alive, there should be an acknowledgement.
