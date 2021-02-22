@@ -2,6 +2,7 @@
 #include <string>
 
 #include "NetworkHandler/NetworkHandler.h"
+#include "ErrorHandler/ExceptionThrower.h"
 
 using namespace pla::common;
 using namespace pla::common::err_handler;
@@ -22,8 +23,12 @@ int main() {
 
   //ErrorLogger errorLogger;
 
-  NetworkHandler networkHandler;
-  networkHandler.run();
+  try {
+    NetworkHandler networkHandler;
+    networkHandler.run();
+  } catch (ExceptionThrower& e) {
+    std::cout << "Error message: " << e.getMessage() << "\n";
+  }
 
   return 0;
   /*

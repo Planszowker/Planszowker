@@ -27,7 +27,7 @@ ClientStates ClientInfo::getClientState() const {
 }
 
 
-void ClientInfo::setClientState(const ClientStates &state) {
+void ClientInfo::setClientState(const ClientStates& state) {
   m_state = state;
 }
 
@@ -38,7 +38,7 @@ std::shared_ptr<sf::TcpSocket> &ClientInfo::getClientSocket()
 }
 
 
-void ClientInfo::setClientSocket(std::shared_ptr<sf::TcpSocket> &socket)
+void ClientInfo::setClientSocket(std::shared_ptr<sf::TcpSocket>& socket)
 {
   m_socket = std::move(socket);
 }

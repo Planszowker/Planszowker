@@ -44,23 +44,14 @@ private:
    * @param socket Tcp Socket with new client.
    * @return bool True if we added new client. False otherwise.
    */
-  bool _addClient(sf::TcpSocket& socket);
-
-  /*!
-   * @brief Remove client from database.
-   *
-   * @param clientId Unique ID of client
-   * @return True on successful deletion, false otherwise.
-   */
-  bool _removeClient(size_t clientId);
+  bool _addClient(std::shared_ptr<sf::TcpSocket>& socket);
 
   /*!
    *
    */
-  void _handleClientsThread(std::promise<void> statePromise);
+  void _handleClientsThread(std::promise<void> statePromise, std::unordered_map<size_t, common::client_info::ClientInfo>& map);
 
   sf::TcpListener m_listener; ///< TCP listener for new connections
-  sf::Packet m_packet; ///< Packet received
 
   std::unordered_map<size_t, common::client_info::ClientInfo> m_clients; ///< Container to hold information about clients
   size_t m_lastClientId;

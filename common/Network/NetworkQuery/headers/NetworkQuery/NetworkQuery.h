@@ -16,7 +16,7 @@ namespace pla::common::network {
 class NetworkQuery
 {
 public:
-  static bool queryClient(sf::TcpSocket& socket);
+  static bool queryClient(const std::shared_ptr<sf::TcpSocket>& socket);
 };
 
 } // namespaces

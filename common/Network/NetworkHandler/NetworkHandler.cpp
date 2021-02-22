@@ -18,6 +18,7 @@ NetworkHandler::NetworkHandler()
   : m_lastClientId(0)
   , m_runNetworkHandler(true)
 {
+  constexpr unsigned short port = 27020; // [TODO]: This shouldn't be hard-coded ;)
   if(m_listener.listen(sf::Socket::AnyPort) != sf::Socket::Done) {
     ErrorLogger::printError("Error binding for TCP Listener in NetworkHandler!");
   }
@@ -31,7 +32,7 @@ void NetworkHandler::run()
   std::promise<void> stateIndicator;
   std::future<void> stateIndicatorFuture = stateIndicator.get_future();
 
-  std::thread handleClientThread(&NetworkHandler::_handleClientsThread, this, std::move(stateIndicator));
+  std::thread handleClientThread(&NetworkHandler::_handleClientsThread, this, std::move(stateIndicator), std::ref(m_clients));
 
   while(m_runNetworkHandler) {
     std::shared_ptr<sf::TcpSocket> tcpSocket = std::make_shared<sf::TcpSocket>();
@@ -42,7 +43,7 @@ void NetworkHandler::run()
       return;
     }
 
-    _addClient(*tcpSocket);
+    _addClient(tcpSocket);
   }
 
   stateIndicatorFuture.wait();
@@ -50,12 +51,12 @@ void NetworkHandler::run()
 }
 
 
-bool NetworkHandler::_addClient(sf::TcpSocket& socket)
+bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket)
 {
   std::lock_guard<std::mutex> lock(m_clientsMutex);
 
   // Create ClientInfo to store information about a client
-  ClientInfo info(socket.getRemoteAddress(), socket.getRemotePort());
+  ClientInfo info(socket->getRemoteAddress(), socket->getRemotePort());
 
   // Iterate over all clients and check if we already have one
   for(auto& client : m_clients)
@@ -66,6 +67,9 @@ bool NetworkHandler::_addClient(sf::TcpSocket& socket)
     }
   }
 
+  // Set socket's reference
+  info.setClientSocket(socket);
+
   // If client doesn't exist, add him to container.
   m_clients.insert(std::make_pair(m_lastClientId, info));
   Logger::printInfo("Adding new client with IP: " + info.getIpAddress().toString() + ":" + std::to_string(info.getPort()) + " with uniqueID: " + std::to_string(m_lastClientId));
@@ -75,24 +79,19 @@ bool NetworkHandler::_addClient(sf::TcpSocket& socket)
 }
 
 
-bool NetworkHandler::_removeClient(size_t clientId)
-{
-  size_t ret = m_clients.erase(clientId);
-
-  return ret != 0;
-}
-
-
-void NetworkHandler::_handleClientsThread(std::promise<void> statePromise) {
+void NetworkHandler::_handleClientsThread(std::promise<void> statePromise, std::unordered_map<size_t, common::client_info::ClientInfo>& map) {
   while(m_runNetworkHandler) {
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
     const std::lock_guard<std::mutex> lock(m_clientsMutex);
 
-    for (auto &client : m_clients) {
-      bool result = NetworkQuery::queryClient(*client.second.getClientSocket());
+    for (auto it = map.begin(); it != map.end(); ++it) {
+      bool result = NetworkQuery::queryClient(it->second.getClientSocket());
+
       if (!result) {
-        Logger::printInfo("Deleting client with ID: " + std::to_string(client.first) + " for failed querying");
-        _removeClient(client.first);
-        continue;
+        Logger::printInfo("Deleting client with ID: " + std::to_string(it->first) + " for failed querying");
+        map.erase(it);
+        break;
       }
     }
   }
