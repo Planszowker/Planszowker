@@ -1,4 +1,6 @@
-name: Super-Linter
+name: Master compilation cmake
+uses: lukka/run-cmake@v3.3
+
 
 # Run this workflow every time a new commit pushed to your repository
 on: push
