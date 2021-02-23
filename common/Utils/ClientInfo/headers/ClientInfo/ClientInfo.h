@@ -34,20 +34,6 @@ public:
 
 
   /*!
-   *  \brief Getter of client's state
-   *
-   *  \return Current client's state
-   */
-  [[nodiscard]] ClientStates getClientState() const;
-
-  /*!
-   *  \brief Setter of client's state
-   *
-   *  \param state New client's state
-   */
-  void setClientState(const ClientStates& state);
-
-  /*!
    *  \brief Getter of client's socket.
    *
    *  \return Reference for shared pointer for client's socket.
@@ -66,8 +52,6 @@ private:
   unsigned short m_Port; ///< Used to store client's port.
 
   std::shared_ptr<sf::TcpSocket> m_socket; ///< Client's socket.
-
-  ClientStates m_state;
 };
 
 } // namespaces
