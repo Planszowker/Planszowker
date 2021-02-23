@@ -1,8 +1,7 @@
-set(EXEC_NAME planszowker_server)
+set(EXEC_NAME PlanszowkerServer)
 
 set(SOURCES
     main.cpp
-    Server.cpp
     )
 
 add_executable(${EXEC_NAME} ${SOURCES})
@@ -12,9 +11,11 @@ target_link_libraries(${EXEC_NAME}
                       PRIVATE Network
 
                       sfml-graphics
-                      sfml-network)
+                      sfml-network
+                      )
 
 target_include_directories(${EXEC_NAME}
                            PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
-                           PRIVATE headers/planszowker_server
-                           PRIVATE headers)
+                           PRIVATE headers/PlanszowkerServer
+                           PRIVATE headers
+                           )

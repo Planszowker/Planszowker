@@ -1,4 +1,4 @@
-set(EXEC_NAME planszowker_client)
+set(EXEC_NAME PlanszowkerClient)
 
 set(SOURCES
     main.cpp
@@ -14,6 +14,5 @@ target_link_libraries(${EXEC_NAME}
                       sfml-network)
 
 target_include_directories(${EXEC_NAME}
-                           PRIVATE {CMAKE_CURRENT_SOURCE_DIR})
-                           #PRIVATE headers/planszowker_client
-                           #PRIVATE headers)
+                           PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
+                           )
