@@ -1,8 +1,7 @@
-set(LIB_NAME ErrorHandler)
+set(LIB_NAME NetworkQuery)
 
 set(SOURCES
-    ErrorLogger.cpp
-    ExceptionThrower.cpp
+    NetworkQuery.cpp
     )
 
 add_library(${LIB_NAME} ${SOURCES})
@@ -13,3 +12,7 @@ target_include_directories(${LIB_NAME}
 
                            PRIVATE headers/${LIB_NAME}
                            )
+
+target_link_libraries(${LIB_NAME}
+                      PRIVATE ClientInfo
+                      )

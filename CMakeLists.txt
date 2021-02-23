@@ -15,4 +15,6 @@ find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
 include_directories(common)
 
 add_subdirectory(common/Utils)
+add_subdirectory(common/Network)
 add_subdirectory(planszowker_server)
+add_subdirectory(planszowker_client)

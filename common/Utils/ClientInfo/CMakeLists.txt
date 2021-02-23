@@ -10,5 +10,5 @@ target_include_directories(${LIB_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                            PUBLIC headers
 
-                           PRIVATE headers/ClientInfo
+                           PRIVATE headers/${LIB_NAME}
                            )

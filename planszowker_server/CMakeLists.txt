@@ -2,7 +2,6 @@ set(EXEC_NAME planszowker_server)
 
 set(SOURCES
     main.cpp
-    NetworkHandler.cpp
     Server.cpp
     )
 
@@ -10,6 +9,7 @@ add_executable(${EXEC_NAME} ${SOURCES})
 
 target_link_libraries(${EXEC_NAME}
                       PRIVATE Utils
+                      PRIVATE Network
 
                       sfml-graphics
                       sfml-network)

@@ -1,7 +1,6 @@
 #include "ExceptionThrower.h"
 
 #include <iostream>
-#include <exception>
 
 namespace pla::common::err_handler {
 

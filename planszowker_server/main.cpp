@@ -1,14 +1,12 @@
-#include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
-#include <iostream>
 #include <string>
 
-#include "ErrorHandler/ErrorLogger.h"
+#include "NetworkHandler/NetworkHandler.h"
 #include "ErrorHandler/ExceptionThrower.h"
 
-using namespace pla;
 using namespace pla::common;
 using namespace pla::common::err_handler;
+using namespace pla::common::network;
 
 ////////////
 // SERVER //
@@ -23,8 +21,17 @@ int main() {
   sf::IpAddress ip_sender;
   unsigned short port;
 
-  ErrorLogger errorLogger;
+  //ErrorLogger errorLogger;
 
+  try {
+    NetworkHandler networkHandler;
+    networkHandler.run();
+  } catch (ExceptionThrower& e) {
+    std::cout << "Error message: " << e.getMessage() << "\n";
+  }
+
+  return 0;
+  /*
   //std::cout << " Version " << PLANSZOWKER_SERVER_VERSION_MAJOR << "." << PLANSZOWKER_SERVER_VERSION_MINOR << std::endl;
 
 
@@ -90,6 +97,6 @@ int main() {
       }
     }
   }
-
+  */
   return EXIT_SUCCESS;
 }

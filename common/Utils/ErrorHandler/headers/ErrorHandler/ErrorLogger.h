@@ -22,7 +22,7 @@ public:
    *
    *  \param str Const reference for warning string.
    */
-  void printWarning(const std::string& str);
+  static void printWarning(const std::string& str);
 
 
   /*!
@@ -30,7 +30,7 @@ public:
    *
    *  \param str Const reference for error string.
    */
-  void printError(const std::string& str);
+  static void printError(const std::string& str);
 };
 
 } // namespaces
