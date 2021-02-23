@@ -6,16 +6,6 @@
 
 namespace pla::common::client_info {
 
-/*!
- *  \brief Enum class to hold current state of client
- */
-enum class ClientStates : unsigned short
-{
-  Invalid, ///< Invalid state, should be deleted from database.
-  Valid, ///< Valid state, no extra action required.
-  WaitingForResponse ///< Waiting for response, if no response in given time, invalid the client.
-};
-
 class ClientInfo
 {
 public:
