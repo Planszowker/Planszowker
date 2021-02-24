@@ -1,4 +1,4 @@
-name: CMake Build
+name: CMake Build with SFML
 
 on:
   push:
@@ -18,9 +18,11 @@ jobs:
       - run: sudo wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip
       - uses: montudor/action-zip@v0.1.1
         with:
-          args: unzip -qq SFML-2.5.1-sources.zip -d SFML-sources
-      - run: ls -l
-      - run: cd SFML-sources && ls -l
+          args: unzip -qq SFML-2.5.1-sources.zip
+      - run: mkdir build && cd build
+      - run: cmake -DBUILD_SHARED_LIBS=OFF ../SFML-2.5.1
+      - run: make
+      - run: sudo make install
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
