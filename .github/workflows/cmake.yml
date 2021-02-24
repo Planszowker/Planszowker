@@ -20,6 +20,7 @@ jobs:
         with:
           args: unzip -qq SFML-2.5.1-sources.zip
       - run: mkdir build && cd build
+      - run: ls -l
       - run: cmake -DBUILD_SHARED_LIBS=OFF ../SFML-2.5.1
       - run: make
       - run: sudo make install
