@@ -1,4 +1,4 @@
-name: CMake Build
+name: CMake Build with SFML
 
 on:
   push:
