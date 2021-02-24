@@ -21,6 +21,7 @@ jobs:
           sudo apt-get install xorg-dev
           sudo apt-get install freeglut3-dev
           sudo apt-get install libudev-dev
+          sudo apt-get install libopenal-dev
       - run: sudo wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip
       - uses: montudor/action-zip@v0.1.1
         with:
