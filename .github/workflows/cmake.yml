@@ -2,7 +2,7 @@ name: CMake Build with SFML
 
 on:
   push:
-    branches: [ feature/workflow ] # [TODO] Change to master when ready
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
