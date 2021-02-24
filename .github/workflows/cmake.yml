@@ -19,7 +19,8 @@ jobs:
       - uses: montudor/action-zip@v0.1.1
         with:
           args: unzip -qq SFML-2.5.1-sources.zip
-      - run: mkdir build && cd build
+      - run: mkdir sfml-build
+      - run: cd sfml-build
       - run: ls -l
       - run: cmake -DBUILD_SHARED_LIBS=OFF ../SFML-2.5.1
       - run: make
