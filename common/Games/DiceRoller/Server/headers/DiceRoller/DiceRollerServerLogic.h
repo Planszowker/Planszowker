@@ -14,7 +14,7 @@ public:
 private:
   std::shared_ptr<network::NetworkHandler> m_networkHandler;
 
-  static constexpr MaxPlayers = 2;
+  static constexpr size_t MaxPlayers = 2;
 };
 
 } // namespaces
