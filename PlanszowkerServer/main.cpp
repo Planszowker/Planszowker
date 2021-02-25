@@ -24,7 +24,7 @@ int main() {
   //ErrorLogger errorLogger;
 
   try {
-    NetworkHandler networkHandler;
+    NetworkHandler networkHandler(2);
     networkHandler.run();
   } catch (ExceptionThrower& e) {
     std::cout << "Error message: " << e.getMessage() << "\n";

@@ -6,8 +6,8 @@ add_subdirectory(Client)
 add_subdirectory(Server)
 
 target_include_directories(${LIB_NAME}
-                             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-                             PUBLIC headers
+                             INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+                             INTERFACE headers
 
-                             PRIVATE headers/${LIB_NAME}
+                             INTERFACE headers/${LIB_NAME}
                            )

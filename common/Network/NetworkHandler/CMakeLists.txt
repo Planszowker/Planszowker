@@ -14,9 +14,9 @@ target_include_directories(${LIB_NAME}
                            )
 
 target_link_libraries(${LIB_NAME}
-                      PRIVATE ClientInfo
-                      PRIVATE ErrorHandler
-                      PRIVATE Logger
+                      PUBLIC ClientInfo
+                      PUBLIC ErrorHandler
+                      PUBLIC Logger
                       PRIVATE NetworkQuery
 
                       PUBLIC sfml-network)

@@ -14,16 +14,14 @@ using namespace pla::common::client_info;
 
 namespace pla::common::network {
 
-NetworkHandler::NetworkHandler()
-  : m_lastClientId(0)
-  , m_runNetworkHandler(true)
-{
-  constexpr unsigned short port = 27020; // [TODO]: This shouldn't be hard-coded ;)
-  if(m_listener.listen(sf::Socket::AnyPort) != sf::Socket::Done) {
-    ErrorLogger::printError("Error binding for TCP Listener in NetworkHandler!");
-  }
 
-  Logger::printInfo("Successfully created TCP Listener on port: " + std::to_string(m_listener.getLocalPort()));
+NetworkHandler::NetworkHandler(size_t maxPlayers)
+  : m_lastClientId(0)
+  , m_maxPlayers(maxPlayers)
+  , m_runNetworkHandler(true)
+  , m_port(0)
+{
+  init();
 }
 
 
@@ -43,7 +41,15 @@ void NetworkHandler::run()
       return;
     }
 
-    _addClient(tcpSocket);
+    if (!m_maxPlayers || m_clients.size() < m_maxPlayers) {
+      if(!_addClient(tcpSocket)) {
+        ErrorLogger::printWarning("Error adding new client from " + tcpSocket->getRemoteAddress().toString() + ":" + std::to_string(tcpSocket->getRemotePort()));
+      }
+    } else {
+      Logger::printInfo("Maximum number of players reached!");
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
   stateIndicatorFuture.wait();
@@ -51,18 +57,14 @@ void NetworkHandler::run()
 }
 
 
-bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket)
-{
-  std::lock_guard<std::mutex> lock(m_clientsMutex);
-
+bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket) {
   // Create ClientInfo to store information about a client
   ClientInfo info(socket->getRemoteAddress(), socket->getRemotePort());
 
   // Iterate over all clients and check if we already have one
-  for(auto& client : m_clients)
-  {
+  for (auto &client : m_clients) {
     // If we found one we return false
-    if(client.second.getIpAddress() == info.getIpAddress() && client.second.getPort() == info.getPort()) {
+    if (client.second.getIpAddress() == info.getIpAddress() && client.second.getPort() == info.getPort()) {
       return false;
     }
   }
@@ -72,10 +74,11 @@ bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket)
 
   // If client doesn't exist, add him to container.
   m_clients.insert(std::make_pair(m_lastClientId, info));
-  Logger::printInfo("Adding new client with IP: " + info.getIpAddress().toString() + ":" + std::to_string(info.getPort()) + " with uniqueID: " + std::to_string(m_lastClientId));
+  Logger::printInfo("Adding new client with IP: " + info.getIpAddress().toString() + ":" + std::to_string(info.getPort()) + " with uniqueID: " + std::to_string(m_lastClientId)
+                    + " (" + std::to_string(m_clients.size()) + " / " + std::to_string(m_maxPlayers) + ")");
   ++m_lastClientId;
 
-   return true;
+  return true;
 }
 
 
@@ -89,7 +92,8 @@ void NetworkHandler::_handleClientsThread(std::promise<void> statePromise, std::
       bool result = NetworkQuery::queryClient(it->second.getClientSocket());
 
       if (!result) {
-        Logger::printInfo("Deleting client with ID: " + std::to_string(it->first) + " for failed querying");
+        Logger::printInfo("Deleting client with ID: " + std::to_string(it->first) + " for failed querying ("
+                          + std::to_string(m_clients.size() - 1) + " / " + std::to_string(m_maxPlayers) + ")");
         map.erase(it);
         break;
       }
@@ -102,6 +106,22 @@ void NetworkHandler::_handleClientsThread(std::promise<void> statePromise, std::
 
 void NetworkHandler::stop() {
   m_runNetworkHandler = false;
+}
+
+
+void NetworkHandler::init()
+{
+  if(m_listener.listen(sf::Socket::AnyPort) != sf::Socket::Done) {
+    ErrorLogger::printError("Error binding for TCP Listener in NetworkHandler!");
+  }
+
+  m_port = m_listener.getLocalPort();
+
+  Logger::printInfo("Successfully created TCP Listener on port: " + std::to_string(m_port));
+}
+
+unsigned short NetworkHandler::getPort() {
+  return m_port;
 }
 
 } // namespaces

@@ -1,7 +1,7 @@
-set(LIB_NAME DiceRollerServer)
+set(LIB_NAME DiceRollerClient)
 
 set(SOURCES
-
+      dummy.cpp
     )
 
 add_library(${LIB_NAME} ${SOURCES})

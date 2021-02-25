@@ -15,7 +15,7 @@ target_link_libraries(${EXEC_NAME}
                       )
 
 target_include_directories(${EXEC_NAME}
-                           PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
-                           PRIVATE headers/PlanszowkerServer
-                           PRIVATE headers
+                             PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
+                             PRIVATE headers/PlanszowkerServer
+                             PRIVATE headers
                            )

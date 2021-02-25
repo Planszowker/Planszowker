@@ -21,10 +21,17 @@ class NetworkHandler
 {
 public:
 
+   /*!
+    * @brief Constructor with maximum number of players connected at the same time
+    */
+  explicit NetworkHandler(size_t maxPlayers = 0);
+
   /*!
-   * @brief Constructor for NetworkHandler.
+   * @brief Get current port
+   *
+   * @return unsigned short Current port
    */
-   NetworkHandler();
+  [[nodiscard]] unsigned short getPort();
 
   /*!
    * @brief Method to run handling network in loop (included).
@@ -51,7 +58,15 @@ private:
    */
   void _handleClientsThread(std::promise<void> statePromise, std::unordered_map<size_t, common::client_info::ClientInfo>& map);
 
+  /*!
+   * @brief Initialize function
+   */
+  void init();
+
+  size_t m_maxPlayers;
+
   sf::TcpListener m_listener; ///< TCP listener for new connections
+  unsigned short m_port; ///< Current used port
 
   std::unordered_map<size_t, common::client_info::ClientInfo> m_clients; ///< Container to hold information about clients
   size_t m_lastClientId;

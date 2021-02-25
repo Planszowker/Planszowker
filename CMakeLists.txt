@@ -16,5 +16,6 @@ include_directories(common)
 
 add_subdirectory(common/Utils)
 add_subdirectory(common/Network)
+add_subdirectory(common/Games)
 add_subdirectory(PlanszowkerServer)
 add_subdirectory(PlanszowkerClient)
