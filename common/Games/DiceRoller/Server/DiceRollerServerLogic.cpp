@@ -1,6 +1,6 @@
 #include "DiceRollerServerLogic.h"
 
-namespace pla::common::dice_roller {
+namespace pla::common::games::dice_roller {
 
 DiceRollerServerLogic::DiceRollerServerLogic()
 {

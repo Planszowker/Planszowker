@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace pla::common::dice_roller {
+namespace pla::common::games::dice_roller {
 
 class DiceRollerServerLogic
 {
