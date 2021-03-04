@@ -1,12 +1,15 @@
 #include <SFML/Network.hpp>
 #include <string>
 
-#include "NetworkHandler/NetworkHandler.h"
+#include "Games/ServerLogic.h"
+#include "Games/ConsoleCharacters.h"
+#include "DiceRoller/DiceRollerServerLogic.h"
 #include "ErrorHandler/ExceptionThrower.h"
 
 using namespace pla::common;
 using namespace pla::common::err_handler;
-using namespace pla::common::network;
+using namespace pla::common::games;
+using namespace pla::common::games::dice_roller;
 
 ////////////
 // SERVER //
@@ -21,11 +24,15 @@ int main() {
   sf::IpAddress ip_sender;
   unsigned short port;
 
+  std::cout << "Dice: " << diceString[Dice::Four] << "\n";
+
   //ErrorLogger errorLogger;
 
   try {
-    NetworkHandler networkHandler(2);
-    networkHandler.run();
+    std::unique_ptr<ServerLogic> serverLogic = std::make_unique<DiceRollerServerLogic>();
+
+    serverLogic->run();
+
   } catch (ExceptionThrower& e) {
     std::cout << "Error message: " << e.getMessage() << "\n";
   }

@@ -16,7 +16,7 @@ class Controller;
 class ConsoleView {
 public:
   virtual void init() = 0;
-  virtual void viewObject(ViewObject& object) = 0;
+  virtual void update(const std::any& object) = 0;
   virtual void notifyController(std::function<void(std::any)> callback) = 0;
   virtual void runLoop(Controller* controller) = 0;
 };

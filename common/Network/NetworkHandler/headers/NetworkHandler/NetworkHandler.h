@@ -31,12 +31,17 @@ public:
    *
    * @return unsigned short Current port
    */
-  [[nodiscard]] unsigned short getPort();
+  [[nodiscard]] unsigned short getPort() const;
 
   /*!
    * @brief Method to run handling network in loop (included).
    */
   void run();
+
+  /*!
+   * @brief Method to run handling network in background (separate thread).
+   */
+   void runInBackground();
 
   /*!
    *
@@ -63,16 +68,16 @@ private:
    */
   void init();
 
-  size_t m_maxPlayers;
+  size_t m_maxPlayers; ///< Maximum players that can join to specific instance
 
   sf::TcpListener m_listener; ///< TCP listener for new connections
   unsigned short m_port; ///< Current used port
 
   std::unordered_map<size_t, common::client_info::ClientInfo> m_clients; ///< Container to hold information about clients
-  size_t m_lastClientId;
+  size_t m_lastClientId; ///< Last client ID. TODO: Possible issue with overflowing
 
   std::mutex m_clientsMutex; ///< Mutex for synchronisation with container's access
-  std::atomic<bool> m_runNetworkHandler;
+  std::atomic<bool> m_runNetworkHandler; ///< Flag to synchronize threads joining
 };
 
 } // namespaces

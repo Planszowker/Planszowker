@@ -22,7 +22,7 @@ int main()
     return EXIT_FAILURE;
   }
 
-  DiceRollerController controller;
+  DiceRollerController controller(socket);
   DiceRollerConsoleView consoleView;
   controller.attachView(&consoleView);
 

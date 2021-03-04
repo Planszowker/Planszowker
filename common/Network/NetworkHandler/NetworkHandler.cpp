@@ -69,6 +69,8 @@ bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket) {
     }
   }
 
+  socket->setBlocking(false);
+
   // Set socket's reference
   info.setClientSocket(socket);
 
@@ -120,8 +122,18 @@ void NetworkHandler::init()
   Logger::printInfo("Successfully created TCP Listener on port: " + std::to_string(m_port));
 }
 
-unsigned short NetworkHandler::getPort() {
+
+unsigned short NetworkHandler::getPort() const
+{
   return m_port;
+}
+
+
+void NetworkHandler::runInBackground()
+{
+  std::thread mainNetworkThread(&NetworkHandler::run, this);
+
+  mainNetworkThread.
 }
 
 } // namespaces

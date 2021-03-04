@@ -7,12 +7,16 @@ set(SOURCES
 add_library(${LIB_NAME} ${SOURCES})
 
 target_include_directories(${LIB_NAME}
-                             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-                             PUBLIC headers
+                             PRIVATE ${Games_SOURCE_DIR}/headers
+                             PRIVATE ${DiceRoller_SOURCE_DIR}/headers
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 
                              PRIVATE headers/DiceRoller
+
+                             PUBLIC headers
                            )
 
 target_link_libraries(${LIB_NAME}
-                        PRIVATE NetworkHandler
+                        PUBLIC NetworkHandler
+                        INTERFACE Games
                       )

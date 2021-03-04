@@ -1,13 +1,13 @@
 set(LIB_NAME NetworkHandler)
 
 set(SOURCES
-    NetworkHandler.cpp
+      NetworkHandler.cpp
     )
 
-add_library(${LIB_NAME} ${SOURCES})
+add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_include_directories(${LIB_NAME}
-                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                            PUBLIC headers
 
                            PRIVATE headers/${LIB_NAME}
