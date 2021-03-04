@@ -2,17 +2,24 @@
 
 #include "ConsoleView.h"
 
+#include <any>
+
 namespace pla::common::games {
+
+class ConsoleView;
 
 class Controller
 {
-  void run() = 0;
-  void updateModel() = 0;
-  void updateView() = 0;
-  void getUpdatedModel() = 0;
-  void handleViewEvent(ConsoleView& view);
+public:
+  virtual void run() = 0;
+  virtual void attachView(ConsoleView* view) = 0;
+  virtual void viewCallback(std::any object) = 0;
+
+private:
+  virtual void updateView() = 0;
+
+  virtual void updateModel() = 0;
+  virtual void getUpdatedModel() = 0;
 };
-
-
 
 } // namespaces

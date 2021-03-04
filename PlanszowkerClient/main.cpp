@@ -1,8 +1,11 @@
 #include <iostream>
-#include <chrono>
-#include <thread>
+
+#include "DiceRoller/DiceRollerController.h"
+#include "DiceRoller/DiceRollerConsoleView.h"
 
 #include <SFML/Network.hpp>
+
+using namespace pla::common::games::dice_roller;
 
 ////////////
 // CLIENT //
@@ -19,10 +22,11 @@ int main()
     return EXIT_FAILURE;
   }
 
-  for(;;) {
-    std::cout << "Jestem sobie klient :)\n";
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-  };
+  DiceRollerController controller;
+  DiceRollerConsoleView consoleView;
+  controller.attachView(&consoleView);
+
+  controller.run();
 
   return EXIT_SUCCESS;
 }
