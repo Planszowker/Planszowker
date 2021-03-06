@@ -49,7 +49,7 @@ jobs:
         sudo chmod 777 -R /usr/local/lib
         sudo chmod 777 -R /usr/local/include
         mkdir build && cd build
-        cmake -DSFML_ROOT="/usr/local/lib/cmake/SFML" ..
+        cmake .. -DSFML_DIR="/usr/local/lib/cmake/SFML/"
         make -j32
 
     #- name: Configure CMake
