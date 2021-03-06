@@ -36,6 +36,8 @@ jobs:
           cmake -DBUILD_SHARED_LIBS=OFF ../SFML-2.5.1
           make
           sudo make install
+          sudo chmod 777 -R /usr/local/lib
+          sudo chmod 777 -R /usr/local/include
   build:
     needs: get-sfml
     name: Build
