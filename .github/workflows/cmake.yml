@@ -36,12 +36,24 @@ jobs:
           cmake -DBUILD_SHARED_LIBS=OFF ../SFML-2.5.1
           make -j32
           sudo make install
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Upload SMFL artifacts
+          path: /usr/local/
   build:
     needs: get-sfml
     name: Build
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/download-artifact@v2
+      with:
+        path: /
+    
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: /usr/local
+      
     - uses: actions/checkout@v2
     - name: Create Build Environment
       #run: cmake -E make_directory ${{github.workspace}}/build
