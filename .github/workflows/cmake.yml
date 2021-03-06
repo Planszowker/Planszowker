@@ -48,8 +48,8 @@ jobs:
     - name: Create Build Environment
       #run: cmake -E make_directory ${{github.workspace}}/build
       run: |
-        chmod 777 -R /usr/local/lib
-        chmod 777 -R /usr/local/include
+        sudo chmod 777 -R /usr/local/lib
+        sudo chmod 777 -R /usr/local/include
         mkdir build && cd build
         cmake -DSFML_DIR="/usr/local/lib" ..
         make -j32
