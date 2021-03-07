@@ -39,7 +39,11 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: Upload SMFL artifacts
-          path: /usr/local/
+          path: |
+            /usr/local/include/SFML/
+            /usr/local/lib/libsfml*.a
+            /usr/local/lib/pkgconfig/sfml*.pc
+            /usr/local/lib/cmake/SFML/
   build:
     needs: get-sfml
     name: Build
