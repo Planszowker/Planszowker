@@ -52,7 +52,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v2
       with:
-        path: /
+        path: /usr/local/
     
     - name: Display structure of downloaded files
       run: ls -R
