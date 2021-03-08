@@ -4,6 +4,7 @@
 
 #include <any>
 #include <mutex>
+#include <atomic>
 
 namespace pla::common::games::dice_roller {
 
@@ -14,7 +15,7 @@ public:
   void update(const std::any& object) final;
   void notifyController(std::function<void(std::any)> callback) final;
 
-  [[noreturn]] void runLoop(Controller* controller) final; // TODO: Remove noreturn
+  void runLoop(Controller* controller, std::atomic_bool& runLoop) final;
 };
 
 } // namespaces

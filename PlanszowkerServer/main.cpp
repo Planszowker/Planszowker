@@ -1,9 +1,9 @@
 #include <SFML/Network.hpp>
 #include <string>
 
-#include "Games/ServerLogic.h"
+#include "Games/ServerHandler.h"
 #include "Games/ConsoleCharacters.h"
-#include "DiceRoller/DiceRollerServerLogic.h"
+#include "DiceRoller/ServerHandler.h"
 #include "ErrorHandler/ExceptionThrower.h"
 
 using namespace pla::common;
@@ -24,20 +24,23 @@ int main() {
   sf::IpAddress ip_sender;
   unsigned short port;
 
-  std::cout << "Dice: " << diceString[Dice::Four] << "\n";
+  std::cout << "Dice: " << diceString[Dice::One] << diceString[Dice::Two] << diceString[Dice::Three]
+                        << diceString[Dice::Four] << diceString[Dice::Five] << diceString[Dice::Six] << "\n";
+
+  std::cout << "Ziuziely dwa \U0001f430\U0001f430\n";
 
   //ErrorLogger errorLogger;
 
   try {
-    std::unique_ptr<ServerLogic> serverLogic = std::make_unique<DiceRollerServerLogic>();
+    std::unique_ptr<ServerHandler> serverHandler = std::make_unique<DiceRollerServerHandler>();
 
-    serverLogic->run();
+    serverHandler->run();
 
   } catch (ExceptionThrower& e) {
     std::cout << "Error message: " << e.getMessage() << "\n";
   }
 
-  return 0;
+  return EXIT_SUCCESS;
   /*
   //std::cout << " Version " << PLANSZOWKER_SERVER_VERSION_MAJOR << "." << PLANSZOWKER_SERVER_VERSION_MINOR << std::endl;
 

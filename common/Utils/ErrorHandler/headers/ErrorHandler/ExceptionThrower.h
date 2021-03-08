@@ -22,7 +22,7 @@ public:
    *  \param prio Priority of a message
    *  \see ExceptionPrio
    */
-  ExceptionThrower(const std::string& message, const ExceptionPrio prio);
+  ExceptionThrower(const std::string& message, ExceptionPrio prio);
 
   /*!
    *  \brief Method to get priority of a thrown exception

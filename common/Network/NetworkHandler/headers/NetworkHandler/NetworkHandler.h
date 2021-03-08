@@ -5,6 +5,8 @@
 #include <future>
 #include <mutex>
 #include <atomic>
+#include <functional>
+#include <Games/ServerHandler.h>
 
 #include "ClientInfo/ClientInfo.h"
 #include "ErrorHandler/ErrorLogger.h"
@@ -39,14 +41,11 @@ public:
   void run();
 
   /*!
-   * @brief Method to run handling network in background (separate thread).
-   */
-   void runInBackground();
-
-  /*!
    *
    */
   void stop();
+
+  void attachServerLogic(games::ServerHandler* serverLogic);
 
 private:
 
@@ -61,7 +60,7 @@ private:
   /*!
    *
    */
-  void _handleClientsThread(std::promise<void> statePromise, std::unordered_map<size_t, common::client_info::ClientInfo>& map);
+  void _handleClientsThread(std::unordered_map<size_t, common::client_info::ClientInfo>& map, std::mutex& clientMutex);
 
   /*!
    * @brief Initialize function
@@ -76,8 +75,11 @@ private:
   std::unordered_map<size_t, common::client_info::ClientInfo> m_clients; ///< Container to hold information about clients
   size_t m_lastClientId; ///< Last client ID. TODO: Possible issue with overflowing
 
-  std::mutex m_clientsMutex; ///< Mutex for synchronisation with container's access
+  mutable std::mutex m_clientsMutex; ///< Mutex for synchronisation with container's access
   std::atomic<bool> m_runNetworkHandler; ///< Flag to synchronize threads joining
+  std::atomic<bool> m_delegateLoop;
+
+  games::ServerHandler* m_serverLogic; ///< Server logic that is attached to this handler.
 };
 
 } // namespaces

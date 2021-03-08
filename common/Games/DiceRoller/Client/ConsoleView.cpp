@@ -1,11 +1,13 @@
-#include "DiceRollerConsoleView.h"
+#include "ConsoleView.h"
 
 #include "DiceRoller/Version.h"
 #include "DiceRoller/ConsoleViewCallbackObject.h"
+#include "DiceRoller/NetworkObjects.h"
 
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <atomic>
 
 using namespace std;
 using namespace pla::common::games;
@@ -13,9 +15,10 @@ using namespace pla::common::games;
 namespace pla::common::games::dice_roller {
 
 void DiceRollerConsoleView::update(const std::any& object) {
-  auto receivedString = std::any_cast<std::string>(object);
+  auto receivedObject = std::any_cast<DiceRollerReplyFromServer>(object);
 
-  std::cout << receivedString << "\n";
+  std::cout << "Received additional info: " << receivedObject.additionalInfo << "\n";
+  std::cout << "Reply: " << static_cast<size_t>(receivedObject.reply) << "\n";
 }
 
 
@@ -37,9 +40,9 @@ void DiceRollerConsoleView::notifyController(std::function<void(std::any)> callb
 }
 
 
-[[noreturn]] void DiceRollerConsoleView::runLoop(Controller* controller) // TODO: Delete noreturn
+void DiceRollerConsoleView::runLoop(Controller* controller, std::atomic_bool& runLoop)
 {
-  while (true) // TODO: Replace this infinite loop with some atomic bool checking
+  while (runLoop)
   {
     // Wait for input
     cin.ignore(std::numeric_limits<streamsize>::max(), '\n');

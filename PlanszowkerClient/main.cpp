@@ -1,10 +1,12 @@
 #include <iostream>
 
-#include "DiceRoller/DiceRollerController.h"
-#include "DiceRoller/DiceRollerConsoleView.h"
+#include "ErrorHandler/ExceptionThrower.h"
+#include "DiceRoller/Controller.h"
+#include "DiceRoller/ConsoleView.h"
 
 #include <SFML/Network.hpp>
 
+using namespace pla::common::err_handler;
 using namespace pla::common::games::dice_roller;
 
 ////////////
@@ -22,11 +24,16 @@ int main()
     return EXIT_FAILURE;
   }
 
-  DiceRollerController controller(socket);
-  DiceRollerConsoleView consoleView;
-  controller.attachView(&consoleView);
+  try {
+    DiceRollerController controller(socket);
+    DiceRollerConsoleView consoleView;
+    controller.attachView(&consoleView);
 
-  controller.run();
+    controller.run();
+  } catch (ExceptionThrower& e) {
+    std::cout << "Exception " << e.what() << ": " << e.getMessage() << "\n";
+
+  }
 
   return EXIT_SUCCESS;
 }

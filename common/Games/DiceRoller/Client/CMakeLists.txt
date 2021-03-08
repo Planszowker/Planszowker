@@ -1,8 +1,9 @@
 set(LIB_NAME DiceRollerClient)
 
 set(SOURCES
-      DiceRollerConsoleView.cpp
-      DiceRollerController.cpp
+      ConsoleView.cpp
+      Controller.cpp
+      ViewLogic.cpp
     )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

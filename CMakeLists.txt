@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.12)
 project(Planszowker VERSION 0.0
                     LANGUAGES CXX)
 
-include (cmake/search_paths.cmake)
-
 set(SFML_STATIC_LIBRARIES TRUE)
 
 # Set compiler specific settings

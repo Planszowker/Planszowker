@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Games/Controller.h"
-#include "DiceRollerConsoleView.h"
+#include "Games/ViewLogic.h"
+#include "ConsoleView.h"
 
 #include "SFML/Network.hpp"
 
 #include <memory>
 #include <any>
+#include <atomic>
 
 namespace pla::common::games::dice_roller {
 
@@ -16,18 +18,11 @@ public:
   explicit DiceRollerController(sf::TcpSocket& serverSocket);
 
   void run() final;
-  void attachView(ConsoleView* view) final;
   void viewCallback(std::any object) final;
+  void receiveThread(std::mutex& mutex) final;
 
 private:
-  void updateView() final;
-
-  void updateModel() final;
-  void getUpdatedModel() final;
-
-private:
-  DiceRollerConsoleView *m_view;
-  sf::TcpSocket& m_serverSocket;
+  void update() final;
 };
 
 } // namespace

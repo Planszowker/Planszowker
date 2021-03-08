@@ -7,6 +7,7 @@ set(SOURCES
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_include_directories(${LIB_NAME}
+                           PRIVATE ${Games_SOURCE_DIR}/headers
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                            PUBLIC headers
 
@@ -18,5 +19,6 @@ target_link_libraries(${LIB_NAME}
                       PUBLIC ErrorHandler
                       PUBLIC Logger
                       PRIVATE NetworkQuery
+                      PRIVATE Games
 
                       PUBLIC sfml-network)

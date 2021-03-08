@@ -19,7 +19,9 @@ NetworkHandler::NetworkHandler(size_t maxPlayers)
   : m_lastClientId(0)
   , m_maxPlayers(maxPlayers)
   , m_runNetworkHandler(true)
+  , m_delegateLoop(false)
   , m_port(0)
+  , m_serverLogic(nullptr)
 {
   init();
 }
@@ -27,12 +29,12 @@ NetworkHandler::NetworkHandler(size_t maxPlayers)
 
 void NetworkHandler::run()
 {
-  std::promise<void> stateIndicator;
-  std::future<void> stateIndicatorFuture = stateIndicator.get_future();
+  std::thread handleClientThread(&NetworkHandler::_handleClientsThread, this, std::ref(m_clients), std::ref(m_clientsMutex));
+  handleClientThread.detach();
 
-  std::thread handleClientThread(&NetworkHandler::_handleClientsThread, this, std::move(stateIndicator), std::ref(m_clients));
-
-  while(m_runNetworkHandler) {
+  // Loop to handle client connections
+  while(m_runNetworkHandler)
+  {
     std::shared_ptr<sf::TcpSocket> tcpSocket = std::make_shared<sf::TcpSocket>();
 
     // Blocks until new connection
@@ -49,20 +51,58 @@ void NetworkHandler::run()
       Logger::printInfo("Maximum number of players reached!");
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // If we reach enough amount of players, break out of loop and process delegating packets
+    if (m_clients.size() == m_maxPlayers) {
+      break;
+    }
   }
 
-  stateIndicatorFuture.wait();
-  handleClientThread.join();
+  // Set PlayerIds to server logic
+  if (m_serverLogic) {
+    std::vector<size_t> playerIds;
+    m_clientsMutex.lock();
+    for (auto& client : m_clients)
+    {
+      playerIds.push_back(client.first);
+    }
+    m_clientsMutex.unlock();
+    m_serverLogic->setPlayersIds(playerIds);
+  }
+
+  // Loop to handle packets received from clients
+  m_delegateLoop = true;
+  while(m_runNetworkHandler)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds (200));
+    const std::lock_guard<std::mutex> lock(m_clientsMutex);
+
+    for (auto& client : m_clients)
+    {
+      sf::Packet clientPacket;
+      sf::Socket::Status status = client.second.getClientSocket()->receive(clientPacket);
+      while (status == sf::Socket::Partial) {
+        status = client.second.getClientSocket()->receive(clientPacket);
+      }
+
+      if (status == sf::Socket::Done) {
+        Logger::printDebug("Received packet from " + client.second.getIpAddress().toString() + ":" + std::to_string(client.second.getPort()));
+        if (m_serverLogic) {
+          m_serverLogic->networkCall(client.second.getClientSocket(), clientPacket, client.first);
+        }
+      }
+    }
+  }
 }
 
 
 bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket) {
+  const std::lock_guard<std::mutex> lock(m_clientsMutex);
+
   // Create ClientInfo to store information about a client
   ClientInfo info(socket->getRemoteAddress(), socket->getRemotePort());
 
   // Iterate over all clients and check if we already have one
-  for (auto &client : m_clients) {
+  for (auto& client : m_clients) {
     // If we found one we return false
     if (client.second.getIpAddress() == info.getIpAddress() && client.second.getPort() == info.getPort()) {
       return false;
@@ -84,9 +124,9 @@ bool NetworkHandler::_addClient(std::shared_ptr<sf::TcpSocket>& socket) {
 }
 
 
-void NetworkHandler::_handleClientsThread(std::promise<void> statePromise, std::unordered_map<size_t, common::client_info::ClientInfo>& map) {
+void NetworkHandler::_handleClientsThread(std::unordered_map<size_t, common::client_info::ClientInfo>& map, std::mutex& clientMutex) {
   while(m_runNetworkHandler) {
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::milliseconds (200));
 
     const std::lock_guard<std::mutex> lock(m_clientsMutex);
 
@@ -97,12 +137,16 @@ void NetworkHandler::_handleClientsThread(std::promise<void> statePromise, std::
         Logger::printInfo("Deleting client with ID: " + std::to_string(it->first) + " for failed querying ("
                           + std::to_string(m_clients.size() - 1) + " / " + std::to_string(m_maxPlayers) + ")");
         map.erase(it);
+
+        if (m_delegateLoop) {
+          Logger::printInfo("Exiting NetworkHandler!");
+          m_runNetworkHandler = false;
+        }
+
         break;
       }
     }
   }
-
-  statePromise.set_value();
 }
 
 
@@ -129,11 +173,10 @@ unsigned short NetworkHandler::getPort() const
 }
 
 
-void NetworkHandler::runInBackground()
-{
-  std::thread mainNetworkThread(&NetworkHandler::run, this);
-
-  mainNetworkThread.
+void NetworkHandler::attachServerLogic(games::ServerHandler* serverLogic) {
+  if (serverLogic != nullptr) {
+    m_serverLogic = serverLogic;
+  }
 }
 
 } // namespaces

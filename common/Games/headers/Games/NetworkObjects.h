@@ -17,12 +17,12 @@ enum class ServerReplies
  */
 struct ObjectSentToServer
 {
-  std::any sentObject;
 };
 
 
 /*!
  * @brief Structure that is received from server.
+ * This structure can be extended with any object, depending on game
  */
 struct ReplyFromServer
 {
@@ -34,12 +34,7 @@ struct ReplyFromServer
   /*!
    * Additional string that can contain error string to be displayed.
    */
-  std::string additionalInfo = "";
-
-  /*!
-   * Received object from server. It can be anything - to be specified by concrete game.
-   */
-  std::any receivedObject;
+  std::string additionalInfo;
 };
 
 } // namespaces

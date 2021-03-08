@@ -1,7 +1,8 @@
 set(LIB_NAME DiceRollerServer)
 
 set(SOURCES
-      DiceRollerServerLogic.cpp
+      ServerHandler.cpp
+      ServerLogic.cpp
     )
 
 add_library(${LIB_NAME} ${SOURCES})
