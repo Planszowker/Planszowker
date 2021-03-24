@@ -19,14 +19,14 @@ public:
    *
    * @param modelUpdateData Data received from Server. Game specific.
    */
-  virtual void updateModel(const std::any& modelUpdateData);
+  virtual void updateModel(const std::any& modelUpdateData) = 0;
 
   /*!
    * @brief Get updated model.
    *
    * @return Updated model object. Game specific.
    */
-  const std::any& getUpdatedModel();
+  virtual const std::any& getUpdatedModel() = 0;
 
 protected:
 };

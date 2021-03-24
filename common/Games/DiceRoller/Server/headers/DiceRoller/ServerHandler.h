@@ -1,10 +1,10 @@
 #pragma once
 
+/* Generic */
 #include "Games/ServerHandler.h"
 #include "NetworkHandler/NetworkHandler.h"
 
-#include "ServerLogic.h"
-
+/* STD */
 #include <memory>
 #include <vector>
 
@@ -13,7 +13,8 @@ namespace pla::common::games::dice_roller {
 class DiceRollerServerHandler : public ServerHandler
 {
 public:
-  DiceRollerServerHandler();
+  DiceRollerServerHandler() = default;
+  ~DiceRollerServerHandler() = default;
 
   void run() final;
   void stop() final { };
