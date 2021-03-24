@@ -1,10 +1,9 @@
 #pragma once
 
-#include "ViewLogic.h"
-#include "ConsoleView.h"
-
+/* SFML */
 #include <SFML/Network.hpp>
 
+/* STD */
 #include <any>
 #include <atomic>
 #include <mutex>
@@ -13,6 +12,9 @@ namespace pla::common::games {
 
 class GenericView;
 
+/*!
+ * @brief Controller interface class.
+ */
 class Controller
 {
 public:
@@ -22,20 +24,35 @@ public:
   {
   }
 
+  /*!
+   * @brief Runs controller.
+   * It is responsible for creating a View and a Model (Logic).
+   * It runs in an infinite loop and receives data from connected server.
+   * Uses MVC design patter.
+   *
+   * @see GenericView
+   * @see ViewLogic
+   */
   virtual void run() = 0;
+
+  /*!
+   * @brief A callback function used in view.
+   *
+   * @see GenericView
+   */
   virtual void viewCallback(std::any object) = 0;
+
+  /*!
+   * @brief Function that runs in separate thread and received server's data.
+   */
   virtual void receiveThread(std::mutex& mutex) = 0;
 
-  std::unique_ptr<ViewLogic>& getViewLogic() { return m_logic; }
-
 protected:
-  virtual void update() = 0;
+  sf::TcpSocket& m_serverSocket; ///< TCP Socket that is used to receive data.
 
-  std::unique_ptr<ViewLogic> m_logic;
-  sf::TcpSocket& m_serverSocket;
-  std::atomic_bool m_runController;
+  std::atomic_bool m_runController; ///< Flag used to sync threads.
 
-  std::mutex m_mutex;
+  std::mutex m_mutex; ///< Mutex for shared resources.
 };
 
 } // namespaces

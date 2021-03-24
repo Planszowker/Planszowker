@@ -1,11 +1,15 @@
 #pragma once
 
+/* Generic */
 #include "Games/Controller.h"
-#include "Games/ViewLogic.h"
+
+/* DiceRoller specific */
 #include "ConsoleView.h"
 
+/* SFML */
 #include "SFML/Network.hpp"
 
+/* STD */
 #include <memory>
 #include <any>
 #include <atomic>
@@ -22,7 +26,8 @@ public:
   void receiveThread(std::mutex& mutex) final;
 
 private:
-  void update() final;
+  DiceRollerConsoleView m_view;
+  DiceRollerViewLogic m_logic;
 };
 
-} // namespace
+} // namespaces

@@ -16,7 +16,6 @@ namespace pla::common::games::dice_roller {
 DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
   : Controller(serverSocket)
 {
-
 }
 
 

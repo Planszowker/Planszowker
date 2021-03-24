@@ -1,36 +1,34 @@
 #pragma once
 
-#include "GenericView.h"
-
+/* STD */
 #include <memory>
 #include <any>
 
 namespace pla::common::games {
 
-class GenericView;
-
 /*!
- * @brief ViewLogic class. It loads specific LUA script that describes
- * how data should be handled.
+ * @brief Class responsible for handling view logic, i.e. how to update Model
+ * according to received data.
  */
 class ViewLogic
 {
 public:
-  /*!
-   * @brief Updates ViewLogic.
-   * @param object Any object that certain game wants to send.
-   * @see ViewLogic
-   */
-  virtual void update(std::any& object) = 0;
 
   /*!
-   * @brief Update connected view with specific data.
-   * @see GenericView
+   * @brief Update model with received data from Server.
+   *
+   * @param modelUpdateData Data received from Server. Game specific.
    */
-  virtual void updateView() = 0;
+  virtual void updateModel(const std::any& modelUpdateData);
+
+  /*!
+   * @brief Get updated model.
+   *
+   * @return Updated model object. Game specific.
+   */
+  const std::any& getUpdatedModel();
 
 protected:
-  std::unique_ptr<GenericView> m_view;
 };
 
 } // namespaces

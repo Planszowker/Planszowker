@@ -1,7 +1,9 @@
 #pragma once
 
+/* Generic */
 #include "Common.h"
 
+/* STD */
 #include <atomic>
 
 namespace pla::common::games {

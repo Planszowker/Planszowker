@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Games/ConsoleView.h"
+/* Generic */
+#include "Games/GenericView.h"
 
+/* STD */
 #include <any>
 #include <mutex>
 #include <atomic>
 
 namespace pla::common::games::dice_roller {
 
-class DiceRollerConsoleView : public ConsoleView
+class DiceRollerConsoleView : public GenericView
 {
 public:
   void init() final;
