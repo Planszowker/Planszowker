@@ -19,6 +19,5 @@ target_link_libraries(${LIB_NAME}
                       PUBLIC ErrorHandler
                       PUBLIC Logger
                       PRIVATE NetworkQuery
-                      PRIVATE Games
 
                       PUBLIC sfml-network)

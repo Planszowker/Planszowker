@@ -6,7 +6,6 @@
 #include <mutex>
 #include <atomic>
 #include <functional>
-#include <Games/ServerHandler.h>
 
 #include "ClientInfo/ClientInfo.h"
 #include "ErrorHandler/ErrorLogger.h"
@@ -45,8 +44,6 @@ public:
    */
   void stop();
 
-  void attachServerLogic(games::ServerHandler* serverLogic);
-
 private:
 
   /*!
@@ -78,8 +75,6 @@ private:
   mutable std::mutex m_clientsMutex; ///< Mutex for synchronisation with container's access
   std::atomic<bool> m_runNetworkHandler; ///< Flag to synchronize threads joining
   std::atomic<bool> m_delegateLoop;
-
-  games::ServerHandler* m_serverLogic; ///< Server logic that is attached to this handler.
 };
 
 } // namespaces

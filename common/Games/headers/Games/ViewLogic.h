@@ -26,7 +26,7 @@ public:
    *
    * @return Updated model object. Game specific.
    */
-  virtual const std::any& getUpdatedModel() = 0;
+  virtual std::any getUpdatedModel() = 0;
 
 protected:
 };

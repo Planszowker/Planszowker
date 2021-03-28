@@ -26,8 +26,6 @@ int main()
 
   try {
     DiceRollerController controller(socket);
-    DiceRollerConsoleView consoleView;
-    controller.attachView(&consoleView);
 
     controller.run();
   } catch (ExceptionThrower& e) {

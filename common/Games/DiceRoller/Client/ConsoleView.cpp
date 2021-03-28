@@ -10,6 +10,7 @@
 #include <atomic>
 
 using namespace pla::common::games;
+using namespace std;
 
 namespace pla::common::games::dice_roller {
 
@@ -46,7 +47,6 @@ void DiceRollerConsoleView::runLoop(Controller* controller, std::atomic_bool& ru
   {
     // Wait for input
     cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-    DiceRollerConsoleViewCallbackObject callbackObject = {true};
 
     std::function<void(std::any)> callback = std::bind(&Controller::viewCallback, controller, std::placeholders::_1);
     notifyController(callback);

@@ -13,7 +13,7 @@ class DiceRollerViewLogic : public ViewLogic
 public:
   void updateModel(const std::any& modelUpdateData) final;
 
-  const std::any& getUpdatedModel() final;
+  std::any getUpdatedModel() final;
 };
 
 } // namespaces

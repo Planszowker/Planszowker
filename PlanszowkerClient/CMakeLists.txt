@@ -7,8 +7,7 @@ set(SOURCES
 add_executable(${EXEC_NAME} ${SOURCES})
 
 target_link_libraries(${EXEC_NAME}
-                      PRIVATE Utils
-                      PRIVATE Network
+                      PRIVATE ErrorHandler
                       PRIVATE DiceRoller
 
                       sfml-graphics

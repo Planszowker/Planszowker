@@ -8,9 +8,9 @@ set(SOURCES
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
-add_subdirectory(DiceRoller)
-
-target_link_libraries(${LIB_NAME})
+target_link_libraries(${LIB_NAME}
+                        PUBLIC NetworkHandler
+                      )
 
 target_include_directories(${LIB_NAME}
                              PUBLIC headers
@@ -18,3 +18,5 @@ target_include_directories(${LIB_NAME}
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                              PRIVATE headers/Games
                            )
+
+add_subdirectory(DiceRoller)

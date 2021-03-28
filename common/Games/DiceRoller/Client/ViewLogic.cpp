@@ -7,7 +7,7 @@ void DiceRollerViewLogic::updateModel(const std::any& modelUpdateData)
 
 }
 
-const std::any& DiceRollerViewLogic::getUpdatedModel()
+std::any DiceRollerViewLogic::getUpdatedModel()
 {
   return std::make_any<bool>(true);
 }

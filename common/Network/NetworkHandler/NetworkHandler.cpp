@@ -14,14 +14,12 @@ using namespace pla::common::client_info;
 
 namespace pla::common::network {
 
-
 NetworkHandler::NetworkHandler(size_t maxPlayers)
   : m_lastClientId(0)
   , m_maxPlayers(maxPlayers)
   , m_runNetworkHandler(true)
   , m_delegateLoop(false)
   , m_port(0)
-  , m_serverLogic(nullptr)
 {
   init();
 }
@@ -57,18 +55,6 @@ void NetworkHandler::run()
     }
   }
 
-  // Set PlayerIds to server logic
-  if (m_serverLogic) {
-    std::vector<size_t> playerIds;
-    m_clientsMutex.lock();
-    for (auto& client : m_clients)
-    {
-      playerIds.push_back(client.first);
-    }
-    m_clientsMutex.unlock();
-    m_serverLogic->setPlayersIds(playerIds);
-  }
-
   // Loop to handle packets received from clients
   m_delegateLoop = true;
   while(m_runNetworkHandler)
@@ -86,9 +72,6 @@ void NetworkHandler::run()
 
       if (status == sf::Socket::Done) {
         Logger::printDebug("Received packet from " + client.second.getIpAddress().toString() + ":" + std::to_string(client.second.getPort()));
-        if (m_serverLogic) {
-          m_serverLogic->networkCall(client.second.getClientSocket(), clientPacket, client.first);
-        }
       }
     }
   }
@@ -170,13 +153,6 @@ void NetworkHandler::init()
 unsigned short NetworkHandler::getPort() const
 {
   return m_port;
-}
-
-
-void NetworkHandler::attachServerLogic(games::ServerHandler* serverLogic) {
-  if (serverLogic != nullptr) {
-    m_serverLogic = serverLogic;
-  }
 }
 
 } // namespaces

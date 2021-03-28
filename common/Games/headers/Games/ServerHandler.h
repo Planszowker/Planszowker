@@ -1,10 +1,12 @@
 #pragma once
 
+/* Generic */
 #include "NetworkHandler/NetworkHandler.h"
-#include "Games/ServerLogic.h"
 
+/* SFML */
 #include <SFML/Network.hpp>
 
+/* STD */
 #include <vector>
 #include <memory>
 #include <atomic>
@@ -18,12 +20,10 @@ public:
   virtual void stop() = 0;
 
   virtual void networkCall(std::shared_ptr<sf::TcpSocket>& client, sf::Packet& packet, size_t playerId) = 0;
-  virtual void setPlayersIds(std::vector<size_t> playerIds) = 0;
 
 protected:
   std::atomic_bool m_running;
-  std::unique_ptr<network::NetworkHandler> m_networkHandler;
-  std::unique_ptr<ServerLogic> m_logic;
+  network::NetworkHandler m_networkHandler;
 };
 
 } // namespaces

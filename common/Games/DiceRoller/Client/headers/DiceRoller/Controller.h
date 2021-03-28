@@ -5,6 +5,7 @@
 
 /* DiceRoller specific */
 #include "ConsoleView.h"
+#include "ViewLogic.h"
 
 /* SFML */
 #include "SFML/Network.hpp"
@@ -26,6 +27,8 @@ public:
   void receiveThread(std::mutex& mutex) final;
 
 private:
+  void update();
+
   DiceRollerConsoleView m_view;
   DiceRollerViewLogic m_logic;
 };
