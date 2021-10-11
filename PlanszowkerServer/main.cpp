@@ -24,17 +24,17 @@ int main() {
   sf::IpAddress ip_sender;
   unsigned short port;
 
-  std::cout << "Dice: " << diceString[Dice::One] << diceString[Dice::Two] << diceString[Dice::Three]
-                        << diceString[Dice::Four] << diceString[Dice::Five] << diceString[Dice::Six] << "\n";
+  //std::cout << "Dice: " << diceString[Dice::One] << diceString[Dice::Two] << diceString[Dice::Three]
+  //                      << diceString[Dice::Four] << diceString[Dice::Five] << diceString[Dice::Six] << "\n";
 
-  std::cout << "Ziuziely dwa \U0001f430\U0001f430\n";
+  //std::cout << "Ziuziely dwa \U0001f430\U0001f430\n";
 
   //ErrorLogger errorLogger;
 
   try {
-    std::unique_ptr<ServerHandler> serverHandler = std::make_unique<DiceRollerServerHandler>();
+    DiceRollerServerHandler serverHandler;
 
-    serverHandler->run();
+    serverHandler.run();
 
   } catch (ExceptionThrower& e) {
     std::cout << "Error message: " << e.getMessage() << "\n";

@@ -23,7 +23,7 @@ public:
   explicit DiceRollerController(sf::TcpSocket& serverSocket);
 
   void run() final;
-  void viewCallback(std::any object) final;
+  void viewCallback(std::any& object) final;
   void receiveThread(std::mutex& mutex) final;
 
 private:

@@ -57,12 +57,14 @@ void DiceRollerController::update()
 }
 
 
-void DiceRollerController::viewCallback(std::any object)
+void DiceRollerController::viewCallback(std::any& object)
 {
+  std::cout << "Ziuziu: " << object.type().name() << "\n";
   try {
-    auto callbackObject = std::any_cast<DiceRollerConsoleViewCallbackObject>(object);
+    //auto callbackObject = std::any_cast<DiceRollerConsoleViewCallbackObject>(object);
+    auto callbackObject = std::any_cast<bool>(object);
 
-    if (callbackObject.occurred) {
+    if (callbackObject) {
       update();
 
       Logger::printDebug("Callback from ConsoleView has occurred!");
@@ -71,6 +73,7 @@ void DiceRollerController::viewCallback(std::any object)
     }
   } catch (const std::bad_any_cast& e) {
     Logger::printDebug("Bad any cast in view's callback!");
+    std::cout << e.what() << std::endl;
   }
 }
 

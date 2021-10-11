@@ -19,7 +19,7 @@ class GenericView
 {
 public:
   /*!
-   * @brief Initialization method. Should be invoked at first place.
+   * @brief Initialization method. Has to be invoked at first place.
    */
   virtual void init() = 0;
 
@@ -34,7 +34,7 @@ public:
   /*!
    * @brief Update rendering.
    *
-   * @ param object Game-specific object that holds required data.
+   * @param object Game-specific object that holds required data.
    */
   virtual void update(const std::any& object) = 0;
 
@@ -44,7 +44,7 @@ protected:
    *
    * @param callback Controller's function that should be invoked.
    */
-  virtual void notifyController(std::function<void(std::any)> callback) = 0;
+  virtual void notifyController(std::function<void(std::any&)> callback) = 0;
 };
 
 } // namespaces

@@ -40,7 +40,7 @@ public:
    *
    * @see GenericView
    */
-  virtual void viewCallback(std::any object) = 0;
+  virtual void viewCallback(std::any& object) = 0;
 
   /*!
    * @brief Function that runs in separate thread and received server's data.
