@@ -1,30 +1,30 @@
 #include "ServerHandler.h"
 
-#include "DiceRoller/NetworkObjects.h"
+#include "DiceRoller/Objects.h"
 #include "ErrorHandler/ErrorLogger.h"
 
 namespace pla::common::games::dice_roller {
 
 using namespace err_handler;
 
-DiceRollerServerHandler::DiceRollerServerHandler()
+DiceRollerServerHandler::DiceRollerServerHandler(network::ServerPacketHandler& networkHandler)
+  : ServerHandler(networkHandler)
 {
-  m_running = true;
 }
 
 
 void DiceRollerServerHandler::run()
 {
-  m_networkHandler.run();
+  m_networkHandler.runInBackground();
 }
 
 
 void DiceRollerServerHandler::networkCall(std::shared_ptr<sf::TcpSocket>& client, sf::Packet& packet, size_t playerId)
 {
-  if (client == nullptr) {
+  /*
+  if (!client) {
     ErrorLogger::printError("Client\'s socket is a nullptr!");
   }
-
 
   const std::size_t packetDataSize = packet.getDataSize();
 
@@ -53,6 +53,7 @@ void DiceRollerServerHandler::networkCall(std::shared_ptr<sf::TcpSocket>& client
     ErrorLogger::printError("Error sending data to server!");
     return;
   }
+  */
 }
 
 } // namespaces

@@ -2,6 +2,7 @@
 
 /* Generic */
 #include "Games/Controller.h"
+#include "NetworkHandler/ClientPacketHandler.h"
 
 /* DiceRoller specific */
 #include "ConsoleView.h"
@@ -24,10 +25,11 @@ public:
 
   void run() final;
   void viewCallback(std::any& object) final;
-  void receiveThread(std::mutex& mutex) final;
 
 private:
   void update();
+
+  network::ClientPacketHandler m_clientPacketHandler;
 
   DiceRollerConsoleView m_view;
   DiceRollerViewLogic m_logic;

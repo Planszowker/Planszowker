@@ -32,7 +32,8 @@ int main() {
   //ErrorLogger errorLogger;
 
   try {
-    DiceRollerServerHandler serverHandler;
+    network::ServerPacketHandler diceRollerNetworkHandler{2};
+    DiceRollerServerHandler serverHandler(diceRollerNetworkHandler);
 
     serverHandler.run();
 

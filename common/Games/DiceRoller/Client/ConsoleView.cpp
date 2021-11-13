@@ -2,7 +2,7 @@
 
 #include "DiceRoller/Version.h"
 #include "DiceRoller/ConsoleViewCallbackObject.h"
-#include "DiceRoller/NetworkObjects.h"
+#include "DiceRoller/Objects.h"
 
 #include <iostream>
 #include <chrono>
@@ -36,14 +36,14 @@ void DiceRollerConsoleView::init() {
 
 
 void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> callback) {
-  DiceRollerConsoleViewCallbackObject callbackObject = {true};
+  // TODO: It is just for testing
+  DiceRollerRequest requestToSend;
+  requestToSend.type = DiceRollerRequestType::Reroll;
 
-  //auto ziu = std::make_any<DiceRollerConsoleViewCallbackObject>(callbackObject);
-  auto ziu = std::make_any<bool>(true);
+  auto request = std::make_any<DiceRollerRequest>(requestToSend);
 
-  std::cout << ziu.type().name() << "\n";
-
-  callback(ziu);
+  std::cout << "Sending request type of value: " << static_cast<int>(std::any_cast<DiceRollerRequest>(requestToSend).type) << "\n";
+  callback(request);
 }
 
 

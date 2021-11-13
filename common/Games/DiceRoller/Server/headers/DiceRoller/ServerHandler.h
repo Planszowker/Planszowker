@@ -2,7 +2,7 @@
 
 /* Generic */
 #include "Games/ServerHandler.h"
-#include "NetworkHandler/NetworkHandler.h"
+#include "NetworkHandler/ServerPacketHandler.h"
 
 /* STD */
 #include <memory>
@@ -13,8 +13,8 @@ namespace pla::common::games::dice_roller {
 class DiceRollerServerHandler : public ServerHandler
 {
 public:
-  DiceRollerServerHandler();
-  ~DiceRollerServerHandler() = default;
+  explicit DiceRollerServerHandler(network::ServerPacketHandler& networkHandler);
+  virtual ~DiceRollerServerHandler() = default;
 
   void run() final;
   void stop() final { };

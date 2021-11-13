@@ -1,8 +1,9 @@
 set(LIB_NAME NetworkHandler)
 
 set(SOURCES
-      NetworkHandler.cpp
-    )
+        ServerPacketHandler.cpp
+        ClientPacketHandler.cpp
+   )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
@@ -18,6 +19,5 @@ target_link_libraries(${LIB_NAME}
                       PUBLIC ClientInfo
                       PUBLIC ErrorHandler
                       PUBLIC Logger
-                      PRIVATE NetworkQuery
 
                       PUBLIC sfml-network)

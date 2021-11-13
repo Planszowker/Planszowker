@@ -10,48 +10,51 @@ class ClientInfo
 {
 public:
   /*!
-   *  \brief Constructor of Client class.
+   * @brief Constructor of Client class.
    *
-   *  This class will store IP and PORT for communication client <=> server.
-   *  \param ipAddr Client's IP address.
-   *  \param port Client's port.
+   * This class will store IP and PORT for communication client <=> server.
+   * @param ipAddress Client's IP address.
+   * @param port Client's port.
+   * @param id Client's id.
    */
-  ClientInfo(const sf::IpAddress& ipAddr, const unsigned short& port);
+  ClientInfo(const sf::IpAddress& ipAddress, const unsigned short& port, size_t id);
 
   /*!
-   *  \brief Getter of client's IP address.
+   * @brief Getter of client's IP address.
    *
-   *  \return Reference for client's IP address.
+   * @return Reference for client's IP address.
    */
-  [[nodiscard]] const sf::IpAddress& getIpAddress();
+  [[nodiscard]] inline const sf::IpAddress& getIpAddress()
+  {
+    return m_ip;
+  }
 
   /*!
-   *  \brief Getter of client's port.
+   * @brief Getter of client's port.
    *
-   *  \return Reference for client's port.
+   * @return Reference for client's port.
    */
-  [[nodiscard]] const unsigned short& getPort() const;
+  [[nodiscard]] inline const unsigned short& getPort() const
+  {
+    return m_port;
+  }
 
 
   /*!
-   *  \brief Getter of client's socket.
+   * @brief Getter of client's id.
    *
-   *  \return Reference for shared pointer for client's socket.
+   * @return Client's ID.
    */
-  std::shared_ptr<sf::TcpSocket>& getClientSocket();
+   [[nodiscard]] inline size_t getId() const
+  {
+     return m_id;
+  }
 
-  /*!
-   *  \brief Setter of client's socket.
-   *
-   *  \param socket Reference for shared pointer for client's socket.
-   */
-  void setClientSocket(std::shared_ptr<sf::TcpSocket>& socket);
 
 private:
-  sf::IpAddress m_Ip; ///< Used to store client's IP address.
-  unsigned short m_Port; ///< Used to store client's port.
-
-  std::shared_ptr<sf::TcpSocket> m_socket; ///< Client's socket.
+  sf::IpAddress m_ip; ///< Used to store client's IP address.
+  unsigned short m_port; ///< Used to store client's port.
+  size_t m_id; ///< Unique player ID.
 };
 
 } // namespaces

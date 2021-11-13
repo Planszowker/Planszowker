@@ -3,45 +3,35 @@
 #include "DiceRoller/ConsoleViewCallbackObject.h"
 #include "Logger/Logger.h"
 #include "ErrorHandler/ErrorLogger.h"
-#include "DiceRoller/NetworkObjects.h"
+#include "DiceRoller/Objects.h"
+#include "NetworkHandler/ClientPacketHandler.h"
 
 #include <thread>
 #include <chrono>
+#include <unordered_map>
 
 using namespace pla::common::err_handler;
 using namespace pla::common::logger;
+using namespace pla::common;
 
 namespace pla::common::games::dice_roller {
 
 DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
-  : Controller(serverSocket)
+  : Controller()
+  , m_clientPacketHandler(serverSocket)
 {
   m_view.init();
 }
 
 
 void DiceRollerController::run() {
-  std::thread viewInput(&DiceRollerConsoleView::runLoop, m_view, this, std::ref(m_runController));
+  std::thread viewInput(&DiceRollerConsoleView::runLoop, m_view, this, std::ref(m_run));
 
-  while (m_runController) {
-    DiceRollerObjectSentToServer toServer;
+  m_clientPacketHandler.runInBackground();
 
-    sf::Packet sendPacket;
-    sendPacket.append(reinterpret_cast<void *>(&toServer), sizeof(toServer));
-    Logger::printDebug("Size of toServer = " + std::to_string(sizeof(toServer)));
-
-    // Send data to server
-    sf::Socket::Status status = m_serverSocket.send(sendPacket);
-    while (status == sf::Socket::Partial) {
-      status = m_serverSocket.send(sendPacket);
-    }
-    if (status != sf::Socket::Done) {
-      m_runController = false;
-      viewInput.join();
-      ErrorLogger::printError("Error sending data to server!");
-      break;
-    }
-
+  while (m_run) {
+    // TODO
+    // Do nothing for now
     std::this_thread::sleep_for(std::chrono::seconds(5));
   }
 
@@ -57,29 +47,23 @@ void DiceRollerController::update()
 }
 
 
-void DiceRollerController::viewCallback(std::any& object)
-{
-  std::cout << "Ziuziu: " << object.type().name() << "\n";
+void DiceRollerController::viewCallback(std::any& object) {
   try {
-    //auto callbackObject = std::any_cast<DiceRollerConsoleViewCallbackObject>(object);
-    auto callbackObject = std::any_cast<bool>(object);
+    auto viewRequest = std::any_cast<DiceRollerRequest>(object);
 
-    if (callbackObject) {
-      update();
+    Logger::printDebug("Callback from ConsoleView has occurred!");
+    Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
 
-      Logger::printDebug("Callback from ConsoleView has occurred!");
-    } else {
-      Logger::printDebug("Callback has occurred, but data got corrupted!");
-    }
-  } catch (const std::bad_any_cast& e) {
+    sf::Packet requestPacket;
+    uint8_t type{2};
+    requestPacket << type;
+    requestPacket.append(reinterpret_cast<const void*>(&viewRequest), sizeof(viewRequest));
+    m_clientPacketHandler.sendPacket(requestPacket);
+
+  } catch (const std::bad_any_cast &e) {
     Logger::printDebug("Bad any cast in view's callback!");
     std::cout << e.what() << std::endl;
   }
-}
-
-
-void DiceRollerController::receiveThread(std::mutex &mutex) {
-
 }
 
 } // namespace
