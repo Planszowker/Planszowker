@@ -1,6 +1,7 @@
 #include "ServerPacketHandler.h"
 
 #include "Logger/Logger.h"
+#include "Games/Objects.h"
 
 using namespace pla::common;
 using namespace pla::common::logger;
@@ -72,6 +73,9 @@ bool ServerPacketHandler::_addClient(std::shared_ptr<sf::TcpSocket>& newSocket) 
     return false;
   }
 
+  // Add to client IDs container
+  m_clientIds.push_back(m_lastClientId);
+
   it->second->setBlocking(false);
 
   Logger::printInfo("Adding new client with IP: " + info.getIpAddress().toString() + ":" + std::to_string(info.getPort()) + " with uniqueID: " + std::to_string(m_lastClientId)
@@ -90,10 +94,10 @@ void ServerPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
 
     // TODO: Maybe refactor for normal for-loop to delete multiple clients in one run
     for (auto& client: m_clients) {
-      // TODO: Refactor
-      uint8_t type{1}; // HEARTBEAT
+      // HEARTBEAT
       sf::Packet packet;
-      packet << type;
+      games::Reply heartbeatReply { };
+      packet.append(&heartbeatReply, sizeof(heartbeatReply));
 
       //Logger::printInfo("Sending data to " + std::to_string(client.first));
       sf::Socket::Status clientStatus = client.second->send(packet);
@@ -102,6 +106,10 @@ void ServerPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
         Logger::printInfo("Deleting client with ID: " + std::to_string(client.first) + " for failed querying ("
                           + std::to_string(m_clients.size() - 1) + " / " + std::to_string(m_maxPlayers) + ")");
         m_clients.erase(client.first);
+
+        // Also remove from client IDs container
+        std::remove(m_clientIds.begin(), m_clientIds.end(), client.first);
+
         break; // Break because erasing invalidates iterator
       }
     }
@@ -128,6 +136,21 @@ void ServerPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
         status = client.second->receive(clientPacket);
       }
 
+      // If we don't have enough players, ignore received packets
+      if (status != sf::Socket::Done || !m_hasEnoughClientsConnected) {
+        continue;
+      }
+
+      // Add received packets to map
+      const auto packetsIt = m_packets.find(client.first);
+      if (packetsIt != m_packets.end()) {
+        packetsIt->second.push_back(clientPacket);
+      } else { // If client does not exist
+        std::deque<sf::Packet> packetDeque;
+        packetDeque.push_back(clientPacket);
+        m_packets.emplace(std::make_pair(client.first, std::move(packetDeque)));
+      }
+
       if (status == sf::Socket::Done) {
         Logger::printDebug("Received packet from " + client.second->getRemoteAddress().toString() + ":"
                            + std::to_string(client.second->getRemotePort()) + " with size of " + std::to_string(clientPacket.getDataSize()));
@@ -146,13 +169,6 @@ void ServerPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
       return;
     }
 
-    // Check if we have enough players
-    if (m_clients.size() >= m_maxPlayers) {
-      m_hasEnoughClientsConnected = true;
-    } else {
-      m_hasEnoughClientsConnected = false;
-    }
-
     const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
     if (!m_hasEnoughClientsConnected) {
       if (!_addClient(newTcpSocket)) {
@@ -163,8 +179,57 @@ void ServerPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
       Logger::printInfo("Maximum number of players reached!");
     }
 
+    // Check if we have enough players
+    if (m_clients.size() >= m_maxPlayers) {
+      m_hasEnoughClientsConnected = true;
+    } else {
+      m_hasEnoughClientsConnected = false;
+    }
+
     // Probably not needed since this task is always blocked on listening...
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
+  }
+}
+
+ServerPacketHandler::packetMap &ServerPacketHandler::getPackets(std::vector<size_t> &keys) {
+  // TODO: Possible problem with multithreading...
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  // Retrieve keys
+  keys = m_clientIds;
+
+  return m_packets;
+}
+
+void ServerPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  for (const auto& client: m_clients) {
+    sf::Socket::Status status = client.second->send(packet);
+    while (status == sf::Socket::Partial) {
+      status = client.second->send(packet);
+    }
+  }
+}
+
+void ServerPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &packet) {
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  auto clientIt = m_clients.find(clientId);
+  if (clientIt != m_clients.end()) {
+    sf::Socket::Status status = clientIt->second->send(packet);
+    while (status == sf::Socket::Partial) {
+      status = clientIt->second->send(packet);
+    }
+  }
+}
+
+void ServerPacketHandler::clearPacketsForClient(size_t clientId) {
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  const auto packetIt = m_packets.find(clientId);
+  if (packetIt != m_packets.end()) {
+    packetIt->second.clear();
   }
 }
 

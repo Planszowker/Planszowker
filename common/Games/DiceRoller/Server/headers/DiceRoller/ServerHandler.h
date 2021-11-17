@@ -13,15 +13,10 @@ namespace pla::common::games::dice_roller {
 class DiceRollerServerHandler : public ServerHandler
 {
 public:
-  explicit DiceRollerServerHandler(network::ServerPacketHandler& networkHandler);
-  virtual ~DiceRollerServerHandler() = default;
+  explicit DiceRollerServerHandler(network::ServerPacketHandler& packetHandler);
 
-  void run() final;
-  void stop() final { };
-
-  void networkCall(std::shared_ptr<sf::TcpSocket>& client, sf::Packet& packet, size_t playerId) final;
 private:
-  static constexpr size_t MaxPlayers = 2;
+  bool _internalHandling() final;
 };
 
 } // namespaces

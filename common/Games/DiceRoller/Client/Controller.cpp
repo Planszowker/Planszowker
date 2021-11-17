@@ -31,8 +31,44 @@ void DiceRollerController::run() {
 
   while (m_run) {
     // TODO
-    // Do nothing for now
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    // Handle packets received from server
+    const auto packets = m_clientPacketHandler.getPackets();
+    for (const auto& packet: packets) {
+      const void* data = packet.getData();
+
+      DiceRollerReply reply = *reinterpret_cast<DiceRollerReply*>(const_cast<void*>(data));
+
+      std::cout << "Reply type from server: " << static_cast<int>(reply.replyType) << "\n";
+
+      // Desired action could not be performed
+      if (reply.status == ReplyType::Invalid || reply.replyType == DiceRollerReplyType::Invalid) {
+        //continue;
+      }
+
+      switch(reply.replyType) {
+        case DiceRollerReplyType::DiceReply:
+        {
+          DiceRollerDiceReplyData diceReplyData = *reinterpret_cast<DiceRollerDiceReplyData *>(
+                  static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
+          );
+
+          std::cout << "DiceReply " << diceReplyData.clientId << " with dice "
+                    << static_cast<int>(diceReplyData.dice[0]) << " "
+                    << static_cast<int>(diceReplyData.dice[1]) << " "
+                    << static_cast<int>(diceReplyData.dice[2]) << "\n";
+
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      m_clientPacketHandler.clearPackets();
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds (10));
   }
 
   viewInput.join();
@@ -55,8 +91,6 @@ void DiceRollerController::viewCallback(std::any& object) {
     Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
 
     sf::Packet requestPacket;
-    uint8_t type{2};
-    requestPacket << type;
     requestPacket.append(reinterpret_cast<const void*>(&viewRequest), sizeof(viewRequest));
     m_clientPacketHandler.sendPacket(requestPacket);
 
@@ -65,5 +99,6 @@ void DiceRollerController::viewCallback(std::any& object) {
     std::cout << e.what() << std::endl;
   }
 }
+
 
 } // namespace

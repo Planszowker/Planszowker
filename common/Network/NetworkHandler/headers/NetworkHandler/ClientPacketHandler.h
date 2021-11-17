@@ -23,6 +23,8 @@ public:
   void stop() final;
 
   bool sendPacket(sf::Packet& packet);
+  std::deque<sf::Packet>& getPackets();
+  void clearPackets();
 
 private:
 

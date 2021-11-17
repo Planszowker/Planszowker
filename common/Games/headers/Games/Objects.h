@@ -1,8 +1,5 @@
 #pragma once
 
-/* STD */
-#include <any>
-
 namespace pla::common::games {
 
 enum class PacketType : uint8_t
@@ -25,7 +22,6 @@ enum class ReplyType : uint8_t
  */
 struct Request
 {
-  PacketType packetType = PacketType::Heartbeat;
 };
 
 
@@ -35,15 +31,8 @@ struct Request
  */
 struct Reply
 {
-  /*!
-   * Reply from server.
-   */
   ReplyType status = ReplyType::Invalid;
-
-  /*!
-   * Additional string that can contain error string to be displayed.
-   */
-  std::string additionalInfo;
+  PacketType packetType = PacketType::Heartbeat;
 };
 
 } // namespaces

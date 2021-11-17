@@ -38,7 +38,8 @@ void DiceRollerConsoleView::init() {
 void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> callback) {
   // TODO: It is just for testing
   DiceRollerRequest requestToSend;
-  requestToSend.type = DiceRollerRequestType::Reroll;
+
+  requestToSend.type = static_cast<DiceRollerRequestType>(m_inputType);
 
   auto request = std::make_any<DiceRollerRequest>(requestToSend);
 
@@ -52,7 +53,13 @@ void DiceRollerConsoleView::runLoop(Controller* controller, std::atomic_bool& ru
   while (runLoop)
   {
     // Wait for input
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Packet to send:\n (1) Roll dice\n (2) Re-roll dice\n (3) Confirm\n Your choice: ";
+    std::cin >> m_inputType;
+
+    if (m_inputType < 1 || m_inputType > 3) {
+      std::cout << "Wrong packet type!\n";
+      continue;
+    }
 
     std::function<void(std::any&)> callback = std::bind(&Controller::viewCallback, controller, std::placeholders::_1);
     notifyController(callback);

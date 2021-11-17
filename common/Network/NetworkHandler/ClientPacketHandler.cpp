@@ -1,5 +1,7 @@
 #include "ClientPacketHandler.h"
 
+#include "Games/Objects.h"
+
 #include <iostream> // TODO: remove debug
 
 namespace pla::common::network {
@@ -46,12 +48,11 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
       socketStatus = m_serverSocket.receive(receivePacket);
     }
 
-    if (socketStatus == sf::Socket::Done) {
-      //std::cout << "Received packet...\n";
-
+    if (socketStatus == sf::Socket::Done && receivePacket.getDataSize() >= sizeof(games::Reply)) {
       // Handle other packet type than HEARTBEAT
-      uint8_t type{0};
-      if (receivePacket >> type && type > 1) // TODO: Remove hard-coded values
+      games::Reply reply = *reinterpret_cast<games::Reply*>(const_cast<void*>(receivePacket.getData()));
+
+      if (reply.packetType != games::PacketType::Heartbeat)
       {
         std::cout << "Packet added to deque\n";
         m_receivedPackets.push_back(receivePacket);
@@ -60,7 +61,7 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
       }
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds (1));
+    std::this_thread::sleep_for(std::chrono::milliseconds (10));
   }
 }
 
@@ -75,6 +76,18 @@ bool ClientPacketHandler::sendPacket(sf::Packet& packet) {
   }
 
   return (retStatus == sf::Socket::Done);
+}
+
+std::deque<sf::Packet>& ClientPacketHandler::getPackets() {
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  return m_receivedPackets;
+}
+
+void ClientPacketHandler::clearPackets() {
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  m_receivedPackets.clear();
 }
 
 

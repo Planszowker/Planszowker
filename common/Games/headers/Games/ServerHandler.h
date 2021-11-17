@@ -16,20 +16,38 @@ namespace pla::common::games {
 class ServerHandler
 {
 public:
-  explicit ServerHandler(network::ServerPacketHandler& networkHandler)
-    : m_networkHandler(networkHandler)
-    , m_running(true)
+  explicit ServerHandler(network::ServerPacketHandler& packetHandler)
+    : m_packetHandler(packetHandler)
+    , m_run(true)
   {
   }
 
-  virtual void run() = 0;
-  virtual void stop() = 0;
+  virtual ~ServerHandler()
+  {
+    m_packetHandler.stop();
+  }
 
-  virtual void networkCall(std::shared_ptr<sf::TcpSocket>& client, sf::Packet& packet, size_t playerId) = 0;
+  virtual void run()
+  {
+    m_packetHandler.runInBackground();
+
+    while(m_run)
+    {
+      if (!_internalHandling()) {
+        break;
+      }
+    }
+  }
 
 protected:
-  std::atomic_bool m_running;
-  network::ServerPacketHandler& m_networkHandler;
+  /*
+   * Method that every game need to override. Game has to handle packets from ServerPacketHandler, process them,
+   * and update game logic as needed.
+   */
+  virtual bool _internalHandling() = 0;
+
+  bool m_run;
+  network::ServerPacketHandler& m_packetHandler;
 };
 
 } // namespaces

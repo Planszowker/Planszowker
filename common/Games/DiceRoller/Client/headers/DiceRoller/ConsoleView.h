@@ -23,6 +23,8 @@ public:
 
 private:
   void notifyController(std::function<void(std::any&)> callback) final;
+
+  int m_inputType{0};
 };
 
 } // namespaces
