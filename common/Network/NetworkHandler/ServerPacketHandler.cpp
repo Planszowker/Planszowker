@@ -2,11 +2,14 @@
 
 #include "Logger/Logger.h"
 #include "Games/Objects.h"
+#include "TimeMeasurement/TimeLogger.h"
+#include "CompilerUtils/FunctionInfoExtractor.h"
 
 using namespace pla::common;
 using namespace pla::common::logger;
 using namespace pla::common::err_handler;
 using namespace pla::common::client_info;
+using namespace pla::common::time_measurement;
 
 namespace pla::common::network {
 
@@ -90,6 +93,7 @@ void ServerPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
   while(m_run) {
     std::this_thread::sleep_for(std::chrono::milliseconds (1000));
 
+    TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
     const std::lock_guard<std::mutex> lock(tcpMutex);
 
     // TODO: Maybe refactor for normal for-loop to delete multiple clients in one run
@@ -125,8 +129,9 @@ void ServerPacketHandler::stop() {
 void ServerPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
   while (m_run)
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds (20));
+    std::this_thread::sleep_for(std::chrono::milliseconds (10));
 
+    TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
     const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
     for (auto& client : m_clients)
     {
@@ -151,10 +156,8 @@ void ServerPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
         m_packets.emplace(std::make_pair(client.first, std::move(packetDeque)));
       }
 
-      if (status == sf::Socket::Done) {
-        Logger::printDebug("Received packet from " + client.second->getRemoteAddress().toString() + ":"
-                           + std::to_string(client.second->getRemotePort()) + " with size of " + std::to_string(clientPacket.getDataSize()));
-      }
+      Logger::printDebug("Received packet from " + client.second->getRemoteAddress().toString() + ":"
+                         + std::to_string(client.second->getRemotePort()) + " with size of " + std::to_string(clientPacket.getDataSize()));
     }
   }
 }
@@ -191,19 +194,25 @@ void ServerPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
   }
 }
 
-ServerPacketHandler::packetMap &ServerPacketHandler::getPackets(std::vector<size_t> &keys) {
-  // TODO: Possible problem with multithreading...
+ServerPacketHandler::packetMap ServerPacketHandler::getPackets(std::vector<size_t> &keys) {
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
   // Retrieve keys
   keys = m_clientIds;
 
-  return m_packets;
+  packetMap returnMap = m_packets;
+
+  // Clear packets from this class
+  m_packets.clear();
+
+  return returnMap;
 }
 
 void ServerPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
+  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
+  auto t1 = std::chrono::high_resolution_clock::now();
   for (const auto& client: m_clients) {
     sf::Socket::Status status = client.second->send(packet);
     while (status == sf::Socket::Partial) {
@@ -213,6 +222,7 @@ void ServerPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
 }
 
 void ServerPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &packet) {
+  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
   auto clientIt = m_clients.find(clientId);
@@ -221,15 +231,6 @@ void ServerPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &packet
     while (status == sf::Socket::Partial) {
       status = clientIt->second->send(packet);
     }
-  }
-}
-
-void ServerPacketHandler::clearPacketsForClient(size_t clientId) {
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
-
-  const auto packetIt = m_packets.find(clientId);
-  if (packetIt != m_packets.end()) {
-    packetIt->second.clear();
   }
 }
 

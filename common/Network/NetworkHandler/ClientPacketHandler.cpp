@@ -1,8 +1,13 @@
 #include "ClientPacketHandler.h"
 
 #include "Games/Objects.h"
+#include "TimeMeasurement/TimeLogger.h"
+#include "CompilerUtils/FunctionInfoExtractor.h"
+#include <chrono>
 
 #include <iostream> // TODO: remove debug
+
+using namespace pla::common::time_measurement;
 
 namespace pla::common::network {
 
@@ -39,6 +44,9 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
    * This method will receive and send packets to server
    */
   while(m_run) {
+    std::this_thread::sleep_for(std::chrono::milliseconds (10));
+
+    TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
     const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
 
     // Receive packets from server
@@ -60,12 +68,11 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         std::cout << "Client packets size: " << m_receivedPackets.size() << std::endl;
       }
     }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds (10));
   }
 }
 
 bool ClientPacketHandler::sendPacket(sf::Packet& packet) {
+  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   // Obtain mutex
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
@@ -79,12 +86,14 @@ bool ClientPacketHandler::sendPacket(sf::Packet& packet) {
 }
 
 std::deque<sf::Packet>& ClientPacketHandler::getPackets() {
+  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
   return m_receivedPackets;
 }
 
 void ClientPacketHandler::clearPackets() {
+  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
   m_receivedPackets.clear();

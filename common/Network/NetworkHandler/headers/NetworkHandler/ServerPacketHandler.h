@@ -36,8 +36,7 @@ public:
     return m_hasEnoughClientsConnected;
   }
 
-  packetMap& getPackets(std::vector<size_t>& keys);
-  void clearPacketsForClient(size_t clientId);
+  packetMap getPackets(std::vector<size_t>& keys);
 
   void sendPacketToEveryClients(sf::Packet& packet);
   void sendPacketToClient(size_t clientId, sf::Packet& packet);

@@ -7,6 +7,10 @@
 #include "ErrorHandler/ErrorLogger.h"
 #include "Logic.h"
 
+// Debug info
+#include "CompilerUtils/FunctionInfoExtractor.h"
+#include "TimeMeasurement/TimeLogger.h"
+
 namespace pla::common::games::dice_roller {
 
 using namespace err_handler;
@@ -22,6 +26,8 @@ bool DiceRollerServerHandler::_internalHandling() {
     return true;
   }
 
+  time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
+
   std::vector<size_t> keys;
   auto packetsMap = m_packetHandler.getPackets(keys);
 
@@ -36,8 +42,8 @@ bool DiceRollerServerHandler::_internalHandling() {
     }
 
     // Iterate over all packets in deque
-    for (auto packet: mapIt->second) {
-      DiceRollerRequest request;
+    for (const auto& packet: mapIt->second) {
+      DiceRollerRequest request{};
       if (packet.getDataSize() < sizeof(request)) {
         // Wrong packet
         continue;
@@ -57,14 +63,9 @@ bool DiceRollerServerHandler::_internalHandling() {
         m_packetHandler.sendPacketToClient(key, getMyIdReply);
       }
 
-
       logic.handleGameLogic(key, request.type, m_packetHandler);
     }
-
-    m_packetHandler.clearPacketsForClient(key);
   }
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
   return true;
 }

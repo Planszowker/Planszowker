@@ -19,5 +19,7 @@ target_link_libraries(${LIB_NAME}
                       PUBLIC ClientInfo
                       PUBLIC ErrorHandler
                       PUBLIC Logger
+                      PUBLIC TimeMeasurement
+                      PUBLIC CompilerUtils
 
                       PUBLIC sfml-network)

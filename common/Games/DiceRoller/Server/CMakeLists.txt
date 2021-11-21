@@ -18,4 +18,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
                         PUBLIC Games
                         PUBLIC DiceRoller
+                        PUBLIC Rng
+                        PUBLIC TimeMeasurement
+                        PUBLIC CompilerUtils
                       )
