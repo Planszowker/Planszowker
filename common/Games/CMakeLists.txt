@@ -4,6 +4,7 @@ project(${LIB_NAME})
 
 set(SOURCES
       GameCreator.cpp
+      GraphicalView.cpp
     )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

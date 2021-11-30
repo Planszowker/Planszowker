@@ -2,7 +2,7 @@
 #include <string>
 
 #include "Games/ServerHandler.h"
-#include "Games/ConsoleCharacters.h"
+#include "Games/Characters.h"
 #include "DiceRoller/ServerHandler.h"
 #include "ErrorHandler/ExceptionThrower.h"
 

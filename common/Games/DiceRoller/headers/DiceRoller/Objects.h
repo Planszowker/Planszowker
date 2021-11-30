@@ -18,6 +18,8 @@ enum class DiceRollerReplyType : uint32_t {
   GetIdReply,
   ReplyWithoutData,
   DiceReply,
+  PointsReply,
+  FinishReply
 };
 
 /*
@@ -48,6 +50,18 @@ struct DiceRollerClientInfoData {
 
 struct DiceRollerGetIdData {
   size_t clientId;
+};
+
+struct DiceRollerPointsReplyData {
+  size_t clientId;
+  size_t points;
+  size_t currentRound;
+};
+
+struct DiceRollerFinishReplyData {
+  size_t winnerClientId;
+  size_t points;
+  bool draw;
 };
 
 } // namespaces

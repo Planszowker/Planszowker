@@ -7,6 +7,9 @@ DiceRollerLogic::DiceRollerLogic(std::vector<size_t> &clientIds)
   : m_clientIds(clientIds)
   , m_currentTurnId(clientIds[0])
   , m_rngGenerator(1,6)
+  , m_dice({0, 0, 0})
+  , m_rounds(1)
+  , m_finished(false)
 {
 }
 
@@ -46,6 +49,11 @@ void DiceRollerLogic::handleGameLogic(size_t clientId, DiceRollerRequestType req
         } };
         replyStruct.replyType = DiceRollerReplyType::DiceReply;
 
+        auto it = m_dice.begin();
+        for (const auto& die: diceReplyData.dice) {
+          *(it++) = die;
+        }
+
         replyToClient.append(&replyStruct, sizeof(replyStruct));
         replyToClient.append(&diceReplyData, sizeof(replyToClient));
         packetHandler.sendPacketToEveryClients(replyToClient);
@@ -65,8 +73,9 @@ void DiceRollerLogic::handleGameLogic(size_t clientId, DiceRollerRequestType req
                 m_rngGenerator.generateRandomNumber()
         } };
 
-        for (int i = 0; i < sizeof(diceReplyData.dice) / sizeof(uint8_t); ++i) {
-          m_playerPoints[clientId] += diceReplyData.dice[i];
+        auto it = m_dice.begin();
+        for (const auto& die: diceReplyData.dice) {
+          *(it++) = die;
         }
 
         replyStruct.replyType = DiceRollerReplyType::DiceReply;
@@ -84,9 +93,20 @@ void DiceRollerLogic::handleGameLogic(size_t clientId, DiceRollerRequestType req
         // Confirm rolls
         std::cout << "Confirm rolls for client " << clientId << "\n";
 
-        replyStruct.replyType = DiceRollerReplyType::ReplyWithoutData;
+        for (const auto& die : m_dice) {
+          m_playerPoints[clientId] += die;
+        }
+
+        replyStruct.replyType = DiceRollerReplyType::PointsReply;
+
+        DiceRollerPointsReplyData pointsReplyData {
+          .clientId = clientId,
+          .points = m_playerPoints[clientId],
+          .currentRound = m_rounds
+        };
 
         replyToClient.append(&replyStruct, sizeof(replyStruct));
+        replyToClient.append(&pointsReplyData, sizeof(pointsReplyData));
         packetHandler.sendPacketToEveryClients(replyToClient);
 
         m_state = State::Confirmed;
@@ -110,10 +130,43 @@ void DiceRollerLogic::handleGameLogic(size_t clientId, DiceRollerRequestType req
     if (keyIt == m_clientIds.end()) {
       std::cout << "DEBUG: m_clientIds begin\n";
       keyIt = m_clientIds.begin();
+
+      // Advance round
+      if (m_rounds < MaxRounds) {
+        ++m_rounds;
+      } else {
+        m_finished = true;
+        replyToClient.clear();
+
+        // TODO: Find better way to check it
+        size_t winnerId = 0;
+        bool draw = false;
+        if (m_playerPoints[m_clientIds[0]] > m_playerPoints[m_clientIds[1]]) {
+          winnerId = m_clientIds[0];
+        } else if (m_playerPoints[m_clientIds[0]] < m_playerPoints[m_clientIds[1]]) {
+          winnerId = m_clientIds[1];
+        } else {
+          draw = true;
+        }
+
+        replyStruct.replyType = DiceRollerReplyType::FinishReply;
+        DiceRollerFinishReplyData finishReplyData {
+          .winnerClientId = winnerId,
+          .points = m_playerPoints[winnerId],
+          .draw = draw
+        };
+
+        replyToClient.append(&replyStruct, sizeof(replyStruct));
+        replyToClient.append(&finishReplyData, sizeof(finishReplyData));
+        packetHandler.sendPacketToEveryClients(replyToClient);
+
+        return;
+      }
     }
 
     std::cout << "DEBUG: Current turn was " << m_currentTurnId << "\n";
     m_currentTurnId = *keyIt;
+
     m_state = State::Entry;
 
     std::cout << "New client ID turn: " << m_currentTurnId << "\n";

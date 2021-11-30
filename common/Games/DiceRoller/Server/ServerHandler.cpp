@@ -23,7 +23,7 @@ DiceRollerServerHandler::DiceRollerServerHandler(network::ServerPacketHandler& p
 
 bool DiceRollerServerHandler::_internalHandling() {
   if (!m_packetHandler.hasEnoughClientsConnected()) {
-    return true;
+    //return true;
   }
 
   time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
@@ -31,9 +31,11 @@ bool DiceRollerServerHandler::_internalHandling() {
   std::vector<size_t> keys;
   auto packetsMap = m_packetHandler.getPackets(keys);
 
-  // TODO: Not elegant, maybe better solution?
-  static DiceRollerLogic logic{keys};
+  if (keys.size()) {
+    //std::cout << "keys.size() = " << keys.size() << "\n";
+  }
 
+  // TODO: Not elegant, maybe better solution?
   for (const auto& key: keys) {
     // Find map entry with client ID -> (size_t, deque) is received
     const auto mapIt = packetsMap.find(key);
@@ -41,6 +43,7 @@ bool DiceRollerServerHandler::_internalHandling() {
       continue;
     }
 
+    std::cout << "DEBUG" << std::endl;
     // Iterate over all packets in deque
     for (const auto& packet: mapIt->second) {
       DiceRollerRequest request{};
@@ -49,21 +52,30 @@ bool DiceRollerServerHandler::_internalHandling() {
         continue;
       }
 
-      request = *reinterpret_cast<DiceRollerRequest*>(const_cast<void*>(packet.getData()));
+      request = *reinterpret_cast<DiceRollerRequest *>(const_cast<void *>(packet.getData()));
 
       if (request.type == DiceRollerRequestType::GetMyId) {
-        sf::Packet getMyIdReply;
-        DiceRollerReply reply { .replyType = DiceRollerReplyType::GetIdReply };
-        DiceRollerGetIdData getIdData { .clientId = key };
+        std::cout << "Got GetMyId packet...\n";
 
+        sf::Packet getMyIdReply;
+        DiceRollerReply reply {
+          .replyType = DiceRollerReplyType::GetIdReply
+        };
+        reply.status = ReplyType::Success;
+        reply.packetType = PacketType::GameSpecificData;
+
+        DiceRollerGetIdData getIdData{.clientId = key};
 
         getMyIdReply.append(&reply, sizeof(reply));
         getMyIdReply.append(&getIdData, sizeof(getIdData));
 
         m_packetHandler.sendPacketToClient(key, getMyIdReply);
+      } else if (m_packetHandler.hasEnoughClientsConnected()) {
+        static DiceRollerLogic logic{keys};
+        if (!logic.isGameFinished()) {
+          logic.handleGameLogic(key, request.type, m_packetHandler);
+        }
       }
-
-      logic.handleGameLogic(key, request.type, m_packetHandler);
     }
   }
 

@@ -30,7 +30,7 @@ void DiceRollerConsoleView::init() {
   // Some basic info about a game
   std::cout << "DiceRoller v" << DiceRollerVersionMajor << "." << DiceRollerVersionMinor << "." << DiceRollerVersionPatch << "\n";
   std::cout << "========================================\n";
-  std::cout << "Press any key when it is your turn to roll dice. Points are summed. Player with a greater score wins.\n";
+  std::cout << "Choose an action. You can reroll up to 1 time. Points are summed. Player with a greater score wins.\n";
   std::cout << "========================================\n";
 }
 
@@ -43,7 +43,7 @@ void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> call
 
   auto request = std::make_any<DiceRollerRequest>(requestToSend);
 
-  std::cout << "Sending request type of value: " << static_cast<int>(std::any_cast<DiceRollerRequest>(requestToSend).type) << "\n";
+  //std::cout << "Sending request type of value: " << static_cast<int>(std::any_cast<DiceRollerRequest>(requestToSend).type) << "\n";
   callback(request);
 }
 

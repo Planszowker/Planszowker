@@ -62,10 +62,10 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
       if (reply.packetType != games::PacketType::Heartbeat)
       {
-        std::cout << "Packet added to deque\n";
+        //std::cout << "Packet added to deque\n";
         m_receivedPackets.push_back(receivePacket);
 
-        std::cout << "Client packets size: " << m_receivedPackets.size() << std::endl;
+        //std::cout << "Client packets size: " << m_receivedPackets.size() << std::endl;
       }
     }
   }

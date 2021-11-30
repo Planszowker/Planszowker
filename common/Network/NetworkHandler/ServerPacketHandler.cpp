@@ -141,8 +141,8 @@ void ServerPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
         status = client.second->receive(clientPacket);
       }
 
-      // If we don't have enough players, ignore received packets
-      if (status != sf::Socket::Done || !m_hasEnoughClientsConnected) {
+      // TODO: It's not true for now - If we don't have enough players, ignore received packets
+      if (status != sf::Socket::Done) {
         continue;
       }
 

@@ -26,6 +26,8 @@ public:
 
   void handleGameLogic(size_t clientId, DiceRollerRequestType requestType, network::ServerPacketHandler& packetHandler);
 
+  inline bool isGameFinished() { return m_finished; }
+
 private:
   bool _checkIfTurnAvailable(size_t clientId);
 
@@ -34,9 +36,17 @@ private:
 
   rng::RandomGenerator<uint8_t> m_rngGenerator;
 
+  std::array<uint8_t, 3> m_dice;
+
   State m_state;
 
   std::unordered_map<size_t, size_t> m_playerPoints;
+
+  size_t m_rounds;
+
+  constexpr static size_t MaxRounds = 3;
+
+  bool m_finished;
 };
 
 } // namespaces

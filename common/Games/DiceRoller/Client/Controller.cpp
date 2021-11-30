@@ -5,6 +5,7 @@
 #include "ErrorHandler/ErrorLogger.h"
 #include "DiceRoller/Objects.h"
 #include "NetworkHandler/ClientPacketHandler.h"
+#include "Games/Characters.h"
 
 #include <thread>
 #include <chrono>
@@ -21,6 +22,16 @@ DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
   , m_clientPacketHandler(serverSocket)
 {
   m_view.init();
+
+  sf::Packet idPacket;
+
+  DiceRollerRequest request{
+    .type = DiceRollerRequestType::GetMyId
+  };
+
+  idPacket.append(&request, sizeof(request));
+
+  m_clientPacketHandler.sendPacket(idPacket);
 }
 
 
@@ -43,20 +54,64 @@ void DiceRollerController::run() {
 
       // Desired action could not be performed
       if (reply.status == ReplyType::Invalid || reply.replyType == DiceRollerReplyType::Invalid) {
-        //continue;
+        continue;
       }
 
       switch(reply.replyType) {
         case DiceRollerReplyType::DiceReply:
         {
+          // TODO: This casts are awful... Figure out better way to do this.
           DiceRollerDiceReplyData diceReplyData = *reinterpret_cast<DiceRollerDiceReplyData *>(
                   static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
           );
 
           std::cout << "DiceReply " << diceReplyData.clientId << " with dice "
-                    << static_cast<int>(diceReplyData.dice[0]) << " "
-                    << static_cast<int>(diceReplyData.dice[1]) << " "
-                    << static_cast<int>(diceReplyData.dice[2]) << "\n";
+                    << diceString[static_cast<int>(diceReplyData.dice[0]) - 1] << " "
+                    << diceString[static_cast<int>(diceReplyData.dice[1]) - 1] << " "
+                    << diceString[static_cast<int>(diceReplyData.dice[2]) - 1] << "\n";
+
+          break;
+        }
+
+        case DiceRollerReplyType::GetIdReply:
+        {
+          std::cout << "GetIdReply reply type...\n";
+
+          auto getIdData = *reinterpret_cast<DiceRollerGetIdData *>(
+                  static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
+          );
+
+          std::cout << "MyID is " << getIdData.clientId << "\n";
+
+          break;
+        }
+
+        case DiceRollerReplyType::PointsReply:
+        {
+          std::cout << "Points reply type...\n";
+
+          auto pointsReplyData = *reinterpret_cast<DiceRollerPointsReplyData *>(
+                  static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
+          );
+
+          std::cout << "=ROUND " << pointsReplyData.currentRound << "= Client(" << pointsReplyData.clientId << ") has total of " << pointsReplyData.points << " points." << "\n";
+
+          break;
+        }
+
+        case DiceRollerReplyType::FinishReply:
+        {
+          std::cout << "Points reply type...\n";
+
+          auto finishReplyData = *reinterpret_cast<DiceRollerFinishReplyData *>(
+                  static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
+          );
+
+          if (finishReplyData.draw) {
+            std::cout << "=== GAME FINISHED WITH DRAW ===\n";
+          } else {
+            std::cout << "=== GAME FINISHED: PLAYER " << finishReplyData.winnerClientId << " HAS WON WITH " << finishReplyData.points << "! ===\n";
+          }
 
           break;
         }
@@ -77,9 +132,7 @@ void DiceRollerController::run() {
 
 void DiceRollerController::update()
 {
-  std::string updateString = "This is sample update string from controller. It will be received from server and/or model :)\n";
-
-  m_view.update(std::make_any<std::string>(updateString));
+  m_view.update(std::make_any<std::string>("Something..."));
 }
 
 
@@ -87,15 +140,15 @@ void DiceRollerController::viewCallback(std::any& object) {
   try {
     auto viewRequest = std::any_cast<DiceRollerRequest>(object);
 
-    Logger::printDebug("Callback from ConsoleView has occurred!");
-    Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
+    //Logger::printDebug("Callback from ConsoleView has occurred!");
+    //Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
 
     sf::Packet requestPacket;
     requestPacket.append(reinterpret_cast<const void*>(&viewRequest), sizeof(viewRequest));
     m_clientPacketHandler.sendPacket(requestPacket);
 
   } catch (const std::bad_any_cast &e) {
-    Logger::printDebug("Bad any cast in view's callback!");
+    //Logger::printDebug("Bad any cast in view's callback!");
     std::cout << e.what() << std::endl;
   }
 }
