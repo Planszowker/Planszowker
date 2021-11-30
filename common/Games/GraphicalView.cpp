@@ -15,7 +15,7 @@ void GraphicalView::runLoop(Controller* controller, std::atomic_bool& runLoop)
         m_window.close();
       }
 
-      update();
+      //update();
     }
   }
 }
