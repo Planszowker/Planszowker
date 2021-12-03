@@ -1,8 +1,8 @@
-set(LIB_NAME ClientInfo)
+set(LIB_NAME TimeMeasurement)
 
 set(SOURCES
-        ClientInfo.cpp
-    )
+        TimeLogger.cpp
+   )
 
 add_library(${LIB_NAME} ${SOURCES})
 

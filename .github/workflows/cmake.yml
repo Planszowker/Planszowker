@@ -11,43 +11,13 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  get-sfml:
-    name: Prepare and build SFML
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          sudo apt-get install libx11-dev
-          sudo apt-get install xorg-dev
-          sudo apt-get install freeglut3-dev
-          sudo apt-get install libudev-dev
-          sudo apt-get install libopenal-dev
-          sudo apt-get install libvorbis-dev
-          sudo apt-get install libflac-dev
-      - run: sudo wget https://www.sfml-dev.org/files/SFML-2.5.1-sources.zip
-      - uses: montudor/action-zip@v0.1.1
-        with:
-          args: unzip -qq SFML-2.5.1-sources.zip
-      - name: Build SFML
-        run: |
-          mkdir sfml-build
-          cd sfml-build
-          cmake -DBUILD_SHARED_LIBS=OFF ../SFML-2.5.1
-          make -j32
-          sudo make install
-      - uses: actions/upload-artifact@v2
-        with:
-          name: Upload SMFL artifacts
-          path: |
-            /usr/local/include/SFML/
-            /usr/local/lib/libsfml*.a
-            /usr/local/lib/pkgconfig/sfml*.pc
-            /usr/local/lib/cmake/SFML/
   build:
-    needs: get-sfml
-    name: Build
-    runs-on: ubuntu-latest
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    container: ubuntu-planszowker
+    runs-on: ubuntu-planszowker
 
     steps:
     - uses: actions/download-artifact@v2

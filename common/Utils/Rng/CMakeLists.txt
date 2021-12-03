@@ -1,8 +1,8 @@
-set(LIB_NAME ClientInfo)
+set(LIB_NAME Rng)
 
 set(SOURCES
-        ClientInfo.cpp
-    )
+        RandomGenerator.cpp
+        )
 
 add_library(${LIB_NAME} ${SOURCES})
 
