@@ -50,7 +50,7 @@ void DiceRollerController::run() {
 
       DiceRollerReply reply = *reinterpret_cast<DiceRollerReply*>(const_cast<void*>(data));
 
-      std::cout << "Reply type from server: " << static_cast<int>(reply.replyType) << "\n";
+      //std::cout << "Reply type from server: " << static_cast<int>(reply.replyType) << "\n";
 
       // Desired action could not be performed
       if (reply.status == ReplyType::Invalid || reply.replyType == DiceRollerReplyType::Invalid) {
@@ -75,7 +75,7 @@ void DiceRollerController::run() {
 
         case DiceRollerReplyType::GetIdReply:
         {
-          std::cout << "GetIdReply reply type...\n";
+          //std::cout << "GetIdReply reply type...\n";
 
           auto getIdData = *reinterpret_cast<DiceRollerGetIdData *>(
                   static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
@@ -88,7 +88,7 @@ void DiceRollerController::run() {
 
         case DiceRollerReplyType::PointsReply:
         {
-          std::cout << "Points reply type...\n";
+          //std::cout << "Points reply type...\n";
 
           auto pointsReplyData = *reinterpret_cast<DiceRollerPointsReplyData *>(
                   static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)
@@ -101,7 +101,7 @@ void DiceRollerController::run() {
 
         case DiceRollerReplyType::FinishReply:
         {
-          std::cout << "Points reply type...\n";
+          //std::cout << "Points reply type...\n";
 
           auto finishReplyData = *reinterpret_cast<DiceRollerFinishReplyData *>(
                   static_cast<char *>(const_cast<void *>(data)) + sizeof(DiceRollerReply)

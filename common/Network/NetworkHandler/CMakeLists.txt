@@ -21,5 +21,6 @@ target_link_libraries(${LIB_NAME}
                       PUBLIC Logger
                       PUBLIC TimeMeasurement
                       PUBLIC CompilerUtils
+                      PUBLIC Games
 
                       PUBLIC sfml-network)
