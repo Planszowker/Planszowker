@@ -18,9 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Create Build Environment
+        working-directory: ${{github.workspace}}/build
+        shell: bash
         run: cmake -E make_directory ${{github.workspace}}/build
 
       - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
         shell: bash
         run: cd ${{github.workspace}}/build && cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release
 
