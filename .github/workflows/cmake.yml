@@ -16,11 +16,11 @@ jobs:
         password: ${{ secrets.DOCKER_ACTIONS }}
 
     steps:
-      - uses: actions/checkout@v2
       - name: Create Build Environment
         shell: bash
         run: mkdir build
 
+      - uses: actions/checkout@v2
       - name: Configure CMake
         working-directory: build
         shell: bash
