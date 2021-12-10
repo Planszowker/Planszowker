@@ -24,7 +24,7 @@ jobs:
       - name: Configure CMake
         working-directory: build
         shell: bash
-        run: ls -al; pwd; cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release
+        run: echo ${{github.workspace}}; ls -al ${{github.workspace}}; cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release
 
       - uses: actions/checkout@v2
       - name: Build
