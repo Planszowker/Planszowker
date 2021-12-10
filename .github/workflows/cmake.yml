@@ -16,21 +16,22 @@ jobs:
         password: ${{ secrets.DOCKER_ACTIONS }}
 
     steps:
+      - uses: actions/checkout@v2
       - name: Create Build Environment
         shell: bash
         run: mkdir -p build
 
-      - uses: actions/checkout@v2
       - name: Configure CMake
         shell: bash
-        run: cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
+        working-directory: build
+        run: cmake .. -DCMAKE_BUILD_TYPE=Release
 
-      - uses: actions/checkout@v2
       - name: Build
         shell: bash
-        run: cd build && cmake --build . --config Release
+        working-directory: build
+        run: cmake --build . --config Release
 
-      - uses: actions/checkout@v2
       - name: Test
         shell: bash
-        run: cd build && ctest -C Release
+        working-directory: build
+        run: ctest -C Release
