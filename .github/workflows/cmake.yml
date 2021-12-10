@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Create Build Environment
         shell: bash
-        run: mkdir build
+        run: mkdir -p build
 
       - uses: actions/checkout@v2
       - name: Configure CMake
@@ -26,11 +26,13 @@ jobs:
         shell: bash
         run: ls -al; pwd; cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release
 
+      - uses: actions/checkout@v2
       - name: Build
         working-directory: build
         shell: bash
         run: cmake --build . --config Release
 
+      - uses: actions/checkout@v2
       - name: Test
         working-directory: build
         shell: bash
