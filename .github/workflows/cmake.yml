@@ -22,18 +22,15 @@ jobs:
 
       - uses: actions/checkout@v2
       - name: Configure CMake
-        working-directory: build
         shell: bash
-        run: echo ${{github.workspace}}; ls -al ${{github.workspace}}; cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release
+        run: cd build && echo ${{github.workspace}}; ls -al ${{github.workspace}}; cmake ${{github.workspace}} -DCMAKE_BUILD_TYPE=Release
 
       - uses: actions/checkout@v2
       - name: Build
-        working-directory: build
         shell: bash
-        run: cmake --build . --config Release
+        run: cd build && cmake --build . --config Release
 
       - uses: actions/checkout@v2
       - name: Test
-        working-directory: build
         shell: bash
-        run: ctest -C Release
+        run: cd build && ctest -C Release
