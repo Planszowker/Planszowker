@@ -7,6 +7,8 @@ set(SFML_STATIC_LIBRARIES TRUE)
 
 # Set compiler specific settings
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
 
