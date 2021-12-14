@@ -13,9 +13,6 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC ErrorHandler
                         PUBLIC Games
                         PUBLIC DiceRoller
-
-                        PUBLIC ${SFML_LIBRARIES}
-                        PUBLIC ${SFML_DEPENDENCIES}
                       )
 
 target_include_directories(${LIB_NAME}

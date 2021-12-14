@@ -10,8 +10,8 @@ target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
                       PRIVATE DiceRoller
 
-                      sfml-graphics
-                      sfml-network
+                      debug sfml-network-d
+                      optimized sfml-network
                       )
 
 target_include_directories(${EXEC_NAME}

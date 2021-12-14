@@ -23,5 +23,7 @@ target_link_libraries(${LIB_NAME}
                       PUBLIC CompilerUtils
                       PUBLIC Games
 
-                      PUBLIC sfml-network
+                      PUBLIC debug sfml-network-d
+
+                      PUBLIC optimized sfml-network
         )

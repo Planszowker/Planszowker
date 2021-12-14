@@ -42,6 +42,8 @@ int main()
 
     view.run();
 
+    runThreads = false;
+
     controllerThread.join();
   } catch (ExceptionThrower& e) {
     std::cout << "Exception " << e.what() << ": " << e.getMessage() << "\n";

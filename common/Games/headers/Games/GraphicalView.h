@@ -12,6 +12,12 @@
 /* SFML */
 #include <SFML/Graphics.hpp>
 
+// Testing purpose only
+#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Widgets.hpp>
+#include <iostream>
+//Testing purpose only
+
 namespace pla::common::games {
 
 class Controller;
@@ -51,6 +57,13 @@ protected:
   virtual void _display();
 
   sf::RenderWindow& m_window;
+
+  // Testing purpose only
+  sfg::SFGUI sfgui;
+
+  void OnButtonClick() {
+    std::cout << "Fufu\n";
+  }
 };
 
 } // namespaces

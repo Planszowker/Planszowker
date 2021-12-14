@@ -12,6 +12,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
 
 find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
+find_package(SFGUI REQUIRED)
 
 include_directories(common)
 
