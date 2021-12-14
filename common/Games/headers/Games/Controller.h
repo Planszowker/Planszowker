@@ -8,6 +8,8 @@
 #include <atomic>
 #include <mutex>
 
+#include "GenericView.h"
+
 namespace pla::common::games {
 
 class GenericView;
@@ -18,7 +20,9 @@ class GenericView;
 class Controller
 {
 public:
-  explicit Controller() : m_run(true)
+  explicit Controller(std::atomic_bool& runThreads)
+    : m_runThreads(runThreads)
+    , m_view(nullptr)
   {
   }
 
@@ -40,8 +44,20 @@ public:
    */
   virtual void viewCallback(std::any& object) = 0;
 
+  /*!
+   * @brief Connect view to controller.
+   *
+   * @param view Generic view pointer
+   */
+  virtual void connectView(GenericView* view)
+  {
+    m_view = view;
+  }
+
 protected:
-  std::atomic_bool m_run; ///< Flag used to sync threads.
+  std::atomic_bool& m_runThreads; ///< Flag used to sync threads.
+
+  GenericView* m_view;
 
   std::mutex m_mutex; ///< Mutex for shared resources.
 };

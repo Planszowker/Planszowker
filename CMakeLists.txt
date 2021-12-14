@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(Planszowker VERSION 0.0
+project(Planszowker VERSION 0.1
                     LANGUAGES CXX)
 
-set(SFML_STATIC_LIBRARIES TRUE)
+#set(SFML_STATIC_LIBRARIES TRUE)
 
 # Set compiler specific settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread")
 
 find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
 

@@ -5,7 +5,7 @@
 #include "NetworkHandler/ClientPacketHandler.h"
 
 /* DiceRoller specific */
-#include "ConsoleView.h"
+#include "GraphicalView.h"
 #include "ViewLogic.h"
 
 /* SFML */
@@ -21,7 +21,7 @@ namespace pla::common::games::dice_roller {
 class DiceRollerController : public Controller
 {
 public:
-  explicit DiceRollerController(sf::TcpSocket& serverSocket);
+  DiceRollerController(sf::TcpSocket& serverSocket, std::atomic_bool& runThreads);
 
   void run() final;
   void viewCallback(std::any& object) final;
@@ -31,8 +31,9 @@ private:
 
   network::ClientPacketHandler m_clientPacketHandler;
 
-  DiceRollerConsoleView m_view;
   DiceRollerViewLogic m_logic;
+
+  std::atomic_bool& m_runThreads;
 };
 
 } // namespaces

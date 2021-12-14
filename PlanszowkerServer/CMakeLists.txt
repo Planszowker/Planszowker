@@ -12,13 +12,10 @@ target_link_libraries(${EXEC_NAME}
 
                       sfml-graphics
                       sfml-network
-
-                      -static-libgcc
-                      -static-libstdc++
                       )
 
 target_include_directories(${EXEC_NAME}
-                             PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                              PRIVATE headers/PlanszowkerServer
                              PRIVATE headers
                            )

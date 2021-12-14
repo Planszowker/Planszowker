@@ -1,6 +1,5 @@
 #include "Controller.h"
 
-#include "DiceRoller/ConsoleViewCallbackObject.h"
 #include "Logger/Logger.h"
 #include "ErrorHandler/ErrorLogger.h"
 #include "DiceRoller/Objects.h"
@@ -17,12 +16,11 @@ using namespace pla::common;
 
 namespace pla::common::games::dice_roller {
 
-DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
-  : Controller()
+DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket, std::atomic_bool& runThreads)
+  : Controller(runThreads)
   , m_clientPacketHandler(serverSocket)
+  , m_runThreads(runThreads)
 {
-  m_view.init();
-
   sf::Packet idPacket;
 
   DiceRollerRequest request{
@@ -36,11 +34,13 @@ DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
 
 
 void DiceRollerController::run() {
-  std::thread viewInput(&DiceRollerConsoleView::runLoop, m_view, this, std::ref(m_run));
-
   m_clientPacketHandler.runInBackground();
 
-  while (m_run) {
+  if (m_view == nullptr) {
+    return;
+  }
+
+  while (m_runThreads) {
     // TODO
 
     // Handle packets received from server
@@ -125,14 +125,12 @@ void DiceRollerController::run() {
 
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
   }
-
-  viewInput.join();
 }
 
 
 void DiceRollerController::update()
 {
-  m_view.update(std::make_any<std::string>("Something..."));
+  // Empty for now
 }
 
 

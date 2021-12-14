@@ -1,9 +1,9 @@
 set(LIB_NAME DiceRollerClient)
 
 set(SOURCES
-      ConsoleView.cpp
-      Controller.cpp
-      ViewLogic.cpp
+        GraphicalView.cpp
+        Controller.cpp
+        ViewLogic.cpp
     )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
@@ -13,6 +13,9 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC ErrorHandler
                         PUBLIC Games
                         PUBLIC DiceRoller
+
+                        PUBLIC ${SFML_LIBRARIES}
+                        PUBLIC ${SFML_DEPENDENCIES}
                       )
 
 target_include_directories(${LIB_NAME}

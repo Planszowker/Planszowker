@@ -11,6 +11,8 @@ add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
+
+                        PUBLIC sfml-graphics
                       )
 
 target_include_directories(${LIB_NAME}

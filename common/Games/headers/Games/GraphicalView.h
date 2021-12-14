@@ -22,6 +22,8 @@ class Controller;
 class GraphicalView : public GenericView
 {
 public:
+  explicit GraphicalView(sf::RenderWindow& window);
+
   /*!
    * @brief Initialization method. Has to be invoked at first place.
    */
@@ -29,28 +31,26 @@ public:
 
   /*!
    * @brief Run view in loop (get user input, handle events, send callbacks).
+   * User can override this method if needed.
    *
    * @param controller Pointer to a controller.
    * @param runLoop Used for thread syncing.
    */
-  void runLoop(Controller* controller, std::atomic_bool& runLoop) override;
-
-  /*!
-   * @brief Update rendering.
-   *
-   * @param object Game-specific object that holds required data.
-   */
-  void update(const std::any& object) override = 0;
+  void run() override;
 
 protected:
   /*!
-   * @brief Notify controller about a recent event.
-   *
-   * @param callback Controller's function that should be invoked.
+   * @brief Handle events. User can override this method for custom event handling.
    */
-  void notifyController(std::function<void(std::any&)> callback) override = 0;
+  virtual void _eventHandler();
 
-  sf::Window m_window; // TODO: This shouldn't be declared here, as main Window will be created in overall GUI
+  /*!
+   * @brief Display function. By default it only clears and render window.
+   * User should override this method to suit his needs.
+   */
+  virtual void _display();
+
+  sf::RenderWindow& m_window;
 };
 
 } // namespaces

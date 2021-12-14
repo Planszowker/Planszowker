@@ -10,19 +10,17 @@
 
 namespace pla::common::games::dice_roller {
 
-class DiceRollerConsoleView : public GenericView
+class DiceRollerGraphicalView : public GraphicalView
 {
 public:
-  DiceRollerConsoleView() = default;
-  virtual ~DiceRollerConsoleView() = default;
+  using GraphicalView::GraphicalView;
+  virtual ~DiceRollerGraphicalView() = default;
 
   void init() final;
-  void update(const std::any& object) final;
-
-  void runLoop(Controller* controller, std::atomic_bool& runLoop) final;
+  void update(const std::any& object);
 
 private:
-  void notifyController(std::function<void(std::any&)> callback) final;
+  void notifyController(std::function<void(std::any&)> callback);
 
   int m_inputType{0};
 };

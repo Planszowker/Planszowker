@@ -10,13 +10,11 @@ target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
                       PRIVATE DiceRoller
 
-                      sfml-graphics
-                      sfml-network
-
-                      -static-libgcc
-                      -static-libstdc++
+                      PUBLIC ${SFML_LIBRARIES}
+                      PUBLIC ${SFML_DEPENDENCIES}
                       )
 
 target_include_directories(${EXEC_NAME}
-                           PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
+                           PUBLIC ${SFML_INCLUDE_DIR}
+                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                            )
