@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.12)
 project(Planszowker VERSION 0.1
                     LANGUAGES CXX)
 
-#set(SFML_STATIC_LIBRARIES TRUE)
+if(WIN32)
+    set(SFML_STATIC_LIBRARIES TRUE)
+endif()
 
 # Set compiler specific settings
 set(CMAKE_CXX_STANDARD 17)
@@ -24,5 +26,6 @@ add_subdirectory(common/Utils/TimeMeasurement)
 add_subdirectory(common/Utils/Rng)
 add_subdirectory(common/Network/NetworkHandler)
 add_subdirectory(common/Games)
+add_subdirectory(common/GameUtils/GameWindow)
 add_subdirectory(PlanszowkerServer)
 add_subdirectory(PlanszowkerClient)

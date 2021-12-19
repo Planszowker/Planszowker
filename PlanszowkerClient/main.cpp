@@ -1,8 +1,7 @@
 #include <iostream>
 
 #include "ErrorHandler/ExceptionThrower.h"
-#include "DiceRoller/Controller.h"
-#include "DiceRoller/GraphicalView.h"
+#include "DiceRoller/Client.h"
 
 #include <SFML/Network.hpp>
 
@@ -31,20 +30,9 @@ int main()
   }
 
   try {
-    std::atomic_bool runThreads = true;
-    sf::RenderWindow window{sf::VideoMode(800, 600), "Ziuziuziu"};
-    DiceRollerGraphicalView view{window};
-    DiceRollerController controller{socket, runThreads};
+    // Temporary solution as socket is not managed for now
+    DiceRollerClient client{socket};
 
-    controller.connectView(&view);
-
-    std::thread controllerThread{&DiceRollerController::run, &controller};
-
-    view.run();
-
-    runThreads = false;
-
-    controllerThread.join();
   } catch (ExceptionThrower& e) {
     std::cout << "Exception " << e.what() << ": " << e.getMessage() << "\n";
 

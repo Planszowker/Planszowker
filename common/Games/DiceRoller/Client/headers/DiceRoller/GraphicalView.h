@@ -8,21 +8,32 @@
 #include <mutex>
 #include <atomic>
 
+/* SFML */
+#include <SFML/Graphics.hpp>
+
+/* SFGUI */
+#include <SFGUI/Widgets.hpp>
+
 namespace pla::common::games::dice_roller {
 
 class DiceRollerGraphicalView : public GraphicalView
 {
 public:
-  using GraphicalView::GraphicalView;
+  DiceRollerGraphicalView(const sf::Vector2i& windowDim, const std::string& windowName);
   virtual ~DiceRollerGraphicalView() = default;
 
   void init() final;
-  void update(const std::any& object);
+  void update(const std::any& objectFromController) final;
 
 private:
-  void notifyController(std::function<void(std::any&)> callback);
+  void _eventHandler(sf::Event& event) final;
+  void _display() final;
 
-  int m_inputType{0};
+  // GUI elements
+  std::shared_ptr<sfg::Button> m_buttonRollReroll;
+  std::shared_ptr<sfg::Button> m_buttonConfirm;
+
+  std::vector<std::shared_ptr<sfg::Widget>> m_widgets;
 };
 
 } // namespaces

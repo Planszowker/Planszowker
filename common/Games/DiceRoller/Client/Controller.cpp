@@ -8,7 +8,6 @@
 
 #include <thread>
 #include <chrono>
-#include <unordered_map>
 
 using namespace pla::common::err_handler;
 using namespace pla::common::logger;
@@ -19,8 +18,9 @@ namespace pla::common::games::dice_roller {
 DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket, std::atomic_bool& runThreads)
   : Controller(runThreads)
   , m_clientPacketHandler(serverSocket)
-  , m_runThreads(runThreads)
 {
+  // Send GetMyId request
+  // Todo: Maybe it is not necessary here?
   sf::Packet idPacket;
 
   DiceRollerRequest request{
@@ -32,13 +32,19 @@ DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket, std::ato
   m_clientPacketHandler.sendPacket(idPacket);
 }
 
+void DiceRollerController::runInBackground()
+{
+   std::thread controllerThread{&DiceRollerController::_run, this};
+   m_controllerThread = std::move(controllerThread);
+}
 
-void DiceRollerController::run() {
-  m_clientPacketHandler.runInBackground();
 
+void DiceRollerController::_run() {
   if (m_view == nullptr) {
     return;
   }
+
+  m_clientPacketHandler.runInBackground();
 
   while (m_runThreads) {
     // TODO
@@ -125,6 +131,8 @@ void DiceRollerController::run() {
 
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
   }
+
+  m_clientPacketHandler.stop();
 }
 
 
@@ -150,6 +158,5 @@ void DiceRollerController::viewCallback(std::any& object) {
     std::cout << e.what() << std::endl;
   }
 }
-
 
 } // namespace

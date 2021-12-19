@@ -18,22 +18,24 @@
 
 namespace pla::common::games::dice_roller {
 
-class DiceRollerController : public Controller
+class DiceRollerController final : public Controller
 {
 public:
   DiceRollerController(sf::TcpSocket& serverSocket, std::atomic_bool& runThreads);
+  ~DiceRollerController() final = default;
 
-  void run() final;
+  void runInBackground() final;
   void viewCallback(std::any& object) final;
 
 private:
   void update();
+  void _run();
 
   network::ClientPacketHandler m_clientPacketHandler;
 
   DiceRollerViewLogic m_logic;
 
-  std::atomic_bool& m_runThreads;
+  std::mutex m_mutex; ///< Mutex for shared resources.
 };
 
 } // namespaces

@@ -1,24 +1,29 @@
 set(LIB_NAME DiceRollerServer)
 
 set(SOURCES
-      ServerHandler.cpp
-      Logic.cpp
+        ServerHandler.cpp
+        Logic.cpp
     )
 
 add_library(${LIB_NAME} ${SOURCES})
 
-target_include_directories(${LIB_NAME}
-                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                             PRIVATE headers/DiceRoller
+target_include_directories(
+        ${LIB_NAME}
 
-                             PUBLIC headers
-                           )
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+        PRIVATE headers/DiceRoller
 
-target_link_libraries(${LIB_NAME}
-                        PUBLIC NetworkHandler
-                        PUBLIC Games
-                        PUBLIC DiceRoller
-                        PUBLIC Rng
-                        PUBLIC TimeMeasurement
-                        PUBLIC CompilerUtils
-                      )
+        PUBLIC headers
+    )
+
+target_link_libraries(
+        ${LIB_NAME}
+
+        PUBLIC NetworkHandler
+
+        PUBLIC Games
+        PUBLIC DiceRoller
+        PUBLIC Rng
+        PUBLIC TimeMeasurement
+        PUBLIC CompilerUtils
+    )

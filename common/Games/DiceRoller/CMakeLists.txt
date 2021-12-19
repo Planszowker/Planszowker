@@ -7,12 +7,16 @@ add_library(${LIB_NAME} INTERFACE)
 add_subdirectory(Client)
 add_subdirectory(Server)
 
-target_link_libraries(${LIB_NAME}
-                        INTERFACE DiceRollerClient
-                        INTERFACE DiceRollerServer
-                      )
+target_link_libraries(
+        ${LIB_NAME}
 
-target_include_directories(${LIB_NAME}
-                             INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-                             INTERFACE headers
-                           )
+        INTERFACE DiceRollerClient
+        INTERFACE DiceRollerServer
+    )
+
+target_include_directories(
+        ${LIB_NAME}
+
+        INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+        INTERFACE headers
+    )

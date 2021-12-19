@@ -12,10 +12,18 @@ using namespace pla::common::games;
 
 namespace pla::common::games::dice_roller {
 
-void DiceRollerGraphicalView::update(const std::any& object) {
-  auto receivedObject = std::any_cast<std::string>(object);
+DiceRollerGraphicalView::DiceRollerGraphicalView(const sf::Vector2i& windowDim, const std::string& windowName)
+  : GraphicalView(windowDim, windowName)
+  , m_buttonRollReroll(std::move(sfg::Button::Create()))
+  , m_buttonConfirm(std::move(sfg::Button::Create()))
+{
+}
 
-  std::cout << receivedObject << std::endl;
+
+void DiceRollerGraphicalView::update(const std::any& objectFromController) {
+  //auto receivedObject = std::any_cast<std::string>(object);
+
+  //std::cout << receivedObject << std::endl;
 
   // TODO: Remove below printout...
   //std::cout << "Received additional info: " << receivedObject.additionalInfo << "\n";
@@ -24,7 +32,29 @@ void DiceRollerGraphicalView::update(const std::any& object) {
 
 
 void DiceRollerGraphicalView::init() {
-  // No mutex is needed here, since it is invoked before any multithreading
+  // Set desktop properties
+  m_desktop.SetProperties(
+          "Button {"
+          " FontSize: 26;"
+          "}"
+  );
+
+  // Roll/Reroll button
+  m_buttonRollReroll->SetLabel("Roll");
+  m_buttonRollReroll->SetPosition(sf::Vector2f(200, 300));
+
+  // Confirm button
+  m_buttonConfirm->SetLabel("Confirm");
+  m_buttonConfirm->SetPosition(sf::Vector2f(400, 300));
+
+  m_widgets.push_back(m_buttonRollReroll);
+  m_widgets.push_back(m_buttonConfirm);
+
+  // Add all widgets to desktop
+  for (const auto& widget : m_widgets)
+  {
+    m_desktop.Add(widget);
+  }
 
   // Some basic info about a game
   std::cout << "DiceRoller (Graphical) v" << DiceRollerVersionMajor << "." << DiceRollerVersionMinor << "." << DiceRollerVersionPatch << "\n";
@@ -34,35 +64,23 @@ void DiceRollerGraphicalView::init() {
 }
 
 
-void DiceRollerGraphicalView::notifyController(std::function<void(std::any&)> callback) {
-  // TODO: It is just for testing
-  DiceRollerRequest requestToSend;
-
-  requestToSend.type = static_cast<DiceRollerRequestType>(m_inputType);
-
-  auto request = std::make_any<DiceRollerRequest>(requestToSend);
-
-  //std::cout << "Sending request type of value: " << static_cast<int>(std::any_cast<DiceRollerRequest>(requestToSend).type) << "\n";
-  callback(request);
+void DiceRollerGraphicalView::_eventHandler(sf::Event& event)
+{
 }
 
 
-/*void DiceRollerGraphicalView::runLoop(Controller* controller, std::atomic_bool& runLoop)
+void DiceRollerGraphicalView::_display()
 {
-  while (runLoop)
-  {
-    // Wait for input
-    std::cout << "Packet to send:\n (1) Roll dice\n (2) Re-roll dice\n (3) Confirm\n Your choice: ";
-    std::cin >> m_inputType;
+  //m_gameWindow->clear(sf::Color::Magenta);
 
-    if (m_inputType < 1 || m_inputType > 3) {
-      std::cout << "Wrong packet type!\n";
-      continue;
-    }
+  sf::RectangleShape rect(sf::Vector2f(250.f, 80.f));
+  rect.setFillColor(sf::Color::Blue);
 
-    std::function<void(std::any&)> callback = std::bind(&Controller::viewCallback, controller, std::placeholders::_1);
-    notifyController(callback);
-  }
-}*/
+  m_gameWindow->setView(m_gameView);
+  m_gameWindow->draw(rect);
+
+  m_gameWindow->setView(m_playersView);
+  m_gameWindow->draw(rect);
+}
 
 } // namespaces

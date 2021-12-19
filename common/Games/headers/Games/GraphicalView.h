@@ -3,6 +3,7 @@
 /* Generic */
 #include "Controller.h"
 #include "GenericView.h"
+#include "GameWindow/GameWindow.h"
 
 /* STD */
 #include <functional>
@@ -12,11 +13,9 @@
 /* SFML */
 #include <SFML/Graphics.hpp>
 
-// Testing purpose only
+/* SFGUI */
 #include <SFGUI/SFGUI.hpp>
 #include <SFGUI/Widgets.hpp>
-#include <iostream>
-//Testing purpose only
 
 namespace pla::common::games {
 
@@ -28,7 +27,7 @@ class Controller;
 class GraphicalView : public GenericView
 {
 public:
-  explicit GraphicalView(sf::RenderWindow& window);
+  GraphicalView(const sf::Vector2i& windowDim, const std::string& windowName);
 
   /*!
    * @brief Initialization method. Has to be invoked at first place.
@@ -48,22 +47,21 @@ protected:
   /*!
    * @brief Handle events. User can override this method for custom event handling.
    */
-  virtual void _eventHandler();
+  virtual void _eventHandler(sf::Event& event) = 0;
 
   /*!
    * @brief Display function. By default it only clears and render window.
    * User should override this method to suit his needs.
    */
-  virtual void _display();
+  virtual void _display() = 0;
 
-  sf::RenderWindow& m_window;
+  // SFML views - split window in game view and player/log view
+  sf::View m_gameView;
+  sf::View m_playersView;
 
-  // Testing purpose only
-  sfg::SFGUI sfgui;
-
-  void OnButtonClick() {
-    std::cout << "Fufu\n";
-  }
+  std::unique_ptr<game_utils::GameWindow> m_gameWindow;
+  sfg::SFGUI m_sfgui;
+  sfg::Desktop m_desktop;
 };
 
 } // namespaces

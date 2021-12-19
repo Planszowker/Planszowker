@@ -7,6 +7,7 @@
 #include <any>
 #include <atomic>
 #include <mutex>
+#include <thread>
 
 #include "GenericView.h"
 
@@ -26,16 +27,25 @@ public:
   {
   }
 
+  virtual ~Controller()
+  {
+    m_controllerThread.join();
+  }
+
   /*!
-   * @brief Runs controller.
-   * It is responsible for creating a View and a Model (Logic).
-   * It runs in an infinite loop and receives data from connected server.
+   * @brief Initialize method for the Controller.
+   * It can be overridden if it is necessary.
+   */
+  virtual void init() { }
+
+  /*!
+   * @brief Runs controller in background.
+   * Run method is invoked in another thread.
    * Uses MVC design patter.
    *
    * @see GenericView
-   * @see ViewLogic
    */
-  virtual void run() = 0;
+  virtual void runInBackground() = 0;
 
   /*!
    * @brief A callback function used in view.
@@ -46,6 +56,7 @@ public:
 
   /*!
    * @brief Connect view to controller.
+   * It has to be invoked before running the controller.
    *
    * @param view Generic view pointer
    */
@@ -57,9 +68,9 @@ public:
 protected:
   std::atomic_bool& m_runThreads; ///< Flag used to sync threads.
 
-  GenericView* m_view;
+  std::thread m_controllerThread; ///< Thread for running controller.
 
-  std::mutex m_mutex; ///< Mutex for shared resources.
+  GenericView* m_view;
 };
 
 } // namespaces

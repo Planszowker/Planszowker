@@ -3,27 +3,31 @@ set(LIB_NAME NetworkHandler)
 set(SOURCES
         ServerPacketHandler.cpp
         ClientPacketHandler.cpp
-   )
+    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
-target_include_directories(${LIB_NAME}
-                           PRIVATE ${Games_SOURCE_DIR}/headers
-                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                           PUBLIC headers
+target_include_directories(
+        ${LIB_NAME}
 
-                           PRIVATE headers/${LIB_NAME}
-                           )
+        PRIVATE ${Games_SOURCE_DIR}/headers
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 
-target_link_libraries(${LIB_NAME}
-                      PUBLIC ClientInfo
-                      PUBLIC ErrorHandler
-                      PUBLIC Logger
-                      PUBLIC TimeMeasurement
-                      PUBLIC CompilerUtils
-                      PUBLIC Games
+        PUBLIC headers
+        PRIVATE headers/${LIB_NAME}
+    )
 
-                      PUBLIC debug sfml-network-d
+target_link_libraries(
+        ${LIB_NAME}
 
-                      PUBLIC optimized sfml-network
-        )
+        PUBLIC ClientInfo
+        PUBLIC ErrorHandler
+        PUBLIC Logger
+        PUBLIC TimeMeasurement
+        PUBLIC CompilerUtils
+        PUBLIC Games
+
+        PUBLIC debug sfml-network-d
+
+        PUBLIC optimized sfml-network
+    )
