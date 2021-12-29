@@ -8,15 +8,20 @@
 #include <string>
 #include <atomic>
 
+//test
+#include <SFGUI/RendererViewport.hpp>
+
 using namespace pla::common::games;
 
 namespace pla::common::games::dice_roller {
 
 DiceRollerGraphicalView::DiceRollerGraphicalView(const sf::Vector2i& windowDim, const std::string& windowName)
   : GraphicalView(windowDim, windowName)
-  , m_buttonRollReroll(std::move(sfg::Button::Create()))
-  , m_buttonConfirm(std::move(sfg::Button::Create()))
+  , m_rollRerollButton(sfg::Button::Create("Roll"))
+  , m_confirmButton(sfg::Button::Create("Confirm"))
 {
+  m_rollRerollButton->SetRequisition(sf::Vector2f(MinimalButtonWidth, MinimalButtonHeight));
+  m_confirmButton->SetRequisition(sf::Vector2f(MinimalButtonWidth * 3.f, MinimalButtonHeight));
 }
 
 
@@ -32,55 +37,34 @@ void DiceRollerGraphicalView::update(const std::any& objectFromController) {
 
 
 void DiceRollerGraphicalView::init() {
-  // Set desktop properties
-  m_desktop.SetProperties(
-          "Button {"
-          " FontSize: 26;"
-          "}"
-  );
-
-  // Roll/Reroll button
-  m_buttonRollReroll->SetLabel("Roll");
-  m_buttonRollReroll->SetPosition(sf::Vector2f(200, 300));
-
-  // Confirm button
-  m_buttonConfirm->SetLabel("Confirm");
-  m_buttonConfirm->SetPosition(sf::Vector2f(400, 300));
-
-  m_widgets.push_back(m_buttonRollReroll);
-  m_widgets.push_back(m_buttonConfirm);
-
-  // Add all widgets to desktop
-  for (const auto& widget : m_widgets)
-  {
-    m_desktop.Add(widget);
-  }
-
   // Some basic info about a game
   std::cout << "DiceRoller (Graphical) v" << DiceRollerVersionMajor << "." << DiceRollerVersionMinor << "." << DiceRollerVersionPatch << "\n";
   std::cout << "========================================\n";
   std::cout << "Choose an action. You can reroll up to 1 time. Points are summed. Player with a greater score wins.\n";
   std::cout << "========================================\n";
+
+  m_actionAreaBox->SetOrientation(sfg::Box::Orientation::HORIZONTAL);
+  m_actionAreaBox->Pack(m_rollRerollButton, false);
+
+  std::cout << "Req: " << m_actionsAreaWindow->GetRequisition().x << " " << m_actionsAreaWindow->GetRequisition().y << "\n";
+  m_rollRerollButton->GetSignal(sfg::Button::OnMouseLeftRelease).Connect([this]{
+    this->m_actionAreaBox->Pack(this->m_confirmButton);
+    this->m_actionAreaBox->Remove(this->m_rollRerollButton);
+    this->m_rollRerollButton->Show(false);
+    _recalculateActionBoxWindowSize();
+  });
 }
 
 
 void DiceRollerGraphicalView::_eventHandler(sf::Event& event)
 {
+
 }
 
 
 void DiceRollerGraphicalView::_display()
 {
-  //m_gameWindow->clear(sf::Color::Magenta);
 
-  sf::RectangleShape rect(sf::Vector2f(250.f, 80.f));
-  rect.setFillColor(sf::Color::Blue);
-
-  m_gameWindow->setView(m_gameView);
-  m_gameWindow->draw(rect);
-
-  m_gameWindow->setView(m_playersView);
-  m_gameWindow->draw(rect);
 }
 
 } // namespaces

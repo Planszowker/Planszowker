@@ -29,11 +29,11 @@ private:
   void _eventHandler(sf::Event& event) final;
   void _display() final;
 
-  // GUI elements
-  std::shared_ptr<sfg::Button> m_buttonRollReroll;
-  std::shared_ptr<sfg::Button> m_buttonConfirm;
+  sfg::Button::Ptr m_rollRerollButton;
+  sfg::Button::Ptr m_confirmButton;
 
-  std::vector<std::shared_ptr<sfg::Widget>> m_widgets;
+  static constexpr float MinimalButtonWidth{100.f};
+  static constexpr float MinimalButtonHeight{30.f};
 };
 
 } // namespaces
