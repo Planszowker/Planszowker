@@ -8,9 +8,6 @@
 #include <string>
 #include <atomic>
 
-//test
-#include <SFGUI/RendererViewport.hpp>
-
 using namespace pla::common::games;
 
 namespace pla::common::games::dice_roller {
@@ -22,6 +19,8 @@ DiceRollerGraphicalView::DiceRollerGraphicalView(const sf::Vector2i& windowDim, 
 {
   m_rollRerollButton->SetRequisition(sf::Vector2f(MinimalButtonWidth, MinimalButtonHeight));
   m_confirmButton->SetRequisition(sf::Vector2f(MinimalButtonWidth * 3.f, MinimalButtonHeight));
+
+  m_textureLoader.loadAndStoreTexture("data/common/dice/DiceSprSheetX128.png", "dice");
 }
 
 
@@ -45,13 +44,24 @@ void DiceRollerGraphicalView::init() {
 
   m_actionAreaBox->SetOrientation(sfg::Box::Orientation::HORIZONTAL);
   m_actionAreaBox->Pack(m_rollRerollButton, false);
+  m_actionAreaBox->Pack(m_confirmButton, false);
 
   std::cout << "Req: " << m_actionsAreaWindow->GetRequisition().x << " " << m_actionsAreaWindow->GetRequisition().y << "\n";
+
   m_rollRerollButton->GetSignal(sfg::Button::OnMouseLeftRelease).Connect([this]{
+    std::cout << "Roll/Reroll button pressed.\n";
+    this->m_rollRerollButton->Show(false);
+    this->m_confirmButton->Show(true);
     this->m_actionAreaBox->Pack(this->m_confirmButton);
     this->m_actionAreaBox->Remove(this->m_rollRerollButton);
-    this->m_rollRerollButton->Show(false);
-    _recalculateActionBoxWindowSize();
+  });
+
+  m_confirmButton->GetSignal(sfg::Button::OnMouseLeftRelease).Connect([this]{
+    std::cout << "Confirm button pressed.\n";
+    this->m_confirmButton->Show(false);
+    this->m_rollRerollButton->Show(true);
+    this->m_actionAreaBox->Pack(this->m_rollRerollButton);
+    this->m_actionAreaBox->Remove(this->m_confirmButton);
   });
 }
 
@@ -64,7 +74,14 @@ void DiceRollerGraphicalView::_eventHandler(sf::Event& event)
 
 void DiceRollerGraphicalView::_display()
 {
+  const auto& [found, diceTexture] = m_textureLoader.retrieveTexture("dice");
 
+  sf::Sprite ziuziu;
+  if (found) {
+    ziuziu.setTexture(*diceTexture);
+  }
+
+  m_gameAreaSfmlCanvas->Draw(ziuziu);
 }
 
 } // namespaces

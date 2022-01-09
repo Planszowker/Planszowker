@@ -23,3 +23,5 @@ find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
 find_package(SFGUI REQUIRED)
 add_executable(TEST sfgui_test.cpp)
 target_link_libraries(TEST sfml-graphics-d sfml-system-d sfml-window-d SFGUI-d)
+
+file(COPY ../data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

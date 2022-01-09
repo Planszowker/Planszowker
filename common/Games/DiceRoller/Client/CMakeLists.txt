@@ -17,6 +17,7 @@ target_link_libraries(
         PUBLIC Games
         PUBLIC DiceRoller
         PUBLIC GameWindow
+        PUBLIC TextureLoader
     )
 
 target_include_directories(

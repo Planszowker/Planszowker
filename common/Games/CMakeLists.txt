@@ -13,6 +13,7 @@ target_link_libraries(
 
         PUBLIC NetworkHandler
         PRIVATE GameWindow
+        PRIVATE TextureLoader
 
         PUBLIC debug sfml-network-d
         PUBLIC debug sfml-graphics-d
@@ -22,8 +23,8 @@ target_link_libraries(
 
         PUBLIC optimized sfml-network
         PUBLIC optimized sfml-graphics
-        PUBLIC debug sfml-window
-        PUBLIC debug sfml-system
+        PUBLIC optimized sfml-window
+        PUBLIC optimized sfml-system
         PUBLIC optimized SFGUI
     )
 

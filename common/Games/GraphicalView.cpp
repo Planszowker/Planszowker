@@ -1,9 +1,11 @@
 #include "GraphicalView.h"
 
+#include <iostream>
+
 namespace pla::common::games {
 
 GraphicalView::GraphicalView(const sf::Vector2i& windowDim, const std::string& windowName)
-  : m_gameWindow(std::make_unique<game_utils::TextureLoader>(sf::VideoMode(windowDim.x, windowDim.y, 32), windowName))
+  : m_gameWindow(std::make_unique<game_utils::GameWindow>(sf::VideoMode(windowDim.x, windowDim.y, 32), windowName))
   , m_gameAreaWindow(sfg::Window::Create(sf::Style::None))
   , m_playerAreaWindow(sfg::Window::Create(sf::Style::None))
   , m_logAreaWindow(sfg::Window::Create(sf::Style::None))
@@ -26,8 +28,6 @@ GraphicalView::GraphicalView(const sf::Vector2i& windowDim, const std::string& w
   // |                      |LOG AREA|  0.4
   // |______________________|________|  \ /
   // |<=========0.8========>|<==0.2=>|
-
-
 
   // Set dimensions for every area
   sf::Vector2f gameAreaDim {static_cast<float>(windowDim.x) * GameAreaWidthFactor, static_cast<float>(windowDim.y)};
@@ -103,7 +103,8 @@ void GraphicalView::run()
     // Draw the SFML Sprite.
     m_gameAreaSfmlCanvas->SetView(m_gameAreaView);
     m_gameAreaSfmlCanvas->Draw(workaroundShape);
-    //_display();
+
+    _display();
 
     m_gameAreaSfmlCanvas->Display();
     m_gameAreaSfmlCanvas->Unbind();
@@ -111,6 +112,7 @@ void GraphicalView::run()
     // Hack to set to default view. Without rendering *anything* the view is not set...
     m_gameWindow->setView(m_gameWindow->getDefaultView());
     m_gameWindow->draw(workaroundShape);
+
 
     m_sfgui.Display(*m_gameWindow);
     m_gameWindow->display();

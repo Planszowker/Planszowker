@@ -4,6 +4,7 @@
 #include "Controller.h"
 #include "GenericView.h"
 #include "GameWindow/GameWindow.h"
+#include "TextureLoader/TextureLoader.h"
 
 /* STD */
 #include <functional>
@@ -57,12 +58,15 @@ protected:
 
   void _recalculateActionBoxWindowSize();
 
+  // Texture Management
+  game_utils::TextureLoader m_textureLoader;
+
   // SFML views
   sf::View m_mainWindowView;
   sf::View m_gameAreaView;
 
   // SFML window
-  std::unique_ptr<game_utils::TextureLoader> m_gameWindow;
+  std::unique_ptr<game_utils::GameWindow> m_gameWindow;
 
   // SFGUI main objects
   sfg::SFGUI m_sfgui;
