@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
+find_package(Sol2 REQUIRED)
+find_package(Lua REQUIRED)
 
 include_directories(common)
 
