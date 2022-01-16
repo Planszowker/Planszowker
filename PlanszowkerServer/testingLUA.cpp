@@ -4,9 +4,14 @@
 int main(int argc, char* argv[]) {
 
   sol::state lua;
-  lua.open_libraries(sol::lib::base);
+  lua.open_libraries(sol::lib::base, sol::lib::package);
 
-  lua.script("print('bark bark bark!')");
+  try {
+    sol::protected_function_result result = lua.script_file("lua-scripts/games/DiceRoller.lua");
+  } catch(sol::error& e) {
+    std::cerr << "Exception has been raised! " << e.what() << "\n";
+  }
 
+  std::cout << "Ending program...\n";
   return EXIT_SUCCESS;
 }

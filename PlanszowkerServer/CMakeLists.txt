@@ -26,3 +26,5 @@ target_include_directories(${EXEC_NAME}
                              PRIVATE headers/PlanszowkerServer
                              PRIVATE headers
                            )
+
+file(COPY lua-scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
