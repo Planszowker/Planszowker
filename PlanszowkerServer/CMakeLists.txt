@@ -8,11 +8,10 @@ add_executable(${EXEC_NAME} ${SOURCES})
 
 add_executable(testingLua testingLUA.cpp)
 target_link_libraries(testingLua PRIVATE lua5.3)
-include_directories(testingLua ${LUA_INCLUDE_DIR})
 
 target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
-                      PRIVATE DiceRoller
+                      PRIVATE GamesServer
 
                       sfml-graphics
                       sfml-network
@@ -22,7 +21,7 @@ target_link_libraries(${EXEC_NAME}
                       )
 
 target_include_directories(${EXEC_NAME}
-                             PRIVATE {CMAKE_CURRENT_SOURCE_DIR}
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                              PRIVATE headers/PlanszowkerServer
                              PRIVATE headers
                            )

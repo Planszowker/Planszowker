@@ -21,3 +21,5 @@ fsm = machine.create({
         { name = 'ConfirmEvent', from = {'Roll', 'Reroll'}, to = 'Confirm' },
     }
 })
+
+print('[LUA] FSM has been created...')

@@ -1,15 +1,13 @@
 #include <SFML/Network.hpp>
 #include <string>
 
-#include "Games/ServerHandler.h"
-#include "Games/Characters.h"
-#include "DiceRoller/ServerHandler.h"
+#include "GamesServer/ServerHandler.h"
 #include "ErrorHandler/ExceptionThrower.h"
+#include "GamesServer/Logic.h"
 
 using namespace pla::common;
 using namespace pla::common::err_handler;
-using namespace pla::common::games;
-using namespace pla::common::games::dice_roller;
+using namespace pla::common::games::server;
 
 ////////////
 // SERVER //
@@ -33,7 +31,7 @@ int main() {
 
   try {
     network::ServerPacketHandler serverPacketHandler{2};
-    DiceRollerServerHandler serverHandler(serverPacketHandler);
+    ServerHandler serverHandler("DiceRoller", serverPacketHandler);
 
     serverHandler.run();
 
