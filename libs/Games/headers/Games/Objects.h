@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>
+#include <cstdint>
+
+#include <SFML/Network.hpp>
+
 namespace pla::common::games {
 
 enum class PacketType : uint8_t
@@ -36,3 +41,6 @@ struct Reply
 };
 
 } // namespaces
+
+sf::Packet& operator << (sf::Packet& packet, const pla::common::games::Request& request);
+sf::Packet& operator >> (sf::Packet& packet, pla::common::games::Request& request);

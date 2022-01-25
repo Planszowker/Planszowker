@@ -137,13 +137,13 @@ void DiceRollerController::update()
 
 void DiceRollerController::viewCallback(std::any& object) {
   try {
-    auto viewRequest = std::any_cast<Request>(object);
+    Request viewRequest = std::any_cast<Request>(object);
 
     //Logger::printDebug("Callback from ConsoleView has occurred!");
     //Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
 
     sf::Packet requestPacket;
-    requestPacket.append(reinterpret_cast<const void*>(&viewRequest), sizeof(viewRequest));
+    requestPacket << viewRequest;
     m_clientPacketHandler.sendPacket(requestPacket);
 
   } catch (const std::bad_any_cast &e) {

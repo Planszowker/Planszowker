@@ -141,19 +141,23 @@ void ServerPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
         status = client.second->receive(clientPacket);
       }
 
-      // TODO: It's not true for now - If we don't have enough players, ignore received packets
       if (status != sf::Socket::Done) {
         continue;
       }
 
       // Add received packets to map
-      const auto packetsIt = m_packets.find(client.first);
+      auto packetsIt = m_packets.find(client.first);
+
+      if (packetsIt == m_packets.end()) { // If we don't have client in current map
+        std::deque<sf::Packet> deque;
+        auto [it, inserted] = m_packets.insert({client.first, deque});
+        if (inserted) {
+          packetsIt = it;
+        }
+      }
+
       if (packetsIt != m_packets.end()) {
         packetsIt->second.push_back(clientPacket);
-      } else { // If client does not exist
-        std::deque<sf::Packet> packetDeque;
-        packetDeque.push_back(clientPacket);
-        m_packets.emplace(std::make_pair(client.first, std::move(packetDeque)));
       }
 
       Logger::printDebug("Received packet from " + client.second->getRemoteAddress().toString() + ":"

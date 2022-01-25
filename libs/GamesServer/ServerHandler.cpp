@@ -21,7 +21,7 @@ void ServerHandler::run()
 
 bool ServerHandler::_internalHandling() {
   if (!m_packetHandler.hasEnoughClientsConnected()) {
-    return true;
+    //return true;
   }
 
   time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
@@ -29,9 +29,9 @@ bool ServerHandler::_internalHandling() {
   std::vector<size_t> keys;
   auto packetsMap = m_packetHandler.getPackets(keys);
 
-  if (!keys.empty()) {
+  //if (!keys.empty()) {
     //std::cout << "keys.size() = " << keys.size() << "\n";
-  }
+  //}
 
   // TODO: Not elegant, maybe better solution?
   for (const auto& key: keys) {
@@ -43,18 +43,20 @@ bool ServerHandler::_internalHandling() {
 
     std::cout << "DEBUG" << std::endl;
     // Iterate over all packets in deque
-    for (const auto& packet: mapIt->second) {
+    for (auto& packet: mapIt->second) {
       Request request{};
-      if (packet.getDataSize() < sizeof(request)) {
-        // Wrong packet
-        continue;
-      }
 
-      request = *reinterpret_cast<Request *>(const_cast<void *>(packet.getData()));
+      packet >> request;
+
+      std::cout << "Type: " << static_cast<int>(request.type) << "\n";
+      std::cout << "Body: " << request.body << "\n";
+
       if (m_packetHandler.hasEnoughClientsConnected()) {
         static Logic logic{keys, m_gameName};
         if (!logic.isGameFinished()) {
           logic.handleGameLogic(key, request, m_packetHandler);
+        } else {
+          return false;
         }
       }
     }

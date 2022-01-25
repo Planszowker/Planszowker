@@ -8,7 +8,7 @@ add_executable(${EXEC_NAME} ${SOURCES})
 
 target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
-                      PRIVATE DiceRoller
+                      PRIVATE GamesClient
 
                       sfml-graphics
                       sfml-network

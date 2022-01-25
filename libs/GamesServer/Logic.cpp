@@ -1,13 +1,18 @@
 #include "Logic.h"
 
+#include "Rng/RandomGenerator.h"
+
 namespace pla::common::games::server {
 
-Logic::Logic(std::vector<size_t> &clientIds, const std::string& gameName)
-  : m_clientIds(clientIds)
-  , m_currentTurnClientId(clientIds[0])
-  , m_finished(false)
-  , m_gameName(gameName)
+Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
+  : m_gameName(gameName)
 {
+  for (auto const& clientId : clientIds) {
+    m_clientsIDsAndPoints[clientId] = 0;
+  }
+
+  m_currentClientsIDAndPointsIt = m_clientsIDsAndPoints.begin();
+
   m_luaVM.open_libraries(sol::lib::base,
                          sol::lib::package,
                          sol::lib::io,
@@ -15,23 +20,58 @@ Logic::Logic(std::vector<size_t> &clientIds, const std::string& gameName)
                          sol::lib::string);
 
   try {
-    sol::protected_function_result result = m_luaVM.script_file("lua-scripts/games/" + m_gameName + "/" + m_gameName + "-states.lua");
-    //sol::protected_function_result result2 = lua.script_file("lua-scripts/games/DiceRoller/DiceRoller.lua");
+    // Load State Machine and make it available as a `machine` variable in LUA
+    m_luaVM.script("machine = require('lua-scripts.core.lua-state-machine')");
+
+    // Make necessary utils visible in LUA
+    auto rng = m_luaVM.new_usertype<rng::RandomGenerator>("rng",
+            sol::constructors<rng::RandomGenerator(int, int)>());
+    rng["generateRandomNumber"] = &rng::RandomGenerator::generateRandomNumber;
+
+    // Bind functions to be available in LUA
+    m_luaVM.set_function("AdvanceRound", &Logic::_advanceRound, this);
+    m_luaVM.set_function("EndGame", &Logic::_endGame, this);
+    m_luaVM.set_function("AddPointsToCurrentPlayer", &Logic::_addPointsToCurrentClient, this);
+    m_luaVM.set_function("GetCurrentPlayerPoints", &Logic::_getCurrentPlayerPoints, this);
+    m_luaVM.set_function("GetRoundsCounter", &Logic::_getRoundsCount, this);
+    m_luaVM.set_function("GetCurrentPlayer", &Logic::_getCurrentClientID, this);
+
+    // Load Game Initialization script - loading this should create states, but it's game dependent
+    sol::protected_function_result result = m_luaVM.script_file(LUA_SCRIPT_GAMES_PREFIX + m_gameName + "/" + m_gameName
+            + LUA_SCRIPT_GAMES_STATES_SUFFIX);
   } catch(sol::error& e) {
     std::cerr << "Exception has been raised! " << e.what() << "\n";
   }
 }
 
-bool Logic::_checkIfTurnAvailable(size_t clientId) const {
-  return m_currentTurnClientId == clientId;
+bool Logic::_checkIfTurnAvailable(size_t clientId) const
+{
+  return m_currentClientsIDAndPointsIt->first == clientId;
+}
+
+void Logic::_advanceRound()
+{
+  std::cout << "Advancing round...\n";
+  m_currentClientsIDAndPointsIt = std::next(m_currentClientsIDAndPointsIt);
+  if (m_currentClientsIDAndPointsIt == m_clientsIDsAndPoints.end()) {
+    // Roll-over -> increase round counter by 1
+    m_currentClientsIDAndPointsIt = m_clientsIDsAndPoints.begin();
+    ++m_roundCounter;
+  }
+}
+
+void Logic::_addPointsToCurrentClient(int points)
+{
+  m_currentClientsIDAndPointsIt->second += points;
 }
 
 void Logic::handleGameLogic(size_t clientId, Request requestType,
                                       network::ServerPacketHandler &packetHandler)
 {
-  for (const auto& key: m_clientIds) {
-    std::cout << "Available clientID: " << key << "\n";
+  for (const auto& client: m_clientsIDsAndPoints) {
+    std::cout << "Available clientID: " << client.first << "\n";
   }
+  std::cout << "Current clientID turn: " << m_currentClientsIDAndPointsIt->first << "\n";
 
   sf::Packet replyToClient;
   Reply replyStruct {};
@@ -44,7 +84,19 @@ void Logic::handleGameLogic(size_t clientId, Request requestType,
 
   replyStruct.status = ReplyType::Success;
 
-  std::cout << "DEBUG: Current turn was " << m_currentTurnClientId << "\n";
+  try {
+    m_luaVM.script("fsm:" + requestType.body + "Event()");
+  } catch(sol::error& e) {
+    std::cerr << "[LUA] Error: " << requestType.body + "Event does NOT exist in State Machine!\n";
+  }
+
+  try {
+    m_luaVM.script_file(LUA_SCRIPT_GAMES_PREFIX + m_gameName + "/" + m_gameName + ".lua");
+  } catch(sol::error& e) {
+    std::cerr << "[LUA] Error: Exception has been raised!\n" << e.what() << "\n";
+  }
+
+  std::cout << "DEBUG: Current turn was " << m_currentClientsIDAndPointsIt->first << "\n";
 }
 
 

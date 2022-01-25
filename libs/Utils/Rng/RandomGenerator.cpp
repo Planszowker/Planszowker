@@ -2,8 +2,7 @@
 
 namespace pla::common::rng {
 
-template <typename IntType>
-RandomGenerator<IntType>::RandomGenerator(IntType min, IntType max)
+RandomGenerator::RandomGenerator(int min, int max)
   : m_min(min)
   , m_max(max)
   , m_randomEngine(m_randomDevice())
@@ -11,12 +10,9 @@ RandomGenerator<IntType>::RandomGenerator(IntType min, IntType max)
 {
 }
 
-template <typename IntType>
-IntType RandomGenerator<IntType>::generateRandomNumber()
+int RandomGenerator::generateRandomNumber()
 {
   return m_uniformDist(m_randomEngine);
 }
-
-template class RandomGenerator<uint8_t>;
 
 }

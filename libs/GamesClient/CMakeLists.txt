@@ -1,4 +1,4 @@
-set(LIB_NAME DiceRollerClient)
+set(LIB_NAME GamesClient)
 
 set(SOURCES
       ConsoleView.cpp
@@ -12,12 +12,11 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC Logger
                         PUBLIC ErrorHandler
                         PUBLIC Games
-                        PUBLIC DiceRoller
                       )
 
 target_include_directories(${LIB_NAME}
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                              PUBLIC headers
 
-                             PRIVATE headers/DiceRoller
+                             PRIVATE headers/${LIB_NAME}
                            )

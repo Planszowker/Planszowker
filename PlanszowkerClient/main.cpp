@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "ErrorHandler/ExceptionThrower.h"
-#include "DiceRoller/Controller.h"
-#include "DiceRoller/ConsoleView.h"
+#include "GamesClient/Controller.h"
+#include "GamesClient/ConsoleView.h"
 
 #include <SFML/Network.hpp>
 
