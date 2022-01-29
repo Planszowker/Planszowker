@@ -27,15 +27,18 @@ public:
 
   [[nodiscard]] inline bool isGameFinished() const { return m_finished; }
 
+  [[nodiscard]] inline ClientIDsAndPointsMap getClientsMap() const { return m_clientsIDsAndPoints; }
+
 private:
   [[nodiscard]] bool _checkIfTurnAvailable(size_t clientId) const;
 
   void _advanceRound();
-  void _endGame() { m_finished = true; }
+  void _finishGame();
   void _addPointsToCurrentClient(int points);
   size_t _getRoundsCount() const { return m_roundCounter; }
   size_t _getCurrentClientID() const { return m_currentClientsIDAndPointsIt->first; }
   int _getCurrentPlayerPoints() const { return m_currentClientsIDAndPointsIt->second; }
+  void _updateClients(std::string req) const;
 
   ClientIDsAndPointsMap m_clientsIDsAndPoints;
   ClientIDsAndPointsMap::iterator m_currentClientsIDAndPointsIt;
@@ -48,7 +51,7 @@ private:
   const std::string& m_gameName;
 
   static constexpr auto LUA_SCRIPT_GAMES_PREFIX = "lua-scripts/games/";
-  static constexpr auto LUA_SCRIPT_GAMES_STATES_SUFFIX = "-states.lua";
+  static constexpr auto LUA_SCRIPT_GAMES_INIT_SUFFIX = "-init.lua";
 };
 
 } // namespaces

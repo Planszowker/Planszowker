@@ -40,13 +40,17 @@ void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> call
   requestToSend.type = PacketType::GameSpecificData;
   switch(m_inputType){
     case 1:
-      requestToSend.body = "Roll";
+      requestToSend.body = "{"
+                           "\"Type\": \"Request\","
+                           "\"Action\": \"ButtonPress\","
+                           "\"Name\": \"Roll\""
+                           "}";
       break;
     case 2:
-      requestToSend.body = "Reroll";
+      requestToSend.body = "";
       break;
     case 3:
-      requestToSend.body = "Confirm";
+      requestToSend.body = "";
       break;
     default:
       break;

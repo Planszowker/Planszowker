@@ -16,6 +16,8 @@ void ServerHandler::run()
       break;
     }
   }
+
+  m_packetHandler.stop();
 }
 
 
@@ -56,6 +58,7 @@ bool ServerHandler::_internalHandling() {
         if (!logic.isGameFinished()) {
           logic.handleGameLogic(key, request, m_packetHandler);
         } else {
+          std::cout << "Finished\n";
           return false;
         }
       }
