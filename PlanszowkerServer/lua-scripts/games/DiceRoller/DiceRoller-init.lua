@@ -10,25 +10,35 @@ use them at all.
 
 Callback from changing states are convenient way to describe how game should behave in such case.
 --]]
-fsm = machine.create({
-    initial = 'Init',
-    events = {
-        { name = 'RollEvent', from = {'Init', 'Confirm'}, to = 'Roll' },
-        { name = 'RerollEvent', from = 'Roll', to = 'Reroll' },
-        { name = 'ConfirmEvent', from = {'Roll', 'Reroll'}, to = 'Confirm' },
+StateMachine = Machine.create(
+    {
+        initial = 'Init',
+        events = {
+            { name = 'RollEvent', from = {'Init', 'Confirm'}, to = 'Roll' },
+            { name = 'RerollEvent', from = 'Roll', to = 'Reroll' },
+            { name = 'ConfirmEvent', from = {'Roll', 'Reroll'}, to = 'Confirm' },
+        }
     }
-})
+)
 
---[[
-We want to use server's RNG, thus we need to create one.
-]]--
-dice_rng = rng.new(1,6)
+-- Map entities into separate table, it will be easier to use them
+Entities = GameObjects.Entities
+
+-- We want to use server's RNG, thus we need to create one.
+DiceRng = Rng.new(1,6)
 
 --[[
 Rolled dice are stored in global variable to be accessible between callbacks. This table's value is then read in the
 `confirm` state.
 ]]--
-rolledDice = {}
+RolledDice = {}
+
+-- Function to update Dice according to results
+function _updateTextures()
+    for i, die in ipairs(RolledDice) do
+        Entities['Die'..tostring(i)]:SetTexture('Die'..die..'.png')
+    end
+end
 
 --[[
 Function that is called when we 'roll' dice
@@ -36,46 +46,51 @@ Function that is called when we 'roll' dice
 
 User rolls 3 dice and gets the result. Then, one can `confirm` the rolls or do a reroll, if the score was too low.
 ]]--
-fsm['onRoll'] = function()
+StateMachine['onRoll'] = function()
     print('[LUA] onRoll was invoked')
-    rolledDice = {}
+    RolledDice = {}
     for i = 1, 3 do
-        rolledDice[i] = dice_rng:generateRandomNumber()
+        RolledDice[i] = DiceRng:GenerateRandomNumber()
     end
 
     print('[LUA] Client ' .. GetCurrentPlayer() .. ' rolled '
-            .. rolledDice[1] .. ' '
-            .. rolledDice[2] .. ' '
-            .. rolledDice[3])
+            .. RolledDice[1] .. ' '
+            .. RolledDice[2] .. ' '
+            .. RolledDice[3])
+
+    -- Update textures
+    _updateTextures()
 end
 
 --[[
 Function that is called when we 'reroll' dice
 ]]--
-fsm['onReroll'] = function()
+StateMachine['onReroll'] = function()
     print('[LUA] onReroll was invoked')
-    rolledDice = {}
+    RolledDice = {}
     for i = 1, 3 do
-        rolledDice[i] = dice_rng:generateRandomNumber()
+        RolledDice[i] = DiceRng:GenerateRandomNumber()
     end
 
     print('[LUA] Client ' .. GetCurrentPlayer() .. ' rerolled '
-            .. rolledDice[1] .. ' '
-            .. rolledDice[2] .. ' '
-            .. rolledDice[3])
+            .. RolledDice[1] .. ' '
+            .. RolledDice[2] .. ' '
+            .. RolledDice[3])
+
+    _updateTextures()
 
     -- Force `confirm`, because user cannot do anything else here
-    fsm:ConfirmEvent()
+    StateMachine:ConfirmEvent()
 end
 
 --[[
 Function that is called when we 'confirm' rolls
 ]]--
-fsm['onConfirm'] = function()
+StateMachine['onConfirm'] = function()
     print('[LUA] onConfirm was invoked')
 
     for i = 1, 3 do
-        AddPointsToCurrentPlayer(rolledDice[i])
+        AddPointsToCurrentPlayer(RolledDice[i])
     end
 
     print('[LUA] Player ID ' .. GetCurrentPlayer() .. ' has ' .. GetCurrentPlayerPoints() .. ' points')

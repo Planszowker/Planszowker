@@ -100,8 +100,11 @@ void ServerPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
     for (auto& client: m_clients) {
       // HEARTBEAT
       sf::Packet packet;
-      games::Reply heartbeatReply { };
-      packet.append(&heartbeatReply, sizeof(heartbeatReply));
+      games::Reply heartbeatReply {
+        .type = games::PacketType::Heartbeat,
+        .status = games::ReplyType::Success
+      };
+      packet << heartbeatReply;
 
       //Logger::printInfo("Sending data to " + std::to_string(client.first));
       sf::Socket::Status clientStatus = client.second->send(packet);
@@ -216,7 +219,6 @@ void ServerPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
   TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
-  auto t1 = std::chrono::high_resolution_clock::now();
   for (const auto& client: m_clients) {
     sf::Socket::Status status = client.second->send(packet);
     while (status == sf::Socket::Partial) {

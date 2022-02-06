@@ -56,9 +56,24 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
       socketStatus = m_serverSocket.receive(receivePacket);
     }
 
-    if (socketStatus == sf::Socket::Done && receivePacket.getDataSize() >= sizeof(games::Reply)) {
+    if (socketStatus == sf::Socket::Done) {
       // Handle other packet type than HEARTBEAT
-      games::Reply reply = *reinterpret_cast<games::Reply*>(const_cast<void*>(receivePacket.getData()));
+      //games::Reply reply = *reinterpret_cast<games::Reply*>(const_cast<void*>(receivePacket.getData()));
+      games::Reply reply;
+      receivePacket >> reply;
+
+      if (reply.type == games::PacketType::GameSpecificData && reply.status == games::ReplyType::Success) {
+        std::cout << "== Game Specific Reply ==\n";
+        std::cout << "Reply from server: " << reply.body << "\n";
+        std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
+        std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
+        std::cout << "== ======================\n";
+      }
+
+      // DEBUG PRINTOUT
+      //if (reply.type == games::PacketType::GameSpecificData && reply.status == games::ReplyType::Success) {
+
+      //}
 
       /*if (reply.status != games::PacketType::Heartbeat)
       {

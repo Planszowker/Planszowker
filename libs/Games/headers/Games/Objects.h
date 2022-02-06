@@ -36,6 +36,7 @@ struct Request
  */
 struct Reply
 {
+  PacketType type = PacketType::GameSpecificData;
   ReplyType status = ReplyType::Invalid;
   std::string body;
 };
@@ -44,3 +45,5 @@ struct Reply
 
 sf::Packet& operator << (sf::Packet& packet, const pla::common::games::Request& request);
 sf::Packet& operator >> (sf::Packet& packet, pla::common::games::Request& request);
+sf::Packet& operator << (sf::Packet& packet, pla::common::games::Reply& reply);
+sf::Packet& operator >> (sf::Packet& packet, pla::common::games::Reply& reply);

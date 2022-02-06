@@ -39,7 +39,11 @@ private:
   size_t _getCurrentClientID() const { return m_currentClientsIDAndPointsIt->first; }
   int _getCurrentPlayerPoints() const { return m_currentClientsIDAndPointsIt->second; }
   void _updateClients(std::string req) const;
+  const std::vector<size_t>& _getClients() const { return m_clientsIDs; }
+  int _getClientPoints(size_t clientID) const;
 
+
+  std::vector<size_t> m_clientsIDs;
   ClientIDsAndPointsMap m_clientsIDsAndPoints;
   ClientIDsAndPointsMap::iterator m_currentClientsIDAndPointsIt;
 
@@ -49,6 +53,8 @@ private:
   sol::state m_luaVM;
 
   const std::string& m_gameName;
+
+  network::ServerPacketHandler* m_networkHandler;
 
   static constexpr auto LUA_SCRIPT_GAMES_PREFIX = "lua-scripts/games/";
   static constexpr auto LUA_SCRIPT_GAMES_INIT_SUFFIX = "-init.lua";

@@ -41,16 +41,27 @@ void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> call
   switch(m_inputType){
     case 1:
       requestToSend.body = "{"
-                           "\"Type\": \"Request\","
+                           "\"ActionRequests\": [{"
                            "\"Action\": \"ButtonPress\","
-                           "\"Name\": \"Roll\""
+                           "\"Info\": \"Roll\""
+                           "}]"
                            "}";
       break;
     case 2:
-      requestToSend.body = "";
+      requestToSend.body = "{"
+                           "\"ActionRequests\": [{"
+                           "\"Action\": \"ButtonPress\","
+                           "\"Info\": \"Reroll\""
+                           "}]"
+                           "}";
       break;
     case 3:
-      requestToSend.body = "";
+      requestToSend.body = "{"
+                           "\"ActionRequests\": [{"
+                           "\"Action\": \"ButtonPress\","
+                           "\"Info\": \"Confirm\""
+                           "}]"
+                           "}";
       break;
     default:
       break;
