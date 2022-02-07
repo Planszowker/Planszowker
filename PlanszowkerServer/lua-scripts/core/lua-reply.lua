@@ -14,16 +14,22 @@ function ReplyModule:GenerateGenericReply()
   end
 end
 
--- Function to convert reply table into JSON string
-function ReplyModule:ConvertReply()
-  return Json.encode(Reply)
+-- Function to send event
+function ReplyModule:ReportEvent(eventString)
+  Reply['Events'] = Reply['Events'] or {}
+
+  local eventCount = #Reply['Events']
+
+  Reply['Events'][eventCount + 1] = {}
+  Reply['Events'][eventCount + 1]['EventString'] = eventString
 end
 
 -- Function that sends resulting JSON string to players, so they can update their view.
 function ReplyModule:SendReply()
   self:GenerateGenericReply(Reply)
 
-  replyString = self:ConvertReply(Reply)
+  -- Encode reply as a JSON string
+  replyString = Json.encode(Reply)
 
   -- Send reply to players
   SendReply(replyString)

@@ -76,15 +76,15 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         std::cout << "=========================\n";
         */
 
-        std::cout << "Reply added to deque\n";
+        //std::cout << "Reply added to deque\n";
         m_receivedReplies.push_back(reply);
 
-        std::cout << "Client replies size: " << m_receivedReplies.size() << std::endl;
+        //std::cout << "Client replies size: " << m_receivedReplies.size() << std::endl;
       } else if (reply.type == games::PacketType::ID) {
         m_validID = true;
         std::stringstream ss{reply.body};
         ss >> m_clientID;
-        std::cout << "Received ClientID: " << m_clientID << "\n";
+        std::cout << "\nReceived ClientID: " << m_clientID << "\n";
       }
     }
   }

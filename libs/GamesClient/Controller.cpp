@@ -71,8 +71,14 @@ void DiceRollerController::run() {
         ss >> replyClientID;
 
         if (replyClientID == m_clientID) {
-          std::cout << "I have " << pointsReply["Points"] << " points.\n";
+          std::cout << "\nI have " << pointsReply["Points"] << " points.\n";
         }
+      }
+
+      for (auto event : j["Events"]) {
+        std::string eventString = event["EventString"];
+        eventString.erase(std::remove(eventString.begin(), eventString.end(), '\"'), eventString.end());
+        std::cout << "\n" << eventString << "\n";
       }
 
 //      DiceRollerReply reply = *reinterpret_cast<DiceRollerReply*>(const_cast<void*>(data));

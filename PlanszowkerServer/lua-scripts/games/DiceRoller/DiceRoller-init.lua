@@ -53,10 +53,13 @@ StateMachine['onRoll'] = function()
         RolledDice[i] = DiceRng:GenerateRandomNumber()
     end
 
-    print('[LUA] Client ' .. GetCurrentPlayer() .. ' rolled '
-            .. RolledDice[1] .. ' '
-            .. RolledDice[2] .. ' '
-            .. RolledDice[3])
+    local eventString = '[LUA] Client ' .. GetCurrentPlayer() .. ' rolled '
+                        .. RolledDice[1] .. ' '
+                        .. RolledDice[2] .. ' '
+                        .. RolledDice[3]
+
+    print(eventString)
+    ReplyModule:ReportEvent(eventString)
 
     -- Update textures
     _updateTextures()
@@ -72,10 +75,13 @@ StateMachine['onReroll'] = function()
         RolledDice[i] = DiceRng:GenerateRandomNumber()
     end
 
-    print('[LUA] Client ' .. GetCurrentPlayer() .. ' rerolled '
-            .. RolledDice[1] .. ' '
-            .. RolledDice[2] .. ' '
-            .. RolledDice[3])
+    local eventString = '[LUA] Client ' .. GetCurrentPlayer() .. ' rerolled '
+                        .. RolledDice[1] .. ' '
+                        .. RolledDice[2] .. ' '
+                        .. RolledDice[3]
+
+    print(eventString)
+    ReplyModule:ReportEvent(eventString)
 
     _updateTextures()
 
