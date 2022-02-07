@@ -33,6 +33,8 @@ private:
 
   DiceRollerConsoleView m_view;
   DiceRollerViewLogic m_logic;
+
+  size_t m_clientID{0};
 };
 
 } // namespaces

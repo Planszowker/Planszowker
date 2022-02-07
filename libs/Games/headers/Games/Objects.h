@@ -10,7 +10,8 @@ namespace pla::common::games {
 enum class PacketType : uint8_t
 {
   Heartbeat, ///< Used for pinging clients.
-  GameSpecificData ///< Used for game specific data.
+  GameSpecificData, ///< Used for game specific data.
+  ID ///< Used to get client's ID associated in server.
 };
 
 

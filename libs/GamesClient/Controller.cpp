@@ -9,6 +9,9 @@
 #include <thread>
 #include <chrono>
 #include <unordered_map>
+#include <sstream>
+
+#include <nlohmann/json.hpp>
 
 using namespace pla::common::err_handler;
 using namespace pla::common::logger;
@@ -22,15 +25,15 @@ DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
 {
   m_view.init();
 
-//  sf::Packet idPacket;
-//
-//  Request request{
-//    .type = PacketType::GameSpecificData;
-//  };
-//
-//  idPacket.append(&request, sizeof(request));
-//
-//  m_clientPacketHandler.sendPacket(idPacket);
+  sf::Packet idPacket;
+
+  Request request{
+    .type = PacketType::ID
+  };
+
+  idPacket << request;
+
+  m_clientPacketHandler.sendPacket(idPacket);
 }
 
 
@@ -39,13 +42,38 @@ void DiceRollerController::run() {
 
   m_clientPacketHandler.runInBackground();
 
+  //std::cout << "Return " << m_clientPacketHandler.getClientID(m_clientID) << "\n";
+
+  do { } while (!m_clientPacketHandler.getClientID(m_clientID));
+
   while (m_run) {
     // TODO
 
     // Handle packets received from server
-    const auto packets = m_clientPacketHandler.getPackets();
-    for (const auto& packet: packets) {
-      const void* data = packet.getData();
+    const auto replies = m_clientPacketHandler.getReplies();
+    for (const auto& reply: replies) {
+
+      /*
+      std::cout << "Reply: " << reply.body << "\n";
+      std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
+      std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
+      std::cout << "== Controller Printout ==\n";
+      */
+
+      nlohmann::json j = nlohmann::json::parse(reply.body);
+
+      for (auto pointsReply : j["PlayersInfo"]) {
+        //std::cout << "I am client " << m_clientID << " and received ID is " << pointsReply["ID"] << "\n";
+        std::stringstream ss;
+        ss.str(pointsReply["ID"]);
+
+        size_t replyClientID {0};
+        ss >> replyClientID;
+
+        if (replyClientID == m_clientID) {
+          std::cout << "I have " << pointsReply["Points"] << " points.\n";
+        }
+      }
 
 //      DiceRollerReply reply = *reinterpret_cast<DiceRollerReply*>(const_cast<void*>(data));
 //
@@ -118,8 +146,6 @@ void DiceRollerController::run() {
 //        default:
 //          break;
 //      }
-
-      m_clientPacketHandler.clearPackets();
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
@@ -137,7 +163,7 @@ void DiceRollerController::update()
 
 void DiceRollerController::viewCallback(std::any& object) {
   try {
-    Request viewRequest = std::any_cast<Request>(object);
+    auto viewRequest = std::any_cast<Request>(object);
 
     //Logger::printDebug("Callback from ConsoleView has occurred!");
     //Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));

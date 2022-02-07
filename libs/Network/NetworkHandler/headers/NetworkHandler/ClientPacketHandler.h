@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <deque>
 
+#include <Games/Objects.h>
+
 #include "PacketHandler.h"
 
 namespace pla::common::network {
@@ -23,8 +25,9 @@ public:
   void stop() final;
 
   bool sendPacket(sf::Packet& packet);
-  std::deque<sf::Packet>& getPackets();
-  void clearPackets();
+  std::deque<games::Reply> getReplies();
+
+  bool getClientID(size_t& id);
 
 private:
 
@@ -32,7 +35,10 @@ private:
 
   // Connection related variables
   sf::TcpSocket& m_serverSocket;
-  std::deque<sf::Packet> m_receivedPackets;
+  std::deque<games::Reply> m_receivedReplies;
+
+  bool m_validID{false};
+  size_t m_clientID{0};
 };
 
 } // namespaces

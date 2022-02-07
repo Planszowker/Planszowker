@@ -3,7 +3,9 @@
 #include "Games/Objects.h"
 #include "TimeMeasurement/TimeLogger.h"
 #include "CompilerUtils/FunctionInfoExtractor.h"
+
 #include <chrono>
+#include <sstream>
 
 #include <iostream> // TODO: remove debug
 
@@ -57,31 +59,33 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
     }
 
     if (socketStatus == sf::Socket::Done) {
-      // Handle other packet type than HEARTBEAT
-      //games::Reply reply = *reinterpret_cast<games::Reply*>(const_cast<void*>(receivePacket.getData()));
       games::Reply reply;
       receivePacket >> reply;
 
-      if (reply.type == games::PacketType::GameSpecificData && reply.status == games::ReplyType::Success) {
+      if (reply.status != games::ReplyType::Success) {
+        continue;
+      }
+
+      if (reply.type == games::PacketType::GameSpecificData) {
+        // DEBUG PRINTOUT
+        /*
         std::cout << "== Game Specific Reply ==\n";
         std::cout << "Reply from server: " << reply.body << "\n";
         std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
         std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
-        std::cout << "== ======================\n";
+        std::cout << "=========================\n";
+        */
+
+        std::cout << "Reply added to deque\n";
+        m_receivedReplies.push_back(reply);
+
+        std::cout << "Client replies size: " << m_receivedReplies.size() << std::endl;
+      } else if (reply.type == games::PacketType::ID) {
+        m_validID = true;
+        std::stringstream ss{reply.body};
+        ss >> m_clientID;
+        std::cout << "Received ClientID: " << m_clientID << "\n";
       }
-
-      // DEBUG PRINTOUT
-      //if (reply.type == games::PacketType::GameSpecificData && reply.status == games::ReplyType::Success) {
-
-      //}
-
-      /*if (reply.status != games::PacketType::Heartbeat)
-      {
-        //std::cout << "Packet added to deque\n";
-        m_receivedPackets.push_back(receivePacket);
-
-        //std::cout << "Client packets size: " << m_receivedPackets.size() << std::endl;
-      }*/
     }
   }
 }
@@ -100,19 +104,22 @@ bool ClientPacketHandler::sendPacket(sf::Packet& packet) {
   return (retStatus == sf::Socket::Done);
 }
 
-std::deque<sf::Packet>& ClientPacketHandler::getPackets() {
+std::deque<games::Reply> ClientPacketHandler::getReplies() {
   TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
-  return m_receivedPackets;
+  std::deque<games::Reply> returnDeque = m_receivedReplies;
+  m_receivedReplies.clear();
+
+  return std::move(returnDeque);
 }
 
-void ClientPacketHandler::clearPackets() {
-  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+bool ClientPacketHandler::getClientID(size_t& id) {
+  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex); // TODO: Check if needed
 
-  m_receivedPackets.clear();
+  id = m_clientID;
+
+  return m_validID;
 }
-
 
 } // namespaces

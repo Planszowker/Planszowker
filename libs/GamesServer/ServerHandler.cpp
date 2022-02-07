@@ -47,8 +47,24 @@ bool ServerHandler::_internalHandling() {
     // Iterate over all packets in deque
     for (auto& packet: mapIt->second) {
       Request request{};
-
       packet >> request;
+
+      if (request.type == PacketType::Heartbeat) {
+        // We don't care about Heartbeat packets
+        continue;
+      } else if (request.type == PacketType::ID) {
+        // If we get ID request, we need to send client's ID
+        Reply idReply{
+          .type = PacketType::ID,
+          .status = ReplyType::Success,
+          .body = std::to_string(key)
+        };
+        sf::Packet replyPacket;
+        replyPacket << idReply;
+
+        m_packetHandler.sendPacketToClient(key, replyPacket);
+        continue;
+      }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";
       std::cout << "Body: " << request.body << "\n";
