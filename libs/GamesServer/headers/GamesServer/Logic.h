@@ -14,6 +14,9 @@
 #include <vector>
 #include <string>
 
+/* ZIPIOS */
+#include <zipios/zipfile.hpp>
+
 namespace pla::common::games::server {
 
 class Logic
@@ -56,8 +59,21 @@ private:
 
   network::ServerPacketHandler* m_networkHandler;
 
-  static constexpr auto LUA_SCRIPT_GAMES_PREFIX = "lua-scripts/games/";
-  static constexpr auto LUA_SCRIPT_GAMES_INIT_SUFFIX = "-init.lua";
+  zipios::ZipFile m_plaGameFile;
+
+  zipios::FileEntry::pointer_t m_boardEntry;
+  zipios::FileEntry::pointer_t m_gameEntry;
+  zipios::FileEntry::pointer_t m_initEntry;
+
+  std::ostringstream m_boardScript;
+  std::ostringstream m_initScript;
+  std::ostringstream m_gameScript;
+
+  static constexpr auto GAME_EXTENSION = ".plagame";
+  static constexpr auto BOARD_DESCRIPTION_FILE = "BoardDescription.json";
+  static constexpr auto LUA_GAMES_DIR = "lua-scripts/games/";
+  static constexpr auto LUA_SCRIPT_EXTENSION = ".lua";
+  static constexpr auto LUA_SCRIPT_INIT_SUFFIX = "-init.lua";
 };
 
 } // namespaces

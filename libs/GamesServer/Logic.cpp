@@ -2,13 +2,15 @@
 
 #include <fstream>
 
-#include "Rng/RandomGenerator.h"
+#include <Rng/RandomGenerator.h>
 
 namespace pla::common::games::server {
 
 Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
   : m_gameName(gameName)
   , m_clientsIDs(clientIds)
+  , m_networkHandler(nullptr)
+  , m_plaGameFile(LUA_GAMES_DIR + m_gameName + GAME_EXTENSION)
 {
   for (auto const& clientId : clientIds) {
     m_clientsIDsAndPoints[clientId] = 0;
@@ -23,17 +25,21 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
                          sol::lib::math);
 
   try {
+    std::string gameDir = m_gameName + '/';
+    m_boardEntry = m_plaGameFile.getEntry((gameDir + BOARD_DESCRIPTION_FILE));
+    m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_EXTENSION));
+    m_initEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_INIT_SUFFIX));
+
     // DEBUG CODE
-    std::ifstream jsonFile{"lua-scripts/games/DiceRoller/BoardDescription.json"};
-    std::string readString;
-    static std::string jsonString;
-    while (jsonFile >> readString) {
-      jsonString += readString;
-    }
+    zipios::ZipFile::stream_pointer_t boardEntryStream(m_plaGameFile.getInputStream(m_boardEntry->getName()));
+    zipios::ZipFile::stream_pointer_t initEntryStream(m_plaGameFile.getInputStream(m_initEntry->getName()));
+    zipios::ZipFile::stream_pointer_t gameEntryStream(m_plaGameFile.getInputStream(m_gameEntry->getName()));
 
-    std::cout << jsonString << "\n";
+    m_boardScript << boardEntryStream->rdbuf();
+    m_initScript << initEntryStream->rdbuf();
+    m_gameScript << gameEntryStream->rdbuf();
 
-    m_luaVM["JsonString"] = jsonString;
+    m_luaVM["JsonString"] = m_boardScript.str();
     // END DEBUG CODE
 
     // Load core LUA modules
@@ -65,8 +71,11 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
     m_luaVM.set_function("SendReply", &Logic::_updateClients, this);
 
     // Load Game Initialization script - loading this should create states, but it's game dependent
-    sol::protected_function_result result = m_luaVM.script_file(LUA_SCRIPT_GAMES_PREFIX + m_gameName + "/" + m_gameName
-            + LUA_SCRIPT_GAMES_INIT_SUFFIX);
+    //sol::protected_function_result result = m_luaVM.script_file(LUA_GAMES_DIR + m_gameName + "/" + m_gameName
+    //                                                            + LUA_SCRIPT_INIT_SUFFIX);
+
+    m_luaVM.script(m_initScript.str());
+
   } catch(sol::error& e) {
     std::cerr << "Exception has been raised! " << e.what() << "\n";
   }
@@ -175,7 +184,8 @@ void Logic::handleGameLogic(size_t clientId, Request requestType,
 
   // Invoking <GameName>.lua script
   try {
-    m_luaVM.script_file(LUA_SCRIPT_GAMES_PREFIX + m_gameName + "/" + m_gameName + ".lua");
+    m_luaVM.script(m_gameScript.str());
+    //m_luaVM.script_file(LUA_GAMES_DIR + m_gameName + "/" + m_gameName + ".lua");
   } catch(sol::error& e) {
     std::cerr << "[LUA] Error: Exception has been raised!\n" << e.what() << "\n";
   }

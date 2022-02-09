@@ -17,6 +17,8 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC CompilerUtils
 
                         PUBLIC lua5.3
+
+                        PRIVATE zipios
                       )
 
 target_include_directories(${LIB_NAME}
