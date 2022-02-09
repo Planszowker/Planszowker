@@ -1,7 +1,7 @@
 local GameObjects = {}
 
 -- Parse BoardDescription into LUA table
-local boardDescription = Json.decode(JsonString)
+local boardDescription = Json.decode(BoardDescriptionString)
 boardDescription['Entities'] = boardDescription['Entities'] or {}
 boardDescription['DestinationPoints'] = boardDescription['DestinationPoints'] or {}
 

@@ -25,22 +25,24 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
                          sol::lib::math);
 
   try {
+    // Create entries to the content of .plagame
     std::string gameDir = m_gameName + '/';
     m_boardEntry = m_plaGameFile.getEntry((gameDir + BOARD_DESCRIPTION_FILE));
     m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_EXTENSION));
     m_initEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_INIT_SUFFIX));
 
-    // DEBUG CODE
+    // Make pointers to file inside .plagame file
     zipios::ZipFile::stream_pointer_t boardEntryStream(m_plaGameFile.getInputStream(m_boardEntry->getName()));
     zipios::ZipFile::stream_pointer_t initEntryStream(m_plaGameFile.getInputStream(m_initEntry->getName()));
     zipios::ZipFile::stream_pointer_t gameEntryStream(m_plaGameFile.getInputStream(m_gameEntry->getName()));
 
+    // Read content of files inside .plagame file into string streams
     m_boardScript << boardEntryStream->rdbuf();
     m_initScript << initEntryStream->rdbuf();
     m_gameScript << gameEntryStream->rdbuf();
 
-    m_luaVM["JsonString"] = m_boardScript.str();
-    // END DEBUG CODE
+    //
+    m_luaVM["BoardDescriptionString"] = m_boardScript.str();
 
     // Load core LUA modules
     m_luaVM.script("Machine = require('lua-scripts.core.lua-state-machine')"); // State machine
@@ -70,10 +72,7 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
     m_luaVM.set_function("GetPlayerPoints", &Logic::_getClientPoints, this);
     m_luaVM.set_function("SendReply", &Logic::_updateClients, this);
 
-    // Load Game Initialization script - loading this should create states, but it's game dependent
-    //sol::protected_function_result result = m_luaVM.script_file(LUA_GAMES_DIR + m_gameName + "/" + m_gameName
-    //                                                            + LUA_SCRIPT_INIT_SUFFIX);
-
+    // Invoke init script from .plagame file
     m_luaVM.script(m_initScript.str());
 
   } catch(sol::error& e) {
@@ -185,7 +184,6 @@ void Logic::handleGameLogic(size_t clientId, Request requestType,
   // Invoking <GameName>.lua script
   try {
     m_luaVM.script(m_gameScript.str());
-    //m_luaVM.script_file(LUA_GAMES_DIR + m_gameName + "/" + m_gameName + ".lua");
   } catch(sol::error& e) {
     std::cerr << "[LUA] Error: Exception has been raised!\n" << e.what() << "\n";
   }
