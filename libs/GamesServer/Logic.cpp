@@ -10,11 +10,15 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
   : m_gameName(gameName)
   , m_clientsIDs(clientIds)
   , m_networkHandler(nullptr)
-  , m_plaGameFile(LUA_GAMES_DIR + m_gameName + GAME_EXTENSION)
 {
   for (auto const& clientId : clientIds) {
     m_clientsIDsAndPoints[clientId] = 0;
   }
+
+  std::string ziuziu = LUA_GAMES_DIR + m_gameName + GAME_EXTENSION;
+  std::cout << ziuziu << "\n";
+  zipios::ZipFile file {ziuziu};
+  m_plaGameFile = std::move(file);
 
   m_currentClientsIDAndPointsIt = m_clientsIDsAndPoints.begin();
 
@@ -27,8 +31,11 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
   try {
     // Create entries to the content of .plagame
     std::string gameDir = m_gameName + '/';
+    std::cout << "1\n";
     m_boardEntry = m_plaGameFile.getEntry((gameDir + BOARD_DESCRIPTION_FILE));
+    std::cout << "2\n";
     m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_EXTENSION));
+    std::cout << "3\n";
     m_initEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_INIT_SUFFIX));
 
     // Make pointers to file inside .plagame file
@@ -98,7 +105,6 @@ void Logic::_advanceRound()
 
 void Logic::_finishGame()
 {
-  // Send reply to clients with players' points
   std::cout << "[CORE] Game finished.\n";
   m_finished = true;
 }

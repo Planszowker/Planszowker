@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.20)
 
 project(Planszowker VERSION 0.0
                     LANGUAGES CXX)
@@ -16,6 +16,8 @@ find_package(Lua REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
 include_directories(${LUA_INCLUDE_DIR})
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 
 include_directories(libs)
 
