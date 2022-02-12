@@ -7,12 +7,6 @@ set(
 
 add_executable(${EXEC_NAME} ${SOURCES})
 
-add_executable(testingLua testingLUA.cpp)
-target_link_libraries(testingLua PRIVATE lua5.3)
-
-add_executable(testingZipios testingZipios.cpp)
-target_link_libraries(testingZipios PRIVATE zipios)
-
 target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
                       PRIVATE GamesServer
