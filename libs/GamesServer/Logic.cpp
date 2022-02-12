@@ -52,16 +52,16 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
     m_luaVM["BoardDescriptionString"] = m_boardScript.str();
 
     // Load core LUA modules
-    m_luaVM.script("Machine = require('lua-scripts.core.lua-state-machine')"); // State machine
-    m_luaVM.script("Json = require('lua-scripts.core.lua-json')"); // JSON encode-decode
-    m_luaVM.script("ReplyModule = require('lua-scripts.core.lua-reply')"); // Reply Module
-    m_luaVM.script("ActionRequest = require('lua-scripts.core.lua-action-request')"); // ActionRequest Module
-    m_luaVM.script("Helper = require('lua-scripts.core.lua-helper')"); // Helper Module
+    m_luaVM.script("Machine = require('scripts.core.lua-state-machine')"); // State machine
+    m_luaVM.script("Json = require('scripts.core.lua-json')"); // JSON encode-decode
+    m_luaVM.script("ReplyModule = require('scripts.core.lua-reply')"); // Reply Module
+    m_luaVM.script("ActionRequest = require('scripts.core.lua-action-request')"); // ActionRequest Module
+    m_luaVM.script("Helper = require('scripts.core.lua-helper')"); // Helper Module
 
     // Load Game Objects
-    m_luaVM.script("Entity = require('lua-scripts.core.objects.entity')");
-    m_luaVM.script("DestinationPoint = require('lua-scripts.core.objects.destination-point')");
-    m_luaVM.script("GameObjects = require('lua-scripts.core.lua-game-objects')"); // Game Objects
+    m_luaVM.script("Entity = require('scripts.core.objects.entity')");
+    m_luaVM.script("DestinationPoint = require('scripts.core.objects.destination-point')");
+    m_luaVM.script("GameObjects = require('scripts.core.lua-game-objects')"); // Game Objects
 
     // Make necessary utils visible in LUA
     auto rng = m_luaVM.new_usertype<rng::RandomGenerator>("Rng",

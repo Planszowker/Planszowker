@@ -11,8 +11,8 @@ int main(int argc, char* argv[]) {
                      sol::lib::string);
 
   try {
-    sol::protected_function_result result = lua.script_file("lua-scripts/games/DiceRoller/DiceRoller-states.lua");
-    sol::protected_function_result result2 = lua.script_file("lua-scripts/games/DiceRoller/DiceRoller.lua");
+    sol::protected_function_result result = lua.script_file("scripts/games/DiceRoller/DiceRoller-states.lua");
+    sol::protected_function_result result2 = lua.script_file("scripts/games/DiceRoller/DiceRoller.lua");
   } catch(sol::error& e) {
     std::cerr << "Exception has been raised! " << e.what() << "\n";
   }

@@ -71,7 +71,7 @@ private:
 
   static constexpr auto GAME_EXTENSION = ".plagame";
   static constexpr auto BOARD_DESCRIPTION_FILE = "BoardDescription.json";
-  static constexpr auto LUA_GAMES_DIR = "lua-scripts/games/";
+  static constexpr auto LUA_GAMES_DIR = "scripts/games/";
   static constexpr auto LUA_SCRIPT_EXTENSION = ".lua";
   static constexpr auto LUA_SCRIPT_INIT_SUFFIX = "-init.lua";
 };

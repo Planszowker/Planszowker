@@ -6,9 +6,9 @@
 #include <zipios/zipfile.hpp>
 
 int main() {
-  //std::fstream file{"lua-scripts/games/DiceRoller.zip"};
+  //std::fstream file{"scripts/games/DiceRoller.zip"};
 
-  zipios::ZipFile zipFile("./lua-scripts/games/DiceRoller.plagame");
+  zipios::ZipFile zipFile("./scripts/games/DiceRoller.plagame");
 
   zipios::FileEntry::pointer_t entry = zipFile.getEntry(("DiceRoller/DiceRoller.lua"));
 

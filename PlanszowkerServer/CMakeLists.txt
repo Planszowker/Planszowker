@@ -33,11 +33,11 @@ target_include_directories(${EXEC_NAME}
                            )
 
 # Copy core lua scripts, except games
-file(COPY lua-scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
-        PATTERN "lua-scripts/games/**" EXCLUDE)
+file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+        PATTERN "scripts/games/**" EXCLUDE)
 
 add_custom_target(PackGames ALL
-        COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/../python/pack_games.py ${CMAKE_CURRENT_BINARY_DIR}/lua-scripts/games
+        COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/../python/pack_games.py ${CMAKE_CURRENT_BINARY_DIR}/scripts/games
         COMMENT "Packing games into .plagame files"
         DEPEND always_rebuild
         VERBATIM
