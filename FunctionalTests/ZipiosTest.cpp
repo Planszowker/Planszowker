@@ -2,19 +2,24 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
+#include <regex>
 
 #include <zipios/zipfile.hpp>
 
 int main() {
-  //std::fstream file{"scripts/games/DiceRoller.zip"};
+  zipios::ZipFile zipFile("../PlanszowkerServer/scripts/games/DiceRoller.plagame");
 
-  zipios::ZipFile zipFile("./scripts/games/DiceRoller.plagame");
+  for (auto entry : zipFile.entries()) {
+    //std::cout << entry->getName() << "\n";
+    std::regex assetsRegex {"/Assets/"};
+    if (std::regex_search(entry->getName(), assetsRegex)) {
+      std::cout << "Found asset " << entry->getFileName() << "!\n";
+    }
+  }
 
-  zipios::FileEntry::pointer_t entry = zipFile.getEntry(("DiceRoller/DiceRoller.lua"));
+  //zipios::ZipFile::stream_pointer_t is(zipFile.getInputStream(entry->getName()));
 
-  zipios::ZipFile::stream_pointer_t is(zipFile.getInputStream(entry->getName()));
-
-  std::cout << is->rdbuf() << "\n";
+  //std::cout << is->rdbuf() << "\n";
 
   return EXIT_SUCCESS;
 }

@@ -63,6 +63,9 @@ void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> call
                            "}]"
                            "}";
       break;
+    case 4:
+      requestToSend.type = PacketType::DownloadAssets;
+      break;
     default:
       break;
   }
@@ -82,7 +85,7 @@ void DiceRollerConsoleView::runLoop(Controller* controller, std::atomic_bool& ru
     std::cout << "Packet to send:\n (1) Roll dice\n (2) Re-roll dice\n (3) Confirm\n Your choice: ";
     std::cin >> m_inputType;
 
-    if (m_inputType < 1 || m_inputType > 3) {
+    if (m_inputType < 1 || m_inputType > 4) {
       std::cout << "Wrong packet type!\n";
       continue;
     }

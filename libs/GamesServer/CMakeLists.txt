@@ -3,10 +3,10 @@ set(LIB_NAME GamesServer)
 project(${LIB_NAME})
 
 set(SOURCES
-      ServerHandler.cpp
-      Logic.cpp
-      GamesHandler.cpp
-      AssetsUploader.cpp
+        ServerHandler.cpp
+        Logic.cpp
+        GamesHandler.cpp
+        AssetsTransmitter.cpp
    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

@@ -1,7 +1,8 @@
 #pragma once
 
 /* Generic */
-#include "NetworkHandler/ServerPacketHandler.h"
+#include <NetworkHandler/ServerPacketHandler.h>
+#include "GamesHandler.h"
 
 /* SFML */
 #include <SFML/Network.hpp>
@@ -20,6 +21,7 @@ public:
     : m_packetHandler(packetHandler)
     , m_run(true)
     , m_gameName(gameName)
+    , m_gamesHandler(gameName)
   {
   }
 
@@ -37,6 +39,8 @@ protected:
 
   bool m_run;
   network::ServerPacketHandler& m_packetHandler;
+
+  GamesHandler m_gamesHandler;
 };
 
 } // namespaces

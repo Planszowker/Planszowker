@@ -11,7 +11,8 @@ enum class PacketType : uint8_t
 {
   Heartbeat, ///< Used for pinging clients.
   GameSpecificData, ///< Used for game specific data.
-  ID ///< Used to get client's ID associated in server.
+  ID, ///< Used to get client's ID associated in server.
+  DownloadAssets, ///< Used to get game's assets - only textures for now.
 };
 
 

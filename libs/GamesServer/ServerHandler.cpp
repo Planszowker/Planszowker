@@ -1,8 +1,11 @@
 #include "ServerHandler.h"
-#include "TimeMeasurement/TimeLogger.h"
-#include "CompilerUtils/FunctionInfoExtractor.h"
-#include "Games/Objects.h"
-#include "GamesHandler.h"
+
+#include <TimeMeasurement/TimeLogger.h>
+#include <CompilerUtils/FunctionInfoExtractor.h>
+#include <Games/Objects.h>
+#include <Logic.h>
+#include <AssetsTransmitter.h>
+
 
 namespace pla::common::games::server {
 
@@ -35,7 +38,6 @@ bool ServerHandler::_internalHandling() {
       continue;
     }
 
-    std::cout << "DEBUG" << std::endl;
     // Iterate over all packets in deque
     for (auto& packet: mapIt->second) {
       Request request{};
@@ -56,15 +58,18 @@ bool ServerHandler::_internalHandling() {
 
         m_packetHandler.sendPacketToClient(key, replyPacket);
         continue;
+      } else if (request.type == PacketType::DownloadAssets) {
+        // User wants to download game's assets
+        AssetsTransmitter uploader(m_gamesHandler.getPlagameFile(), m_packetHandler, key);
       }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";
       std::cout << "Body: " << request.body << "\n";
 
       if (m_packetHandler.hasEnoughClientsConnected()) {
-        static GamesHandler gamesHandler {keys, m_gameName, m_packetHandler};
-        if (!gamesHandler.getLogic().isGameFinished()) {
-          gamesHandler.getLogic().handleGameLogic(key, request);
+        static Logic logic {keys, m_gameName, m_packetHandler, m_gamesHandler.getPlagameFile()};
+        if (!logic.isGameFinished()) {
+          logic.handleGameLogic(key, request);
         } else {
           std::cout << "Finished\n";
           return false;
