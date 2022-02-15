@@ -2,7 +2,7 @@
 #include "TimeMeasurement/TimeLogger.h"
 #include "CompilerUtils/FunctionInfoExtractor.h"
 #include "Games/Objects.h"
-#include "Logic.h"
+#include "GamesHandler.h"
 
 namespace pla::common::games::server {
 
@@ -22,18 +22,10 @@ void ServerHandler::run()
 
 
 bool ServerHandler::_internalHandling() {
-  if (!m_packetHandler.hasEnoughClientsConnected()) {
-    //return true;
-  }
-
   time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
 
   std::vector<size_t> keys;
   auto packetsMap = m_packetHandler.getPackets(keys);
-
-  //if (!keys.empty()) {
-    //std::cout << "keys.size() = " << keys.size() << "\n";
-  //}
 
   // TODO: Not elegant, maybe better solution?
   for (const auto& key: keys) {
@@ -70,9 +62,9 @@ bool ServerHandler::_internalHandling() {
       std::cout << "Body: " << request.body << "\n";
 
       if (m_packetHandler.hasEnoughClientsConnected()) {
-        static Logic logic{keys, m_gameName};
-        if (!logic.isGameFinished()) {
-          logic.handleGameLogic(key, request, m_packetHandler);
+        static GamesHandler gamesHandler {keys, m_gameName, m_packetHandler};
+        if (!gamesHandler.getLogic().isGameFinished()) {
+          gamesHandler.getLogic().handleGameLogic(key, request);
         } else {
           std::cout << "Finished\n";
           return false;

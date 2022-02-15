@@ -3,22 +3,19 @@
 #include <fstream>
 
 #include <Rng/RandomGenerator.h>
+#include <GamesHandler.h>
 
 namespace pla::common::games::server {
 
-Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
+Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, zipios::ZipFile& zipFile)
   : m_gameName(gameName)
   , m_clientsIDs(clientIds)
-  , m_networkHandler(nullptr)
+  , m_networkHandler(packetHandler)
+  , m_plaGameFile(zipFile)
 {
   for (auto const& clientId : clientIds) {
     m_clientsIDsAndPoints[clientId] = 0;
   }
-
-  std::string ziuziu = LUA_GAMES_DIR + m_gameName + GAME_EXTENSION;
-  std::cout << ziuziu << "\n";
-  zipios::ZipFile file {ziuziu};
-  m_plaGameFile = std::move(file);
 
   m_currentClientsIDAndPointsIt = m_clientsIDsAndPoints.begin();
 
@@ -31,12 +28,9 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName)
   try {
     // Create entries to the content of .plagame
     std::string gameDir = m_gameName + '/';
-    std::cout << "1\n";
-    m_boardEntry = m_plaGameFile.getEntry((gameDir + BOARD_DESCRIPTION_FILE));
-    std::cout << "2\n";
-    m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_EXTENSION));
-    std::cout << "3\n";
-    m_initEntry = m_plaGameFile.getEntry((gameDir + m_gameName + LUA_SCRIPT_INIT_SUFFIX));
+    m_boardEntry = m_plaGameFile.getEntry(gameDir + GamesHandler::BOARD_DESCRIPTION_FILE);
+    m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_EXTENSION));
+    m_initEntry = m_plaGameFile.getEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_INIT_SUFFIX));
 
     // Make pointers to file inside .plagame file
     zipios::ZipFile::stream_pointer_t boardEntryStream(m_plaGameFile.getInputStream(m_boardEntry->getName()));
@@ -123,11 +117,7 @@ void Logic::_updateClients(std::string req) const
   sf::Packet replyPacket;
   replyPacket << reply;
 
-  if (m_networkHandler) {
-    m_networkHandler->sendPacketToEveryClients(replyPacket);
-  } else {
-    std::cerr << "[CORE] DEBUG: NetworkHandler is nullptr!\n";
-  }
+  m_networkHandler.sendPacketToEveryClients(replyPacket);
 }
 
 
@@ -150,8 +140,7 @@ void Logic::_addPointsToCurrentClient(int points)
 }
 
 
-void Logic::handleGameLogic(size_t clientId, Request requestType,
-                                      network::ServerPacketHandler &packetHandler)
+void Logic::handleGameLogic(size_t clientId, Request requestType)
 {
   for (const auto& client: m_clientsIDsAndPoints) {
     std::cout << "Available clientID: " << client.first << "\n";
@@ -163,11 +152,9 @@ void Logic::handleGameLogic(size_t clientId, Request requestType,
 
   // TODO: bug when previous client was deleted before game - BRD-15
   if (!_checkIfTurnAvailable(clientId)) {
-    packetHandler.sendPacketToClient(clientId, replyToClient);
+    m_networkHandler.sendPacketToClient(clientId, replyToClient);
     return;
   }
-
-  m_networkHandler = &packetHandler;
 
   replyStruct.status = ReplyType::Success;
 

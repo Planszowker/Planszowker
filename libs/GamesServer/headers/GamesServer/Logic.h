@@ -24,9 +24,9 @@ class Logic
 public:
   using ClientIDsAndPointsMap = std::unordered_map<size_t, int>;
 
-  explicit Logic(std::vector<size_t>& clientIds, const std::string& gameName);
+  Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, zipios::ZipFile& zipFile);
 
-  void handleGameLogic(size_t clientId, Request requestType, network::ServerPacketHandler& packetHandler);
+  void handleGameLogic(size_t clientId, Request requestType);
 
   [[nodiscard]] inline bool isGameFinished() const { return m_finished; }
 
@@ -45,8 +45,13 @@ private:
   const std::vector<size_t>& _getClients() const { return m_clientsIDs; }
   int _getClientPoints(size_t clientID) const;
 
+  const std::string& m_gameName;
+  network::ServerPacketHandler& m_networkHandler;
 
-  std::vector<size_t> m_clientsIDs;
+  zipios::ZipFile& m_plaGameFile;
+
+  std::vector<size_t>& m_clientsIDs;
+
   ClientIDsAndPointsMap m_clientsIDsAndPoints;
   ClientIDsAndPointsMap::iterator m_currentClientsIDAndPointsIt;
 
@@ -55,12 +60,6 @@ private:
 
   sol::state m_luaVM;
 
-  const std::string& m_gameName;
-
-  network::ServerPacketHandler* m_networkHandler;
-
-  zipios::ZipFile m_plaGameFile;
-
   zipios::FileEntry::pointer_t m_boardEntry;
   zipios::FileEntry::pointer_t m_gameEntry;
   zipios::FileEntry::pointer_t m_initEntry;
@@ -68,12 +67,6 @@ private:
   std::ostringstream m_boardScript;
   std::ostringstream m_initScript;
   std::ostringstream m_gameScript;
-
-  static constexpr auto GAME_EXTENSION = ".plagame";
-  static constexpr auto BOARD_DESCRIPTION_FILE = "BoardDescription.json";
-  static constexpr auto LUA_GAMES_DIR = "scripts/games/";
-  static constexpr auto LUA_SCRIPT_EXTENSION = ".lua";
-  static constexpr auto LUA_SCRIPT_INIT_SUFFIX = "-init.lua";
 };
 
 } // namespaces

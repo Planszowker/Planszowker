@@ -5,7 +5,9 @@ project(${LIB_NAME})
 set(SOURCES
       ServerHandler.cpp
       Logic.cpp
-    )
+      GamesHandler.cpp
+      AssetsUploader.cpp
+   )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
