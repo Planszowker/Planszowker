@@ -1,11 +1,10 @@
-set(LIB_NAME GamesServer)
+set(LIB_NAME AssetsManager)
 
 project(${LIB_NAME})
 
 set(SOURCES
-        ServerHandler.cpp
-        Logic.cpp
-        GamesHandler.cpp
+        AssetsTransmitter.cpp
+        AssetsReceiver.cpp
    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
@@ -13,12 +12,7 @@ add_library(${LIB_NAME} STATIC ${SOURCES})
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
                         PUBLIC Games
-                        PUBLIC Rng
-                        PUBLIC TimeMeasurement
-                        PUBLIC CompilerUtils
-                        PUBLIC AssetsManager
-
-                        PUBLIC lua5.3
+                        PRIVATE GamesServer
 
                         PRIVATE zipios
                       )

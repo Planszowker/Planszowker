@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace pla::common::games::server {
+namespace pla::common::assets {
 
 class AssetsTransmitter
 {
@@ -13,9 +13,9 @@ public:
   AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, size_t key);
 
 private:
-  void _startTransaction();
+  void _startTransaction(std::string assetName);
   void _transferFile(zipios::ZipFile::stream_pointer_t& fileStream);
-  void _endTransaction();
+  void _endTransaction(std::string assetName);
 
   void _getAssetsList();
 

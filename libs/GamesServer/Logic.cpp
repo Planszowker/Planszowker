@@ -26,7 +26,7 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, networ
                          sol::lib::math);
 
   try {
-    // Create entries to the content of .plagame
+    // Create entries from the content of .plagame
     std::string gameDir = m_gameName + '/';
     m_boardEntry = m_plaGameFile.getEntry(gameDir + GamesHandler::BOARD_DESCRIPTION_FILE);
     m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_EXTENSION));

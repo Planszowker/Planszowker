@@ -3,6 +3,7 @@
 #include "Games/Objects.h"
 #include "TimeMeasurement/TimeLogger.h"
 #include "CompilerUtils/FunctionInfoExtractor.h"
+#include <AssetsManager/AssetsReceiver.h>
 
 #include <chrono>
 #include <sstream>
@@ -16,6 +17,7 @@ namespace pla::common::network {
 ClientPacketHandler::ClientPacketHandler(sf::TcpSocket& serverSocket)
   : PacketHandler()
   , m_serverSocket(serverSocket)
+  , m_transactionState(TransactionState::NotStarted)
 {
   m_serverSocket.setBlocking(false);
 }
@@ -85,6 +87,27 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         std::stringstream ss{reply.body};
         ss >> m_clientID;
         std::cout << "\nReceived ClientID: " << m_clientID << "\n";
+      } else if (reply.type == games::PacketType::StartTransaction) {
+        if (m_transactionState == TransactionState::NotStarted) {
+          std::cout << "[DEBUG] Started transaction for " << reply.body << "!\n";
+          m_currentAssetKey = reply.body;
+          m_transactionState = TransactionState::InProgress;
+          m_receivedRawPackets.clear();
+        }
+      } else if (reply.type == games::PacketType::AssetTransaction) {
+        if (m_transactionState == TransactionState::InProgress) {
+          std::cout << "Transaction data block!\n";
+          m_receivedRawPackets.push_back(receivePacket);
+        }
+      } else if (reply.type == games::PacketType::EndTransaction) {
+        if (m_transactionState == TransactionState::InProgress) {
+          std::cout << "[DEBUG] Ended transaction for " << reply.body << "!\n";
+          if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
+            std::cerr << "Error adding " << m_currentAssetKey << "!\n";
+          }
+
+          m_transactionState = TransactionState::NotStarted;
+        }
       }
     }
   }
@@ -113,6 +136,7 @@ std::deque<games::Reply> ClientPacketHandler::getReplies() {
 
   return std::move(returnDeque);
 }
+
 
 bool ClientPacketHandler::getClientID(size_t& id) {
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex); // TODO: Check if needed

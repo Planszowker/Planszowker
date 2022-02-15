@@ -40,6 +40,7 @@ public:
 
   void sendPacketToEveryClients(sf::Packet& packet);
   void sendPacketToClient(size_t clientId, sf::Packet& packet);
+  void sendToClient(size_t clientId, const void* data, size_t dataSize);
 
 private:
 

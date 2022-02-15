@@ -4,7 +4,7 @@
 #include <CompilerUtils/FunctionInfoExtractor.h>
 #include <Games/Objects.h>
 #include <Logic.h>
-#include <AssetsTransmitter.h>
+#include <AssetsManager/AssetsTransmitter.h>
 
 
 namespace pla::common::games::server {
@@ -60,7 +60,8 @@ bool ServerHandler::_internalHandling() {
         continue;
       } else if (request.type == PacketType::DownloadAssets) {
         // User wants to download game's assets
-        AssetsTransmitter uploader(m_gamesHandler.getPlagameFile(), m_packetHandler, key);
+        assets::AssetsTransmitter uploader(m_gamesHandler.getPlagameFile(), m_packetHandler, key);
+        continue;
       }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";

@@ -1,11 +1,14 @@
 #include <AssetsTransmitter.h>
 
 #include <Games/Objects.h>
-#include <GamesHandler.h>
+#include <GamesServer/GamesHandler.h>
 
 #include <regex>
+#include <utility>
 
-namespace pla::common::games::server {
+namespace pla::common::assets {
+
+using namespace games;
 
 AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, size_t key)
   : m_plagameFile(plagameFile)
@@ -16,37 +19,44 @@ AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::Serv
   _getAssetsList();
 
   for (const auto& entry : m_assetsEntries) {
-    auto buf = std::make_shared<std::vector<char>>(4096);
+    Reply reply {
+      .type = games::PacketType::AssetTransaction,
+      .status = games::ReplyType::Success
+    };
+
+    const size_t packetSize = sizeof(reply) + PACKET_SIZE;
+    auto buf = std::make_shared<std::vector<char>>(packetSize);
 
     zipios::ZipFile::stream_pointer_t entryStream(m_plagameFile.getInputStream(entry->getName()));
 
-    std::cout << "Transferring " << entry->getFileName() << " to client...\n";
-    _startTransaction();
+    std::cout << "[DEBUG] Transferring " << entry->getFileName() << " to client...\n";
+    _startTransaction(entry->getFileName());
 
     while(true) {
-      entryStream->read(buf->data(), PACKET_SIZE);
+      memcpy(buf->data(), reinterpret_cast<void*>(&reply), sizeof(reply));
+      entryStream->read(buf->data() + sizeof(reply), PACKET_SIZE);
       size_t bytesRead = entryStream->gcount();
 
-      std::cout << "Read " << bytesRead << " bytes!\n";
-      // TODO: Send to client
+      std::cout << "[DEBUG] Read " << sizeof(reply) + bytesRead << " bytes!\n";
+      m_packetHandler.sendToClient(key, buf->data(), sizeof(reply) + bytesRead);
 
       if (bytesRead < PACKET_SIZE) {
         break;
       }
     }
 
-    _endTransaction();
+    _endTransaction(entry->getFileName());
   }
 }
 
 
-void AssetsTransmitter::_startTransaction()
+void AssetsTransmitter::_startTransaction(std::string assetName)
 {
   sf::Packet packet;
   Reply reply {
-    .type = PacketType::DownloadAssets,
+    .type = PacketType::StartTransaction,
     .status = ReplyType::Success,
-    .body = "StartTransaction"
+    .body = std::move(assetName)
   };
 
   packet << reply;
@@ -61,13 +71,13 @@ void AssetsTransmitter::_transferFile(zipios::ZipFile::stream_pointer_t& fileStr
 }
 
 
-void AssetsTransmitter::_endTransaction()
+void AssetsTransmitter::_endTransaction(std::string assetName)
 {
   sf::Packet packet;
   Reply reply {
-          .type = PacketType::DownloadAssets,
+          .type = PacketType::EndTransaction,
           .status = ReplyType::Success,
-          .body = "EndTransaction"
+          .body = std::move(assetName)
   };
 
   packet << reply;
@@ -82,7 +92,7 @@ void AssetsTransmitter::_getAssetsList()
   // Iterate over all entries in .plagame file
   for (const auto& entry : m_plagameFile.entries()) {
     // Find files inside assets folder
-    std::regex assetsRegex {GamesHandler::ASSETS_DIR};
+    std::regex assetsRegex {games::server::GamesHandler::ASSETS_DIR};
     if (std::regex_search(entry->getName(), assetsRegex)) {
       std::cout << "[DEBUG] Found asset " << entry->getFileName() << "!\n";
 
