@@ -14,7 +14,6 @@ enum class PacketType : uint8_t
   ID, ///< Used to get client's ID associated in server.
   DownloadAssets, ///< Used to get game's assets - only textures for now.
   StartTransaction, ///< Used to start asset transaction.
-  AssetTransaction, ///< Used to transfer asset.
   EndTransaction, ///< Used to end asset transaction.
 };
 

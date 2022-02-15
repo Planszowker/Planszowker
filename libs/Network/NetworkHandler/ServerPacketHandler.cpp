@@ -242,18 +242,4 @@ void ServerPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &packet
 }
 
 
-void ServerPacketHandler::sendToClient(size_t clientId, const void* data, size_t dataSize)
-{
-  TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
-
-  auto clientIt = m_clients.find(clientId);
-  if (clientIt != m_clients.end()) {
-    clientIt->second->setBlocking(true);
-    sf::Socket::Status status = clientIt->second->send(data, dataSize);
-    clientIt->second->setBlocking(false);
-  }
-}
-
-
 } // namespaces

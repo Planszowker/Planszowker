@@ -19,13 +19,7 @@ AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::Serv
   _getAssetsList();
 
   for (const auto& entry : m_assetsEntries) {
-    Reply reply {
-      .type = games::PacketType::AssetTransaction,
-      .status = games::ReplyType::Success
-    };
-
-    const size_t packetSize = sizeof(reply) + PACKET_SIZE;
-    auto buf = std::make_shared<std::vector<char>>(packetSize);
+    auto buf = std::make_shared<std::vector<char>>(PACKET_SIZE);
 
     zipios::ZipFile::stream_pointer_t entryStream(m_plagameFile.getInputStream(entry->getName()));
 
@@ -33,12 +27,13 @@ AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::Serv
     _startTransaction(entry->getFileName());
 
     while(true) {
-      memcpy(buf->data(), reinterpret_cast<void*>(&reply), sizeof(reply));
-      entryStream->read(buf->data() + sizeof(reply), PACKET_SIZE);
+      entryStream->read(buf->data(), PACKET_SIZE);
       size_t bytesRead = entryStream->gcount();
 
-      std::cout << "[DEBUG] Read " << sizeof(reply) + bytesRead << " bytes!\n";
-      m_packetHandler.sendToClient(key, buf->data(), sizeof(reply) + bytesRead);
+      std::cout << "[DEBUG] Read " << bytesRead << " bytes!\n";
+      sf::Packet packet;
+      packet.append(buf->data(), bytesRead);
+      m_packetHandler.sendPacketToClient(key, packet);
 
       if (bytesRead < PACKET_SIZE) {
         break;

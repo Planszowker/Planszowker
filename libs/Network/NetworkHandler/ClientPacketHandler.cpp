@@ -53,61 +53,78 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
     TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
     const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
 
-    // Receive packets from server
+    // Receive packets from server.
     sf::Packet receivePacket;
     sf::Socket::Status socketStatus = m_serverSocket.receive(receivePacket);
-    while (socketStatus == sf::Socket::Partial) {
-      socketStatus = m_serverSocket.receive(receivePacket);
+    if (socketStatus == sf::Socket::NotReady) {
+      continue;
     }
 
     if (socketStatus == sf::Socket::Done) {
       games::Reply reply;
-      receivePacket >> reply;
 
+      if (!(receivePacket >> reply)) {
+        // If we fail to extract reply from packet, it means the packet is either corrupted
+        // or is a part of transaction.
+        if (m_transactionState == TransactionState::InProgress) {
+          // If it's a transaction part, add it to deque and stop processing.
+          m_receivedRawPackets.push_back(receivePacket);
+          continue;
+        }
+
+        // If it's a corrupted packet, just continue.
+        continue;
+      }
+
+      // If received status is not Success, we shouldn't handle it.
       if (reply.status != games::ReplyType::Success) {
         continue;
       }
 
-      if (reply.type == games::PacketType::GameSpecificData) {
-        // DEBUG PRINTOUT
-        /*
-        std::cout << "== Game Specific Reply ==\n";
-        std::cout << "Reply from server: " << reply.body << "\n";
-        std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
-        std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
-        std::cout << "=========================\n";
-        */
-
-        //std::cout << "Reply added to deque\n";
-        m_receivedReplies.push_back(reply);
-
-        //std::cout << "Client replies size: " << m_receivedReplies.size() << std::endl;
-      } else if (reply.type == games::PacketType::ID) {
-        m_validID = true;
-        std::stringstream ss{reply.body};
-        ss >> m_clientID;
-        std::cout << "\nReceived ClientID: " << m_clientID << "\n";
-      } else if (reply.type == games::PacketType::StartTransaction) {
-        if (m_transactionState == TransactionState::NotStarted) {
-          std::cout << "[DEBUG] Started transaction for " << reply.body << "!\n";
-          m_currentAssetKey = reply.body;
-          m_transactionState = TransactionState::InProgress;
-          m_receivedRawPackets.clear();
+      // Handle other packets type.
+      switch (reply.type) {
+        case games::PacketType::GameSpecificData:
+        {
+          m_receivedReplies.push_back(reply);
+          break;
         }
-      } else if (reply.type == games::PacketType::AssetTransaction) {
-        if (m_transactionState == TransactionState::InProgress) {
-          std::cout << "Transaction data block!\n";
-          m_receivedRawPackets.push_back(receivePacket);
+
+        case games::PacketType::ID:
+        {
+          m_validID = true;
+          std::stringstream ss{reply.body};
+          ss >> m_clientID;
+          std::cout << "\nReceived ClientID: " << m_clientID << "\n";
+          break;
         }
-      } else if (reply.type == games::PacketType::EndTransaction) {
-        if (m_transactionState == TransactionState::InProgress) {
-          std::cout << "[DEBUG] Ended transaction for " << reply.body << "!\n";
-          if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
-            std::cerr << "Error adding " << m_currentAssetKey << "!\n";
+
+        case games::PacketType::StartTransaction:
+        {
+          if (m_transactionState == TransactionState::NotStarted) {
+            std::cout << "[DEBUG] Started transaction for " << reply.body << "!\n";
+            m_currentAssetKey = reply.body;
+            m_transactionState = TransactionState::InProgress;
+            m_receivedRawPackets.clear();
           }
-
-          m_transactionState = TransactionState::NotStarted;
+          break;
         }
+
+        case games::PacketType::EndTransaction:
+        {
+          if (m_transactionState == TransactionState::InProgress) {
+            std::cout << "[DEBUG] Ended transaction for " << reply.body << "!\n";
+
+            if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
+              std::cerr << "Error adding " << m_currentAssetKey << "!\n";
+            }
+
+            m_transactionState = TransactionState::NotStarted;
+          }
+          break;
+        }
+
+        default:
+          break;
       }
     }
   }

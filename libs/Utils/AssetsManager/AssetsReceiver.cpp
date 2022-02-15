@@ -26,7 +26,7 @@ bool AssetsReceiver::parseAndAddAsset(std::deque<sf::Packet>& packets, const std
   games::Reply reply;
   for (auto& packet : packets) {
     // Insert packet's data into buffer
-    assetBuffer->insert(assetBuffer->end(), static_cast<const char*>(packet.getData()) + sizeof(reply), static_cast<const char*>(packet.getData()) + sizeof(reply) + packet.getDataSize());
+    assetBuffer->insert(assetBuffer->end(), static_cast<const char*>(packet.getData()), static_cast<const char*>(packet.getData()) + packet.getDataSize());
   }
 
   m_assets[assetName] = std::move(std::reinterpret_pointer_cast<sf::Texture>(assetBuffer));
