@@ -3,6 +3,7 @@
 /* Generic */
 #include <NetworkHandler/ServerPacketHandler.h>
 #include "GamesHandler.h"
+#include <AssetsManager/AssetsTransmitter.h>
 
 /* SFML */
 #include <SFML/Network.hpp>
@@ -41,6 +42,8 @@ protected:
   network::ServerPacketHandler& m_packetHandler;
 
   GamesHandler m_gamesHandler;
+
+  std::map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
 };
 
 } // namespaces

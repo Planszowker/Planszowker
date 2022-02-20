@@ -2,6 +2,8 @@
 
 #include <Games/Objects.h>
 
+#include <AssetsDefines.h>
+
 #include <iostream>
 #include <vector>
 
@@ -9,6 +11,7 @@ namespace pla::common::assets {
 
 std::mutex AssetsReceiver::m_assetsMutex;
 std::unordered_map<std::string, std::shared_ptr<sf::Texture>> AssetsReceiver::m_assets;
+std::vector<std::string> AssetsReceiver::m_assetsNames;
 
 bool AssetsReceiver::parseAndAddAsset(std::deque<sf::Packet>& packets, const std::string& assetName)
 {
@@ -20,23 +23,43 @@ bool AssetsReceiver::parseAndAddAsset(std::deque<sf::Packet>& packets, const std
   }
 
   std::cout << "Adding asset with name " << assetName << "\n";
-  std::shared_ptr<std::vector<char>> assetBuffer = std::make_shared<std::vector<char>>();
+  std::shared_ptr<std::vector<char>> recvBuffer = std::make_shared<std::vector<char>>();
 
-  // TODO: Possible problem when client is on platform that has different reply's size that server has...
-  games::Reply reply;
   for (auto& packet : packets) {
     // Insert packet's data into buffer
-    assetBuffer->insert(assetBuffer->end(), static_cast<const char*>(packet.getData()), static_cast<const char*>(packet.getData()) + packet.getDataSize());
+    recvBuffer->insert(recvBuffer->end(),
+                       static_cast<const char*>(packet.getData()),
+                       static_cast<const char*>(packet.getData()) + packet.getDataSize());
   }
 
-  m_assets[assetName] = std::move(std::reinterpret_pointer_cast<sf::Texture>(assetBuffer));
+  std::shared_ptr<sf::Texture> _texture = std::make_shared<sf::Texture>();
+  _texture->loadFromMemory(recvBuffer->data(), recvBuffer->size());
+
+  m_assets[assetName] = std::move(_texture);
+  m_assetsNames.push_back(assetName);
   return true;
 }
 
 
-static std::shared_ptr<sf::Texture*> getTexture(std::string name)
+std::shared_ptr<sf::Texture> AssetsReceiver::getTexture(std::string name)
 {
+  const std::scoped_lock assetsMutex(m_assetsMutex); // Obtain mutex
+
+  auto assetPtr = m_assets.find(name);
+  if (assetPtr != m_assets.end()) {
+    return assetPtr->second;
+  }
+
+  // If we haven't found asset with given name
   return nullptr;
+}
+
+
+const std::vector<std::string>& AssetsReceiver::getAssetNames()
+{
+  const std::scoped_lock assetsMutex(m_assetsMutex); // Obtain mutex
+
+  return m_assetsNames;
 }
 
 } // namespace

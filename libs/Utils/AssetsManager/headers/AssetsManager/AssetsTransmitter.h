@@ -3,6 +3,8 @@
 #include <zipios/zipfile.hpp>
 #include <NetworkHandler/ServerPacketHandler.h>
 
+#include "AssetsDefines.h"
+
 #include <vector>
 
 namespace pla::common::assets {
@@ -10,22 +12,27 @@ namespace pla::common::assets {
 class AssetsTransmitter
 {
 public:
-  AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, size_t key);
+  AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries);
+
+  // Transmit assets in chunks - to not overflow eth fifo on client's side
+  void transmitAssets(size_t key);
 
 private:
-  void _startTransaction(std::string assetName);
+  void _startTransaction(std::string assetName, size_t key);
   void _transferFile(zipios::ZipFile::stream_pointer_t& fileStream);
-  void _endTransaction(std::string assetName);
-
-  void _getAssetsList();
-
-  static constexpr auto PACKET_SIZE {1024};
+  void _endTransaction(std::string assetName, size_t key);
 
   network::ServerPacketHandler& m_packetHandler;
   zipios::ZipFile& m_plagameFile;
-  size_t m_key;
+  std::vector<std::string>& m_assetsEntries;
+  std::vector<std::string>::iterator m_currentAssetNamePtr;
 
-  std::vector<zipios::FileEntry::pointer_t> m_assetsEntries;
+  // Chunk buffer
+  std::shared_ptr<std::vector<char>> m_buf = std::make_shared<std::vector<char>>(1024);
+
+  // Client specific containers
+  size_t m_transactionCounter {0};
+  zipios::ZipFile::stream_pointer_t m_assetStreamPtr;
 };
 
 } // namespace

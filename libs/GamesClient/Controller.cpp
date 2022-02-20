@@ -39,6 +39,7 @@ DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
 
 void DiceRollerController::run() {
   std::thread viewInput(&DiceRollerConsoleView::runLoop, m_view, this, std::ref(m_run));
+  std::thread assetView(&DiceRollerConsoleView::showAssets, m_view);
 
   m_clientPacketHandler.runInBackground();
 
@@ -158,6 +159,7 @@ void DiceRollerController::run() {
   }
 
   viewInput.join();
+  assetView.join();
 }
 
 

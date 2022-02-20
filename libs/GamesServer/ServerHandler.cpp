@@ -60,7 +60,24 @@ bool ServerHandler::_internalHandling() {
         continue;
       } else if (request.type == PacketType::DownloadAssets) {
         // User wants to download game's assets
-        assets::AssetsTransmitter uploader(m_gamesHandler.getPlagameFile(), m_packetHandler, key);
+        auto assetTransmitterPtr = m_assetsTransmitterMap.find(key);
+        if (assetTransmitterPtr == m_assetsTransmitterMap.end()) {
+          // If we haven't found entry with AssetTransmitter, we have to add a new one
+          auto [it, inserted] = m_assetsTransmitterMap.insert({key, std::make_shared<assets::AssetsTransmitter>(
+                  m_gamesHandler.getPlagameFile(),
+                  m_packetHandler,
+                  m_gamesHandler.getAssetsEntries())});
+
+          if (inserted) {
+            assetTransmitterPtr = it;
+          } else {
+            std::cerr << "Cannot add new asset transmitter to map!\n";
+          }
+        }
+
+        // Transmit assets in chunks
+        assetTransmitterPtr->second->transmitAssets(key);
+
         continue;
       }
 

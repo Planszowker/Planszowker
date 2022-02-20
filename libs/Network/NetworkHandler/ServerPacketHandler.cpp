@@ -112,10 +112,13 @@ void ServerPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
       if (clientStatus != sf::Socket::Done) {
         Logger::printInfo("Deleting client with ID: " + std::to_string(client.first) + " for failed querying ("
                           + std::to_string(m_clients.size() - 1) + " / " + std::to_string(m_maxPlayers) + ")");
-        m_clients.erase(client.first);
+
+        size_t keyToRemove = client.first;
+
+        m_clients.erase(keyToRemove);
 
         // Also remove from client IDs container
-        std::remove(m_clientIds.begin(), m_clientIds.end(), client.first);
+        std::erase(m_clientIds, keyToRemove);
 
         break; // Break because erasing invalidates iterator
       }

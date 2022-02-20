@@ -8,6 +8,8 @@
 #include <mutex>
 #include <atomic>
 
+#include <SFML/Graphics.hpp>
+
 namespace pla::common::games::dice_roller {
 
 class DiceRollerConsoleView : public GenericView
@@ -20,6 +22,9 @@ public:
   void update(const std::any& object) final;
 
   void runLoop(Controller* controller, std::atomic_bool& runLoop) final;
+
+  // Debug function to show window with downloaded assets
+  void showAssets();
 
 private:
   void notifyController(std::function<void(std::any&)> callback) final;

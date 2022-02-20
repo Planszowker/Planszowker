@@ -45,6 +45,8 @@ private:
 
   void _backgroundTask(std::mutex& tcpSocketsMutex) final;
 
+  bool _requestAsset();
+
   // Connection related variables
   sf::TcpSocket& m_serverSocket;
   std::deque<games::Reply> m_receivedReplies;
@@ -55,6 +57,8 @@ private:
 
   TransactionState m_transactionState;
   std::string m_currentAssetKey;
+
+  size_t m_transactionCounter {0};
 };
 
 } // namespaces

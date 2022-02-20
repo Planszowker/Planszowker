@@ -4,6 +4,7 @@
 #include "TimeMeasurement/TimeLogger.h"
 #include "CompilerUtils/FunctionInfoExtractor.h"
 #include <AssetsManager/AssetsReceiver.h>
+#include <AssetsManager/AssetsDefines.h>
 
 #include <chrono>
 #include <sstream>
@@ -69,10 +70,23 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         if (m_transactionState == TransactionState::InProgress) {
           // If it's a transaction part, add it to deque and stop processing.
           m_receivedRawPackets.push_back(receivePacket);
+          ++m_transactionCounter;
+
+          //std::cout << "[DEBUG] Transaction counter: " << m_transactionCounter << "\n";
+
+          if (m_transactionCounter == assets::CHUNK_QUANTITY) {
+            // We have received enough chunks, we need to send a request for more data.
+            // Cannot use SendPacket(), because it would require double mutex locking...
+            //std::cout << "[DEBUG] Requesting asset...\n";
+            m_transactionCounter = 0;
+            _requestAsset();
+          }
+
           continue;
         }
 
         // If it's a corrupted packet, just continue.
+        std::cerr << "[DEBUG] Corrupted packet!\n";
         continue;
       }
 
@@ -118,7 +132,12 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
               std::cerr << "Error adding " << m_currentAssetKey << "!\n";
             }
 
+            // Reset transaction parameters
             m_transactionState = TransactionState::NotStarted;
+            m_transactionCounter = 0;
+
+            // Check if more data is available - if yes, receive it as a new transaction
+            _requestAsset();
           }
           break;
         }
@@ -161,6 +180,23 @@ bool ClientPacketHandler::getClientID(size_t& id) {
   id = m_clientID;
 
   return m_validID;
+}
+
+
+bool ClientPacketHandler::_requestAsset() {
+  sf::Packet requestPacket;
+  games::Request request {
+          .type = games::PacketType::DownloadAssets
+  };
+  requestPacket << request;
+
+  // Send packet to server without requesting a mutex
+  sf::Socket::Status retStatus = m_serverSocket.send(requestPacket);
+  while (retStatus == sf::Socket::Partial) {
+    retStatus = m_serverSocket.send(requestPacket);
+  }
+
+  return (retStatus == sf::Socket::Done);
 }
 
 } // namespaces

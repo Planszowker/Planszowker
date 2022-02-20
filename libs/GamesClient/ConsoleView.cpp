@@ -7,6 +7,10 @@
 #include <string>
 #include <atomic>
 
+#include <SFML/Graphics.hpp>
+
+#include <AssetsManager/AssetsReceiver.h>
+
 using namespace pla::common::games;
 
 namespace pla::common::games::dice_roller {
@@ -93,6 +97,63 @@ void DiceRollerConsoleView::runLoop(Controller* controller, std::atomic_bool& ru
     std::function<void(std::any&)> callback = std::bind(&Controller::viewCallback, controller, std::placeholders::_1);
     notifyController(callback);
   }
+}
+
+
+void DiceRollerConsoleView::showAssets()
+{
+  size_t ctr {0};
+
+  sf::RenderWindow window(sf::VideoMode(640, 640), "Assets previewer");
+  window.setFramerateLimit(60.f);
+
+  sf::Clock clk;
+
+  while (window.isOpen()) {
+    sf::Event event{};
+    while (window.pollEvent(event)) {
+      switch (event.type) {
+        case sf::Event::Closed:
+          window.close();
+          break;
+        default:
+          break;
+      }
+    }
+
+    auto assets = assets::AssetsReceiver::getAssetNames();
+
+    sf::Time elapsed = clk.getElapsedTime();
+    if (!assets.empty() && elapsed.asSeconds() >= 1.f) {
+      clk.restart();
+
+      ++ctr;
+      if (ctr >= assets.size()) {
+        ctr = 0;
+      }
+
+      //std::cout << "Choosing " << assets[ctr] << " asset...\n";
+
+      auto texture = assets::AssetsReceiver::getTexture(assets[ctr]);
+      //std::cout << "Texture info " << texture->getSize().x << " x " << texture->getSize().y << " asset...\n";
+
+      sf::Sprite sprite;
+      sprite.setTexture(*texture);
+
+      auto ziu = texture->getSize();
+      sf::Vector2f factor (640.f / float(ziu.x), 640.f / float(ziu.y));
+
+      sprite.setScale(factor);
+
+      window.clear(sf::Color::Magenta);
+      window.draw(sprite);
+    }
+
+    window.display();
+  }
+
+  std::cout << "Exiting Thread...\n";
+  std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 } // namespaces

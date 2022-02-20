@@ -15,6 +15,8 @@ public:
 
   zipios::ZipFile& getPlagameFile() { return m_plagameFile; }
 
+  std::vector<std::string>& getAssetsEntries() { return m_assetsEntries; }
+
   static constexpr auto GAME_EXTENSION = ".plagame";
   static constexpr auto BOARD_DESCRIPTION_FILE = "BoardDescription.json";
   static constexpr auto GAMES_DIR = "scripts/games/";
@@ -23,9 +25,13 @@ public:
   static constexpr auto LUA_SCRIPT_EXTENSION = ".lua";
   static constexpr auto LUA_SCRIPT_INIT_SUFFIX = "-init.lua";
 private:
+  void _getAssetsList();
+
   const std::string& m_gameName;
 
   zipios::ZipFile m_plagameFile;
+
+  std::vector<std::string> m_assetsEntries;
 };
 
 } // namespace

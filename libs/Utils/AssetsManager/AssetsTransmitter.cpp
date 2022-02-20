@@ -3,49 +3,76 @@
 #include <Games/Objects.h>
 #include <GamesServer/GamesHandler.h>
 
-#include <regex>
 #include <utility>
 
 namespace pla::common::assets {
 
 using namespace games;
 
-AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, size_t key)
+// TODO: Remove debug printout ;)
+AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries)
   : m_plagameFile(plagameFile)
   , m_packetHandler(packetHandler)
-  , m_key(key)
+  , m_assetsEntries(assetsEntries)
+  , m_currentAssetNamePtr(assetsEntries.begin())
 {
-  // Firstly, get list of all files inside assets folder
-  _getAssetsList();
+  // Set stream pointer to the first asset available.
+  m_assetStreamPtr = m_plagameFile.getInputStream(*(m_currentAssetNamePtr));
+}
 
-  for (const auto& entry : m_assetsEntries) {
-    auto buf = std::make_shared<std::vector<char>>(PACKET_SIZE);
 
-    zipios::ZipFile::stream_pointer_t entryStream(m_plagameFile.getInputStream(entry->getName()));
+void AssetsTransmitter::transmitAssets(size_t key)
+{
+  //std::cout << "[DEBUG] Transmitting assets...\n";
+  if (m_currentAssetNamePtr == m_assetsEntries.end()) {
+    // We have already sent all the assets.
+    std::cout << "[DEBUG] We have reached end of assets...\n";
+    return;
+  }
 
-    std::cout << "[DEBUG] Transferring " << entry->getFileName() << " to client...\n";
-    _startTransaction(entry->getFileName());
+  // Start asset transaction, if not yet started.
+  if (m_transactionCounter == 0) {
+    std::cout << "[DEBUG] Starting transaction...\n";
+    _startTransaction(*m_currentAssetNamePtr, key);
+  }
 
-    while(true) {
-      entryStream->read(buf->data(), PACKET_SIZE);
-      size_t bytesRead = entryStream->gcount();
+  // We send CHUNK_SIZE packets with data and then wait for response.
+  for (size_t iter = 0; iter < CHUNK_QUANTITY; ++iter) {
+    //std::cout << "[DEBUG] Transferring " << m_transactionCounter << " chunk to client...\n";
+    m_assetStreamPtr->read(m_buf->data(), CHUNK_SIZE);
 
-      std::cout << "[DEBUG] Read " << bytesRead << " bytes!\n";
-      sf::Packet packet;
-      packet.append(buf->data(), bytesRead);
-      m_packetHandler.sendPacketToClient(key, packet);
+    // Increase transaction counter;
+    ++m_transactionCounter;
 
-      if (bytesRead < PACKET_SIZE) {
-        break;
+    // Read how many bytes we have successfully read.
+    size_t bytesRead = m_assetStreamPtr->gcount();
+
+    // Create packet with chunk data and send it to client.
+    sf::Packet packet;
+    packet.append(m_buf->data(), bytesRead);
+    m_packetHandler.sendPacketToClient(key, packet);
+
+    //std::cout << "[DEBUG] Bytes read: " << bytesRead << "\n";
+
+    // If we cannot read CHUNK_SIZE bytes, it means EOF.
+    if (bytesRead < CHUNK_SIZE) {
+      // Move to next asset and clear transaction counter.
+      _endTransaction(*m_currentAssetNamePtr, key);
+
+      ++m_currentAssetNamePtr; // Get to next asset
+      // Check if we have any more assets...
+      if (m_currentAssetNamePtr != m_assetsEntries.end()) {
+        // Update asset stream
+        m_assetStreamPtr = m_plagameFile.getInputStream(*(m_currentAssetNamePtr));
       }
+      m_transactionCounter = 0; // Reset transaction counter
+      break;
     }
-
-    _endTransaction(entry->getFileName());
   }
 }
 
 
-void AssetsTransmitter::_startTransaction(std::string assetName)
+void AssetsTransmitter::_startTransaction(std::string assetName, size_t key)
 {
   sf::Packet packet;
   Reply reply {
@@ -56,7 +83,7 @@ void AssetsTransmitter::_startTransaction(std::string assetName)
 
   packet << reply;
 
-  m_packetHandler.sendPacketToClient(m_key, packet);
+  m_packetHandler.sendPacketToClient(key, packet);
 }
 
 
@@ -66,7 +93,7 @@ void AssetsTransmitter::_transferFile(zipios::ZipFile::stream_pointer_t& fileStr
 }
 
 
-void AssetsTransmitter::_endTransaction(std::string assetName)
+void AssetsTransmitter::_endTransaction(std::string assetName, size_t key)
 {
   sf::Packet packet;
   Reply reply {
@@ -77,23 +104,7 @@ void AssetsTransmitter::_endTransaction(std::string assetName)
 
   packet << reply;
 
-  m_packetHandler.sendPacketToClient(m_key, packet);
-}
-
-
-void AssetsTransmitter::_getAssetsList()
-{
-  std::cout << "[DEBUG] Trying to get all assets list...\n";
-  // Iterate over all entries in .plagame file
-  for (const auto& entry : m_plagameFile.entries()) {
-    // Find files inside assets folder
-    std::regex assetsRegex {games::server::GamesHandler::ASSETS_DIR};
-    if (std::regex_search(entry->getName(), assetsRegex)) {
-      std::cout << "[DEBUG] Found asset " << entry->getFileName() << "!\n";
-
-      m_assetsEntries.push_back(entry);
-    }
-  }
+  m_packetHandler.sendPacketToClient(key, packet);
 }
 
 } // namespace
