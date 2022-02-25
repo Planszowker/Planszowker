@@ -1,21 +1,18 @@
-set(LIB_NAME AssetsManager)
+set(LIB_NAME ServerSupervisor)
 
 project(${LIB_NAME})
 
 set(SOURCES
-        AssetsTransmitter.cpp
-        AssetsReceiver.cpp
+        ServerSupervisor.cpp
+        Command.cpp
    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
-                        PUBLIC NetworkHandler
-                        PUBLIC Games
-                        PRIVATE GamesServer
-                        PRIVATE EasyLogging
-
-                        PRIVATE zipios
+                        PUBLIC EasyLogging
+                        PUBLIC zipios
+                        PUBLIC PlametaParser
                       )
 
 target_include_directories(${LIB_NAME}

@@ -2,7 +2,7 @@
 This script is run each round.
 ]]--
 
-print('Current: ' .. StateMachine.current)
+print('[LUA] Current state: ' .. StateMachine.current)
 
 --[[
 Handle state changes depending on received requests.

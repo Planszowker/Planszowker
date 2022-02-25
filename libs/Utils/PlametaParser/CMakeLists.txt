@@ -1,21 +1,17 @@
-set(LIB_NAME AssetsManager)
+set(LIB_NAME PlametaParser)
 
 project(${LIB_NAME})
 
 set(SOURCES
-        AssetsTransmitter.cpp
-        AssetsReceiver.cpp
+        Parser.cpp
+        Entry.cpp
    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
-                        PUBLIC NetworkHandler
-                        PUBLIC Games
-                        PRIVATE GamesServer
                         PRIVATE EasyLogging
-
-                        PRIVATE zipios
+                        PRIVATE ErrorHandler
                       )
 
 target_include_directories(${LIB_NAME}

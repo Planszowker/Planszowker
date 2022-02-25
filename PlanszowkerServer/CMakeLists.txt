@@ -10,6 +10,8 @@ add_executable(${EXEC_NAME} ${SOURCES})
 target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
                       PRIVATE GamesServer
+                      PRIVATE EasyLogging
+                      PRIVATE ServerSupervisor
 
                       sfml-graphics
                       sfml-network
@@ -25,6 +27,8 @@ target_include_directories(${EXEC_NAME}
                              PRIVATE headers/PlanszowkerServer
                              PRIVATE headers
                            )
+# Copy config
+file(COPY config.plameta DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Copy core lua scripts, except games
 file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR}

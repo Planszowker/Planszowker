@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Planszowker VERSION 0.0
+project(Planszowker VERSION 0.0.1
                     LANGUAGES CXX)
 
 set(SFML_STATIC_LIBRARIES TRUE)
@@ -15,6 +15,9 @@ find_package(Sol2 REQUIRED)
 find_package(Lua REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
+configure_file("Config.h.in" "Config.h")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 include_directories(${LUA_INCLUDE_DIR})
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
@@ -28,7 +31,10 @@ add_subdirectory(libs/Utils/CompilerUtils)
 add_subdirectory(libs/Utils/TimeMeasurement)
 add_subdirectory(libs/Utils/Rng)
 add_subdirectory(libs/Utils/AssetsManager)
+add_subdirectory(libs/Utils/External/EasyLogging)
 add_subdirectory(libs/Network/NetworkHandler)
+add_subdirectory(libs/ServerSupervisor)
+add_subdirectory(libs/Utils/PlametaParser)
 add_subdirectory(libs/Games)
 add_subdirectory(libs/GamesClient)
 add_subdirectory(libs/GamesServer)

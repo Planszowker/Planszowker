@@ -16,4 +16,10 @@ void ErrorLogger::printError(const std::string& str)
   throw ExceptionThrower(str, ExceptionPrio::Error);
 }
 
+
+void ErrorLogger::throwError()
+{
+  throw ExceptionThrower("", ExceptionPrio::Error);
+}
+
 } // namespaces

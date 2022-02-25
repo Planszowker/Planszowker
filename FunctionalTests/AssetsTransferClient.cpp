@@ -7,10 +7,6 @@
 #include <array>
 #include <vector>
 
-struct header{
-  uint32_t type = 7;
-};
-
 int main()
 {
   sf::TcpSocket socket;

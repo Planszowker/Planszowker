@@ -31,6 +31,8 @@ public:
    *  \param str Const reference for error string.
    */
   static void printError(const std::string& str);
+
+  static void throwError();
 };
 
 } // namespaces
