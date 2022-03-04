@@ -1,4 +1,6 @@
 #include <string>
+#include <fstream>
+#include <sstream>
 
 #include <ErrorHandler/ExceptionThrower.h>
 #include <Supervisor/Supervisor.h>
@@ -20,20 +22,23 @@ static constexpr auto CONFIG_FILENAME = "config.plameta";
 ////////////
 int main() {
 
-  std::ifstream configStream {CONFIG_FILENAME};
+  std::ifstream configFile {CONFIG_FILENAME};
 
   el::Configurations customConf;
   customConf.setToDefault();
   customConf.set(el::Level::Debug, el::ConfigurationType::Format, "[%level]: %msg");
   el::Loggers::reconfigureLogger("default", customConf);
 
-  if (!configStream.is_open()) {
+  if (!configFile.is_open()) {
     LOG(ERROR) << "Cannot open " << CONFIG_FILENAME << " file!";
     return EXIT_FAILURE;
   }
 
   try {
-    Supervisor serverSupervisor {configStream};
+    std::stringstream configStream;
+    configStream << configFile.rdbuf();
+
+    Supervisor serverSupervisor {std::move(configStream)};
     serverSupervisor.run();
   } catch (ExceptionThrower& e) {
     LOG(INFO) << "Terminating Planszówker Server due to errors...";

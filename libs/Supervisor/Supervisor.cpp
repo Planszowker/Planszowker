@@ -8,9 +8,8 @@
 
 namespace pla::supervisor {
 
-Supervisor::Supervisor(std::ifstream& configStream)
-  : m_configStream(configStream)
-  , m_configParser(m_configStream)
+Supervisor::Supervisor(std::stringstream configStream)
+  : m_configParser(std::move(configStream))
 {
   auto helpCmd = std::make_shared<Command>(
           "help",
@@ -22,7 +21,7 @@ Supervisor::Supervisor(std::ifstream& configStream)
               std::cout << "\t" << command->getCommand() << " - " << command->getDescription() << "\n";
             }
           }
-          );
+  );
 
   auto quitCmd = std::make_shared<Command>(
           "quit",

@@ -21,6 +21,7 @@ public:
 
   EntryType getType() { return m_type; }
   std::string getKey() { return m_key; }
+  std::string getRaw() { return m_rawValue; }
 
   EntryVariant getVariant();
 

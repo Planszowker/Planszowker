@@ -3,7 +3,6 @@
 #include <ErrorHandler/ErrorLogger.h>
 #include <easylogging++.h>
 
-#include <fstream>
 #include <regex>
 
 // debug
@@ -11,15 +10,15 @@
 
 namespace pla::utils::plameta {
 
-Parser::Parser(std::ifstream& plametaFileStream)
-  : m_plametaFileStream(plametaFileStream)
+Parser::Parser(std::stringstream plametaContent)
+  : m_plametaContent(std::move(plametaContent))
 {
   _setValidEntries();
 
   std::string readLine;
   std::string currentSection {"global"};
 
-  while (std::getline(m_plametaFileStream, readLine)) {
+  while (std::getline(m_plametaContent, readLine)) {
     std::regex sectionRegex {"^\\[(.+)\\]$"}; // Match for [section]
     std::smatch results;
     if (std::regex_match(readLine, results, sectionRegex)) {
@@ -30,7 +29,7 @@ Parser::Parser(std::ifstream& plametaFileStream)
 
     // If we haven't found new section, it means we have to look for new entry
     // entry-name: entry-value
-    std::regex entryRegex {R"(^([a-zA-Z0-9_\-]+):[\s]{1}([a-zA-Z0-9_\s\-\.]+)$)"};
+    std::regex entryRegex {R"(^([a-zA-Z0-9_\-]+):[\s]{1}([a-zA-Z0-9_\s\-\.,]+)$)"};
     if (std::regex_match(readLine, results, entryRegex)) {
       auto key = results.str(1);
       auto value = results.str(2);
@@ -99,14 +98,14 @@ Parser::Parser(std::ifstream& plametaFileStream)
 
 void Parser::_setValidEntries()
 {
-  m_validEntries.emplace_back("name", EntryType::String);
-  m_validEntries.emplace_back("description", EntryType::String);
-  m_validEntries.emplace_back("distributor", EntryType::String);
-  m_validEntries.emplace_back("author", EntryType::String);
-  m_validEntries.emplace_back("version", EntryType::String);
-  m_validEntries.emplace_back("min_players", EntryType::Int);
-  m_validEntries.emplace_back("max_players", EntryType::Int);
-  m_validEntries.emplace_back("port", EntryType::Int);
+  m_validEntries.emplace_back("name", EntryType::String, "N/A");
+  m_validEntries.emplace_back("description", EntryType::String, "N/A");
+  m_validEntries.emplace_back("distributor", EntryType::String, "N/A");
+  m_validEntries.emplace_back("author", EntryType::String, "N/A");
+  m_validEntries.emplace_back("version", EntryType::String, "N/A");
+  m_validEntries.emplace_back("min_players", EntryType::Int, "0");
+  m_validEntries.emplace_back("max_players", EntryType::Int, "0");
+  m_validEntries.emplace_back("port", EntryType::Int, "0");
 }
 
 
@@ -122,16 +121,25 @@ std::shared_ptr<Entry> Parser::operator[] (const std::string& key)
   LOG(DEBUG) << "Entry key: " << entryKey;
 
   auto it = m_entries.find(section);
-  if (it == m_entries.end()) {
-    // Throw exception if nullptr is returned
-    err_handler::ErrorLogger::throwError();
-    return nullptr;
+  if (it != m_entries.end()) {
+    auto& entries = it->second;
+
+    for (const auto& entry : entries) {
+      if (entry->getKey() == entryKey) {
+        return entry;
+      }
+    }
   }
 
-  auto& entries = it->second;
-  for (const auto& entry : entries) {
-    if (entry->getKey() == entryKey) {
-      return entry;
+  // If we haven't found given entry
+  for (const auto& validEntry : m_validEntries) {
+    if (std::get<0>(validEntry) == entryKey) {
+
+      // We get default value
+      std::shared_ptr<Entry> returnPtr = std::make_shared<Entry>(std::get<0>(validEntry),
+                                                                 std::get<2>(validEntry),
+                                                                 std::get<1>(validEntry));
+      return std::move(returnPtr);
     }
   }
 

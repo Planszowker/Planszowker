@@ -26,6 +26,8 @@ SupervisorPacketHandler::SupervisorPacketHandler(std::atomic_bool& run, size_t p
     ErrorLogger::printError("Error binding for TCP Listener in ServerPacketHandler!");
   }
 
+  m_listener.setBlocking(false);
+
   Logger::printInfo("Successfully created TCP Listener on port: " + std::to_string(m_port));
 }
 
@@ -174,10 +176,14 @@ void SupervisorPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
   while(m_run) {
     std::shared_ptr<sf::TcpSocket> newTcpSocket = std::make_shared<sf::TcpSocket>();
 
-    // Blocks until new connection is made
-    if (m_listener.accept(*newTcpSocket) != sf::Socket::Done) {
-      ErrorLogger::printWarning("Error accepting new TCP Socket!");
-      return;
+    auto status = m_listener.accept(*newTcpSocket);
+    while (status == sf::Socket::Partial) {
+      status = m_listener.accept(*newTcpSocket);
+    }
+
+    if (status != sf::Socket::Done) {
+      std::this_thread::sleep_for(std::chrono::milliseconds (10));
+      continue;
     }
 
     const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
@@ -197,7 +203,6 @@ void SupervisorPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
       m_hasEnoughClientsConnected = false;
     }
 
-    // Probably not needed since this task is always blocked on listening...
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
   }
 }
