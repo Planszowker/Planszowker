@@ -4,7 +4,7 @@
 #include <mutex>
 #include <thread>
 
-namespace pla::common::network {
+namespace pla::network {
 
 /*!
  *  @brief Class for handling network communication.
@@ -12,7 +12,7 @@ namespace pla::common::network {
  */
 class PacketHandler {
 public:
-  PacketHandler() : m_run(false) { }
+  explicit PacketHandler(std::atomic_bool& run) : m_run(run) { }
 
   virtual void runInBackground() = 0;
 
@@ -24,7 +24,7 @@ protected:
   // Multithreading variables
   std::thread m_backgroundThread;
   std::mutex m_tcpSocketsMutex;
-  std::atomic_bool m_run;
+  std::atomic_bool& m_run;
 };
 
 }

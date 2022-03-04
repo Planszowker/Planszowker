@@ -1,13 +1,13 @@
 #include "GraphicalView.h"
 
-namespace pla::common::games {
+namespace pla::games {
 
 void GraphicalView::runLoop(Controller* controller, std::atomic_bool& runLoop)
 {
   while (m_window.isOpen())
   {
     // Process events
-    sf::Event event;
+    sf::Event event{};
     while (m_window.pollEvent(event))
     {
       // Close window: exit

@@ -18,7 +18,7 @@
 
 namespace pla::common::games::dice_roller {
 
-class DiceRollerController : public Controller
+class DiceRollerController : public pla::games::Controller
 {
 public:
   explicit DiceRollerController(sf::TcpSocket& serverSocket);
@@ -35,6 +35,8 @@ private:
   DiceRollerViewLogic m_logic;
 
   size_t m_clientID{0};
+
+  std::atomic_bool m_run;
 };
 
 } // namespaces

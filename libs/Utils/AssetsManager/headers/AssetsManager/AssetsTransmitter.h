@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace pla::common::assets {
+namespace pla::assets {
 
 class AssetsTransmitter
 {

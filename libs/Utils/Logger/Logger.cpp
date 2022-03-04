@@ -2,7 +2,7 @@
 
 using namespace std;
 
-namespace pla::common::logger {
+namespace pla::logger {
 
 void Logger::printInfo(const std::string& str)
 {

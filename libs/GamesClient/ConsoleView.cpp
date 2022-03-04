@@ -11,7 +11,7 @@
 
 #include <AssetsManager/AssetsReceiver.h>
 
-using namespace pla::common::games;
+using namespace pla::games;
 
 namespace pla::common::games::dice_roller {
 
@@ -70,6 +70,9 @@ void DiceRollerConsoleView::notifyController(std::function<void(std::any&)> call
     case 4:
       requestToSend.type = PacketType::DownloadAssets;
       break;
+    case 5:
+      requestToSend.type = PacketType::ListAvailableGames;
+      break;
     default:
       break;
   }
@@ -86,10 +89,16 @@ void DiceRollerConsoleView::runLoop(Controller* controller, std::atomic_bool& ru
   while (runLoop)
   {
     // Wait for input
-    std::cout << "Packet to send:\n (1) Roll dice\n (2) Re-roll dice\n (3) Confirm\n Your choice: ";
+    std::cout << "Packet to send:\n"
+                 "(1) Roll dice\n"
+                 "(2) Re-roll dice\n"
+                 "(3) Confirm\n"
+                 "(4) Get assets\n"
+                 "(5) List all games\n"
+                 "Your choice: ";
     std::cin >> m_inputType;
 
-    if (m_inputType < 1 || m_inputType > 4) {
+    if (m_inputType < 1 || m_inputType > 5) {
       std::cout << "Wrong packet type!\n";
       continue;
     }

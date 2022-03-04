@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace pla::common::client_info {
+namespace pla::client_info {
 
 class ClientInfo
 {

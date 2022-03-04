@@ -3,7 +3,7 @@
 #include <chrono>
 #include <iostream>
 
-namespace pla::common::time_measurement {
+namespace pla::time_measurement {
 
 class TimeLogger{
 public:

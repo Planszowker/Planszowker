@@ -6,7 +6,7 @@
 
 #include "ErrorHandlerDefs.h"
 
-namespace pla::common::err_handler {
+namespace pla::err_handler {
 
 /*!
  *  \brief Class to log out warnings and error using exceptions

@@ -7,13 +7,13 @@
 #include <memory>
 #include <fstream>
 
-namespace pla::server {
+namespace pla::supervisor {
 
-class ServerSupervisor
+class Supervisor
 {
 public:
-  ServerSupervisor() = delete;
-  explicit ServerSupervisor(std::ifstream& configStream);
+  Supervisor() = delete;
+  explicit Supervisor(std::ifstream& configStream);
 
   void run();
 

@@ -17,7 +17,7 @@
 /* ZIPIOS */
 #include <zipios/zipfile.hpp>
 
-namespace pla::common::games::server {
+namespace pla::games_server {
 
 class Logic
 {
@@ -26,7 +26,7 @@ public:
 
   Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, zipios::ZipFile& zipFile);
 
-  void handleGameLogic(size_t clientId, Request requestType);
+  void handleGameLogic(size_t clientId, games::Request requestType);
 
   [[nodiscard]] inline bool isGameFinished() const { return m_finished; }
 

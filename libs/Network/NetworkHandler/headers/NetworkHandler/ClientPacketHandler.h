@@ -13,7 +13,7 @@
 
 #include "PacketHandler.h"
 
-namespace pla::common::network {
+namespace pla::network {
 
 enum class TransactionState : uint8_t {
   NotStarted,
@@ -24,7 +24,7 @@ class ClientPacketHandler : public PacketHandler
 {
 public:
 
-  explicit ClientPacketHandler(sf::TcpSocket& serverSocket);
+  explicit ClientPacketHandler(std::atomic_bool& run, sf::TcpSocket& serverSocket);
   ~ClientPacketHandler();
 
   void runInBackground() final;
@@ -33,12 +33,6 @@ public:
   bool sendPacket(sf::Packet& packet);
   std::deque<games::Reply> getReplies();
 
-  /**
-   * Get raw packets from assets transfer
-   * @return Deque with assets chunks
-   */
-  std::deque<sf::Packet> getRawPackets();
-
   bool getClientID(size_t& id);
 
 private:
@@ -46,6 +40,7 @@ private:
   void _backgroundTask(std::mutex& tcpSocketsMutex) final;
 
   bool _requestAsset();
+  void _listAllAvailableGames();
 
   // Connection related variables
   sf::TcpSocket& m_serverSocket;

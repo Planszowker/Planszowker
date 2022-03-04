@@ -1,0 +1,1 @@
+#include <Supervisor/GamesInfoExtractor.h>

@@ -4,7 +4,7 @@
 #include <memory>
 #include <any>
 
-namespace pla::common::games {
+namespace pla::games {
 
 /*!
  * @brief Class responsible for handling view logic, i.e. how to update Model

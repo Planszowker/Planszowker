@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace pla::server {
+namespace pla::supervisor {
 
 Command::Command(std::string&& command, std::string&& description, std::function<void()> callback)
   : m_command(std::move(command))

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace pla::common::err_handler {
+namespace pla::err_handler {
 
 /*!
  *  \brief Enum class to hold priorities about thrown exceptions

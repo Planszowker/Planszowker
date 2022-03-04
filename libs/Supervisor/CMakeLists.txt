@@ -1,10 +1,11 @@
-set(LIB_NAME ServerSupervisor)
+set(LIB_NAME Supervisor)
 
 project(${LIB_NAME})
 
 set(SOURCES
-        ServerSupervisor.cpp
+        Supervisor.cpp
         Command.cpp
+        GamesInfoExtractor.cpp
    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
@@ -13,6 +14,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC EasyLogging
                         PUBLIC zipios
                         PUBLIC PlametaParser
+                        PUBLIC NetworkHandler
                       )
 
 target_include_directories(${LIB_NAME}

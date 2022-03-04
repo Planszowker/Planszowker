@@ -8,7 +8,7 @@
 
 namespace pla::common::games::dice_roller {
 
-class DiceRollerViewLogic : public ViewLogic
+class DiceRollerViewLogic : public pla::games::ViewLogic
 {
 public:
   void updateModel(const std::any& modelUpdateData) final;

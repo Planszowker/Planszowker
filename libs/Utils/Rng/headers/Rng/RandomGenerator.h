@@ -7,7 +7,7 @@
 #include <random>
 #include <cmath>
 
-namespace pla::common::rng {
+namespace pla::rng {
 
 class RandomGenerator
 {

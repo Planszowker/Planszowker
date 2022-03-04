@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace pla::common::logger {
+namespace pla::logger {
 
 /*!
  * @brief Class to log additional information

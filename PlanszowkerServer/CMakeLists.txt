@@ -1,7 +1,6 @@
 set(EXEC_NAME PlanszowkerServer)
 
-set(
-        SOURCES
+set(SOURCES
         main.cpp
 )
 
@@ -11,7 +10,7 @@ target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
                       PRIVATE GamesServer
                       PRIVATE EasyLogging
-                      PRIVATE ServerSupervisor
+                      PRIVATE Supervisor
 
                       sfml-graphics
                       sfml-network

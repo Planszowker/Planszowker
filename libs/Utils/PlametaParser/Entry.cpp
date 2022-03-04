@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <ErrorHandler/ErrorLogger.h>
+
 namespace pla::utils::plameta {
 
 Entry::Entry(std::string key, std::string rawValue, EntryType type)
@@ -12,43 +14,30 @@ Entry::Entry(std::string key, std::string rawValue, EntryType type)
 }
 
 
-template<>
-int Entry::getValue<int>()
+Entry::EntryVariant Entry::getVariant()
 {
-  int returnVal {0};
-
   if (m_type == EntryType::Int) {
+    int returnVal {0};
+
     // Read value as int
     std::stringstream ss {m_rawValue};
     ss >> returnVal;
-  }
 
-  return returnVal;
-}
+    return EntryVariant {returnVal};
+  } else if (m_type == EntryType::Float) {
+    float returnVal {0.f};
 
-
-template<>
-std::string Entry::getValue<std::string>()
-{
-  if (m_type == EntryType::String) {
-    return m_rawValue;
-  }
-  return "";
-}
-
-
-template<>
-float Entry::getValue<float>()
-{
-  float returnVal {0.f};
-
-  if (m_type == EntryType::Float) {
-    // Read value as float
     std::stringstream ss {m_rawValue};
     ss >> returnVal;
+
+    return EntryVariant {returnVal};
+  } else if (m_type == EntryType::String) {
+    return EntryVariant {m_rawValue};
   }
 
-  return returnVal;
+  // Throw error when type is not supported
+  err_handler::ErrorLogger::throwError();
+  return EntryVariant {0};
 }
 
 } // Namespace

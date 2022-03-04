@@ -4,9 +4,7 @@
 #include <chrono>
 #include <iostream>
 
-namespace pla::common::time_measurement{
-
-using namespace pla::common;
+namespace pla::time_measurement{
 
 TimeLogger::TimeLogger(std::string functionName)
   : m_tStart(std::chrono::high_resolution_clock::now())

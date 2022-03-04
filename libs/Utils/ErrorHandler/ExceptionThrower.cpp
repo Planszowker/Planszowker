@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace pla::common::err_handler {
+namespace pla::err_handler {
 
 ExceptionThrower::ExceptionThrower(const std::string& message, const ExceptionPrio prio)
 {

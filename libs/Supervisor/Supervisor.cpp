@@ -1,14 +1,14 @@
-#include "ServerSupervisor.h"
-
+#include <Supervisor/Supervisor.h>
 #include <PlametaParser/Entry.h>
+#include <NetworkHandler/ServerPacketHandler.h>
 
 #include <string>
 #include <iostream>
 #include <thread>
 
-namespace pla::server {
+namespace pla::supervisor {
 
-ServerSupervisor::ServerSupervisor(std::ifstream& configStream)
+Supervisor::Supervisor(std::ifstream& configStream)
   : m_configStream(configStream)
   , m_configParser(m_configStream)
 {
@@ -38,45 +38,31 @@ ServerSupervisor::ServerSupervisor(std::ifstream& configStream)
 }
 
 
-void ServerSupervisor::run()
+void Supervisor::run()
 {
   // Do something...
 
-  std::shared_ptr<utils::plameta::Entry> entryPtr = m_configParser["config:port"];
+  auto entryPtr = m_configParser["config:port"];
+  std::cout << "[Config]:port = " << std::get<int>(entryPtr->getVariant()) << "\n";
 
-  if (entryPtr) {
-    std::cout << "[" << entryPtr->getKey() << "]: ";
-    switch (entryPtr->getType()) {
-      case utils::plameta::EntryType::Int:
-        std::cout << entryPtr->getValue<int>();
-        break;
-      case utils::plameta::EntryType::String:
-        std::cout << entryPtr->getValue<std::string>();
-        break;
-      case utils::plameta::EntryType::Float:
-        std::cout << entryPtr->getValue<float>();
-        break;
-      default:
-        LOG(ERROR) << "Wrong entry type!";
-        std::terminate();
-        break;
-    }
-    std::cout << "\n";
-  }
+  std::size_t port = static_cast<size_t>(std::get<int>(entryPtr->getVariant()));
+  network::SupervisorPacketHandler supervisorPacketHandler {m_run, port};
 
-  std::thread inputThread {&ServerSupervisor::_getUserInput, this};
+  supervisorPacketHandler.runInBackground();
+
+  std::thread inputThread {&Supervisor::_getUserInput, this};
 
   inputThread.join();
 }
 
 
-void ServerSupervisor::_registerCommand(std::shared_ptr<Command>&& command)
+void Supervisor::_registerCommand(std::shared_ptr<Command>&& command)
 {
   m_commands.push_back(std::move(command));
 }
 
 
-void ServerSupervisor::_getUserInput()
+void Supervisor::_getUserInput()
 {
   std::string inputCommand;
 

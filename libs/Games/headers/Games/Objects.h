@@ -5,7 +5,7 @@
 
 #include <SFML/Network.hpp>
 
-namespace pla::common::games {
+namespace pla::games {
 
 enum class PacketType : uint8_t
 {
@@ -15,6 +15,8 @@ enum class PacketType : uint8_t
   DownloadAssets, ///< Used to get game's assets - only textures for now.
   StartTransaction, ///< Used to start asset transaction.
   EndTransaction, ///< Used to end asset transaction.
+  ListAvailableGames, ///< Used to list all games the server is able to handle.
+  ListOpenLobbies, ///< Used to list all open lobbies.
 };
 
 
@@ -47,7 +49,7 @@ struct Reply
 
 } // namespaces
 
-sf::Packet& operator << (sf::Packet& packet, const pla::common::games::Request& request);
-sf::Packet& operator >> (sf::Packet& packet, pla::common::games::Request& request);
-sf::Packet& operator << (sf::Packet& packet, pla::common::games::Reply& reply);
-sf::Packet& operator >> (sf::Packet& packet, pla::common::games::Reply& reply);
+sf::Packet& operator << (sf::Packet& packet, const pla::games::Request& request);
+sf::Packet& operator >> (sf::Packet& packet, pla::games::Request& request);
+sf::Packet& operator << (sf::Packet& packet, const pla::games::Reply& reply);
+sf::Packet& operator >> (sf::Packet& packet, pla::games::Reply& reply);

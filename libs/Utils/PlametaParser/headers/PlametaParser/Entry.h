@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <variant>
 
 namespace pla::utils::plameta {
 
@@ -15,13 +16,13 @@ enum class EntryType : uint8_t {
 class Entry
 {
 public:
+  using EntryVariant = std::variant<int, float, std::string>;
   Entry(std::string key, std::string rawValue, EntryType type);
 
   EntryType getType() { return m_type; }
   std::string getKey() { return m_key; }
 
-  template<typename T>
-  T getValue();
+  EntryVariant getVariant();
 
 private:
   std::string m_key;

@@ -2,6 +2,7 @@ set(LIB_NAME NetworkHandler)
 
 set(SOURCES
         ServerPacketHandler.cpp
+        SupervisorPacketHandler.cpp
         ClientPacketHandler.cpp
    )
 

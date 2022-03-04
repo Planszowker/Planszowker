@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 
-namespace pla::common::assets {
+namespace pla::assets {
 
 std::mutex AssetsReceiver::m_assetsMutex;
 std::unordered_map<std::string, std::shared_ptr<sf::Texture>> AssetsReceiver::m_assets;

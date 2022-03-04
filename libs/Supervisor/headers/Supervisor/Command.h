@@ -2,7 +2,7 @@
 #include <functional>
 #include <memory>
 
-namespace pla::server {
+namespace pla::supervisor {
 
 class Command
 {

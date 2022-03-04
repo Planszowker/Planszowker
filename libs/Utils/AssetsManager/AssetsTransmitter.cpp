@@ -5,7 +5,7 @@
 
 #include <utility>
 
-namespace pla::common::assets {
+namespace pla::assets {
 
 using namespace games;
 

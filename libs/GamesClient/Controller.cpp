@@ -4,7 +4,6 @@
 #include "ErrorHandler/ErrorLogger.h"
 #include "Games/Objects.h"
 #include "NetworkHandler/ClientPacketHandler.h"
-#include "Games/Characters.h"
 
 #include <thread>
 #include <chrono>
@@ -13,15 +12,15 @@
 
 #include <nlohmann/json.hpp>
 
-using namespace pla::common::err_handler;
-using namespace pla::common::logger;
-using namespace pla::common;
+using namespace pla::err_handler;
+using namespace pla::logger;
+using namespace pla::games;
 
 namespace pla::common::games::dice_roller {
 
 DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
   : Controller()
-  , m_clientPacketHandler(serverSocket)
+  , m_clientPacketHandler(m_run, serverSocket)
 {
   m_view.init();
 
@@ -39,13 +38,13 @@ DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
 
 void DiceRollerController::run() {
   std::thread viewInput(&DiceRollerConsoleView::runLoop, m_view, this, std::ref(m_run));
-  std::thread assetView(&DiceRollerConsoleView::showAssets, m_view);
+  //std::thread assetView(&DiceRollerConsoleView::showAssets, m_view);
 
   m_clientPacketHandler.runInBackground();
 
   //std::cout << "Return " << m_clientPacketHandler.getClientID(m_clientID) << "\n";
 
-  do { } while (!m_clientPacketHandler.getClientID(m_clientID));
+  m_clientPacketHandler.getClientID(m_clientID);
 
   while (m_run) {
     // TODO
@@ -54,12 +53,15 @@ void DiceRollerController::run() {
     const auto replies = m_clientPacketHandler.getReplies();
     for (const auto& reply: replies) {
 
-      /*
+
       std::cout << "Reply: " << reply.body << "\n";
       std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
       std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
       std::cout << "== Controller Printout ==\n";
-      */
+
+      if (reply.status != ReplyType::Success) {
+        continue;
+      }
 
       nlohmann::json j = nlohmann::json::parse(reply.body);
 
@@ -159,7 +161,7 @@ void DiceRollerController::run() {
   }
 
   viewInput.join();
-  assetView.join();
+  //assetView.join();
 }
 
 

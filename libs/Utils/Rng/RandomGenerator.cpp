@@ -1,6 +1,6 @@
 #include "RandomGenerator.h"
 
-namespace pla::common::rng {
+namespace pla::rng {
 
 RandomGenerator::RandomGenerator(int min, int max)
   : m_min(min)

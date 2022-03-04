@@ -13,7 +13,7 @@
 #include <memory>
 #include <atomic>
 
-namespace pla::common::games::server {
+namespace pla::games_server {
 
 class ServerHandler
 {

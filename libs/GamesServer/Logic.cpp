@@ -5,7 +5,9 @@
 #include <Rng/RandomGenerator.h>
 #include <GamesHandler.h>
 
-namespace pla::common::games::server {
+namespace pla::games_server {
+
+using namespace games;
 
 Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, zipios::ZipFile& zipFile)
   : m_gameName(gameName)

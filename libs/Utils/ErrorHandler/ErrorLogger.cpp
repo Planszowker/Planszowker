@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace pla::common::err_handler {
+namespace pla::err_handler {
 
 void ErrorLogger::printWarning(const std::string& str)
 {

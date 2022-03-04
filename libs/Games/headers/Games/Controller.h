@@ -8,7 +8,7 @@
 #include <atomic>
 #include <mutex>
 
-namespace pla::common::games {
+namespace pla::games {
 
 class GenericView;
 

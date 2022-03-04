@@ -12,7 +12,7 @@
 /* SFML */
 #include <SFML/Graphics.hpp>
 
-namespace pla::common::games {
+namespace pla::games {
 
 class Controller;
 

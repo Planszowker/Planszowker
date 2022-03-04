@@ -60,7 +60,7 @@ Parser::Parser(std::ifstream& plametaFileStream)
             sectionIt = it;
           } else {
             LOG(ERROR) << "Parser: Cannot insert entry!";
-            common::err_handler::ErrorLogger::throwError();
+            err_handler::ErrorLogger::throwError();
           }
         }
 
@@ -72,30 +72,28 @@ Parser::Parser(std::ifstream& plametaFileStream)
     }
   }
 
-
+  // Debug printout
+  // TODO: Delete this section
   for (const auto& globalKey : m_entries) {
     LOG(DEBUG) << "Global key " << globalKey.first;
     for (const auto& keyEntry : globalKey.second) {
-      auto type = keyEntry->getType();
-      switch (type) {
-        case EntryType::String:
-          LOG(DEBUG) << keyEntry->getKey() << ": " << keyEntry->getValue<std::string>();
+      std::cout << "[" << keyEntry->getKey() << "]: ";
+      switch (keyEntry->getType()) {
+        case EntryType::Float:
+          std::cout << std::get<float>(keyEntry->getVariant()) << "\n";
           break;
         case EntryType::Int:
-          LOG(DEBUG) << keyEntry->getKey() << ": " << keyEntry->getValue<int>();
+          std::cout << std::get<int>(keyEntry->getVariant()) << "\n";
           break;
-        case EntryType::Float:
-          LOG(DEBUG) << keyEntry->getKey() << ": " << keyEntry->getValue<float>();
+        case EntryType::String:
+          std::cout << std::get<std::string>(keyEntry->getVariant()) << "\n";
           break;
         default:
-          LOG(ERROR) << "Wrong parameter type!";
-          common::err_handler::ErrorLogger::throwError();
+          err_handler::ErrorLogger::throwError();
           break;
       }
     }
   }
-
-
 }
 
 
@@ -125,6 +123,8 @@ std::shared_ptr<Entry> Parser::operator[] (const std::string& key)
 
   auto it = m_entries.find(section);
   if (it == m_entries.end()) {
+    // Throw exception if nullptr is returned
+    err_handler::ErrorLogger::throwError();
     return nullptr;
   }
 
@@ -135,6 +135,8 @@ std::shared_ptr<Entry> Parser::operator[] (const std::string& key)
     }
   }
 
+  // Throw exception if nullptr is returned
+  err_handler::ErrorLogger::throwError();
   return nullptr;
 }
 

@@ -10,7 +10,7 @@
 
 namespace pla::common::games::dice_roller {
 
-class DiceRollerConsoleView : public GenericView
+class DiceRollerConsoleView : public pla::games::GenericView
 {
 public:
   DiceRollerConsoleView() = default;
@@ -19,7 +19,7 @@ public:
   void init() final;
   void update(const std::any& object) final;
 
-  void runLoop(Controller* controller, std::atomic_bool& runLoop) final;
+  void runLoop(pla::games::Controller* controller, std::atomic_bool& runLoop) final;
 
 private:
   void notifyController(std::function<void(std::any&)> callback) final;

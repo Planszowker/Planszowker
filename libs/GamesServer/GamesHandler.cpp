@@ -2,7 +2,7 @@
 
 #include <regex>
 
-namespace pla::common::games::server {
+namespace pla::games_server {
 
 GamesHandler::GamesHandler(const std::string& gameName)
   : m_gameName(gameName)

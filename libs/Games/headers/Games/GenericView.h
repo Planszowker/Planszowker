@@ -8,7 +8,7 @@
 #include <any>
 #include <atomic>
 
-namespace pla::common::games {
+namespace pla::games {
 
 class Controller;
 

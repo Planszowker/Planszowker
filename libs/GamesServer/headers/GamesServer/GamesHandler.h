@@ -7,7 +7,7 @@
 
 #include <NetworkHandler/ServerPacketHandler.h>
 
-namespace pla::common::games::server {
+namespace pla::games_server {
 
 class GamesHandler {
 public:

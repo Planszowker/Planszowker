@@ -9,7 +9,7 @@
 #include <SFML/Network.hpp>
 #include <SFML/Graphics.hpp>
 
-namespace pla::common::assets {
+namespace pla::assets {
 
 class AssetsReceiver
 {

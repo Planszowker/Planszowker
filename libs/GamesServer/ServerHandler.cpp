@@ -7,7 +7,9 @@
 #include <AssetsManager/AssetsTransmitter.h>
 
 
-namespace pla::common::games::server {
+namespace pla::games_server {
+
+using namespace games;
 
 void ServerHandler::run()
 {

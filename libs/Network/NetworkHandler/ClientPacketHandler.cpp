@@ -11,12 +11,12 @@
 
 #include <iostream> // TODO: remove debug
 
-using namespace pla::common::time_measurement;
+using namespace pla::time_measurement;
 
-namespace pla::common::network {
+namespace pla::network {
 
-ClientPacketHandler::ClientPacketHandler(sf::TcpSocket& serverSocket)
-  : PacketHandler()
+ClientPacketHandler::ClientPacketHandler(std::atomic_bool& run, sf::TcpSocket& serverSocket)
+  : PacketHandler(run)
   , m_serverSocket(serverSocket)
   , m_transactionState(TransactionState::NotStarted)
 {
@@ -66,7 +66,7 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
       if (!(receivePacket >> reply)) {
         // If we fail to extract reply from packet, it means the packet is either corrupted
-        // or is a part of transaction.
+        // or is a part of asset transaction.
         if (m_transactionState == TransactionState::InProgress) {
           // If it's a transaction part, add it to deque and stop processing.
           m_receivedRawPackets.push_back(receivePacket);
@@ -142,6 +142,10 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           break;
         }
 
+        case games::PacketType::ListAvailableGames:
+          _listAllAvailableGames();
+          break;
+
         default:
           break;
       }
@@ -197,6 +201,11 @@ bool ClientPacketHandler::_requestAsset() {
   }
 
   return (retStatus == sf::Socket::Done);
+}
+
+
+void ClientPacketHandler::_listAllAvailableGames()
+{
 }
 
 } // namespaces
