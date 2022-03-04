@@ -1,0 +1,12 @@
+[overview]
+name: Dummy Game
+description: Just a dummy game, nothing at all...
+distributor: None
+
+[adaptation]
+author: Ishiguro
+version: 1.0
+
+[settings]
+min_players: 2
+max_players: 4

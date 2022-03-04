@@ -1,0 +1,25 @@
+set(LIB_NAME Supervisor)
+
+project(${LIB_NAME})
+
+set(SOURCES
+        Supervisor.cpp
+        Command.cpp
+        GamesInfoExtractor.cpp
+   )
+
+add_library(${LIB_NAME} STATIC ${SOURCES})
+
+target_link_libraries(${LIB_NAME}
+                        PUBLIC EasyLogging
+                        PUBLIC zipios
+                        PUBLIC PlametaParser
+                        PUBLIC NetworkHandler
+                      )
+
+target_include_directories(${LIB_NAME}
+                             PUBLIC headers
+
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                             PRIVATE headers/${LIB_NAME}
+                           )

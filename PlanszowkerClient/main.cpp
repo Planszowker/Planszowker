@@ -1,12 +1,12 @@
 #include <iostream>
 
 #include "ErrorHandler/ExceptionThrower.h"
-#include "DiceRoller/Controller.h"
-#include "DiceRoller/ConsoleView.h"
+#include "GamesClient/Controller.h"
+#include "GamesClient/ConsoleView.h"
 
 #include <SFML/Network.hpp>
 
-using namespace pla::common::err_handler;
+using namespace pla::err_handler;
 using namespace pla::common::games::dice_roller;
 
 ////////////
@@ -16,10 +16,7 @@ int main()
 {
   sf::TcpSocket socket;
 
-  unsigned short inPort = 0;
-  std::cin >> inPort;
-
-  sf::Socket::Status status = socket.connect("localhost", inPort);
+  sf::Socket::Status status = socket.connect("localhost", 27016);
   if(status != sf::Socket::Done) {
     return EXIT_FAILURE;
   }
