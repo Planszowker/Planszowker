@@ -1,6 +1,7 @@
 #include <Supervisor/GamesInfoExtractor.h>
 
 #include <PlametaParser/Parser.h>
+#include <ErrorHandler/ErrorLogger.h>
 
 #include <filesystem>
 #include <regex>
@@ -23,28 +24,31 @@ GamesInfoExtractor::GamesInfoExtractor()
     }
   }
 
-  _getParsers();
-
-  // DEBUG
-  for (auto parser : m_parsers) {
-    LOG(DEBUG) << (*parser)["overview:description"]->getRaw();
-  }
+  _getMetaAssets();
 }
 
 
-void GamesInfoExtractor::_getParsers()
+void GamesInfoExtractor::_getMetaAssets()
 {
+  // Look for .plameta and Thumbnail in found games
+  // Entry looks like this: `scripts/games/GameName.plagame`
   for (const auto& plagameFilePath : m_gameEntries) {
     zipios::ZipFile plagameFile {plagameFilePath};
 
-    zipios::ZipFile::stream_pointer_t is(plagameFile.getInputStream(".plameta"));
+    zipios::ZipFile::stream_pointer_t plametaStream(plagameFile.getInputStream(PlametaFile));
+    zipios::ZipFile::stream_pointer_t thumbnailStream(plagameFile.getInputStream(ThumbnailFile));
 
-    std::stringstream plametaStream;
-    plametaStream << is->rdbuf();
+    // Add .plameta and thumbnail streams (if exist) to the meta assets map
+    if (plametaStream) {
+      m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, plametaStream});
+    } else {
+      err_handler::ErrorLogger::printError(".plameta file is mandatory!");
+    }
 
-    auto parser = std::make_shared<utils::plameta::Parser>(std::move(plametaStream));
-
-    m_parsers.emplace_back(std::move(parser));
+    // Thumbnail does not have to be present
+    if (thumbnailStream) {
+      m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, thumbnailStream});
+    }
   }
 }
 

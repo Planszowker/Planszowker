@@ -14,13 +14,13 @@ public:
   GamesInfoExtractor();
 
   static constexpr auto GamesDir = "scripts/games";
+  static constexpr auto PlametaFile = ".plameta";
+  static constexpr auto ThumbnailFile = "Thumbnail.png";
 private:
-  void _getParsers();
+  void _getMetaAssets();
 
   std::vector<std::string> m_gameEntries;
-  std::vector<zipios::FileEntry::pointer_t> m_plametaFilesStreams;
-
-  std::vector<std::shared_ptr<utils::plameta::Parser>> m_parsers;
+  std::unordered_map<std::string, zipios::ZipFile::stream_pointer_t> m_gameMetaAssets;
 };
 
 }

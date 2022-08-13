@@ -14,8 +14,11 @@ class AssetsTransmitter
 public:
   AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries);
 
-  // Transmit assets in chunks - to not overflow eth fifo on client's side
-  void transmitAssets(size_t key);
+  // Transmit all available assets in chunks - to not overflow eth fifo on client's side
+  void transmitAssets(size_t clientKey);
+
+  // Transmit specific asset in chunks
+  bool transmitAsset(size_t clientKey, const std::string& assetName);
 
 private:
   void _startTransaction(std::string assetName, size_t key);
@@ -25,10 +28,10 @@ private:
   network::ServerPacketHandler& m_packetHandler;
   zipios::ZipFile& m_plagameFile;
   std::vector<std::string>& m_assetsEntries;
-  std::vector<std::string>::iterator m_currentAssetNamePtr;
+  std::vector<std::string>::iterator m_currentAssetNameIter;
 
   // Chunk buffer
-  std::shared_ptr<std::vector<char>> m_buf = std::make_shared<std::vector<char>>(1024);
+  std::shared_ptr<std::vector<char>> m_buf = std::make_shared<std::vector<char>>(CHUNK_SIZE);
 
   // Client specific containers
   size_t m_transactionCounter {0};

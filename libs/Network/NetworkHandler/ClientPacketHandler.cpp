@@ -1,10 +1,11 @@
 #include "ClientPacketHandler.h"
 
-#include "Games/Objects.h"
-#include "TimeMeasurement/TimeLogger.h"
-#include "CompilerUtils/FunctionInfoExtractor.h"
+#include <Games/Objects.h>
+#include <TimeMeasurement/TimeLogger.h>
+#include <CompilerUtils/FunctionInfoExtractor.h>
 #include <AssetsManager/AssetsReceiver.h>
 #include <AssetsManager/AssetsDefines.h>
+#include <ErrorHandler/ErrorLogger.h>
 
 #include <chrono>
 #include <sstream>
@@ -19,6 +20,7 @@ ClientPacketHandler::ClientPacketHandler(std::atomic_bool& run, sf::TcpSocket& s
   : PacketHandler(run)
   , m_serverSocket(serverSocket)
   , m_transactionState(TransactionState::NotStarted)
+  , m_callbacks(nullptr)
 {
   m_serverSocket.setBlocking(false);
 }
@@ -109,6 +111,12 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           std::stringstream ss{reply.body};
           ss >> m_clientID;
           std::cout << "\nReceived ClientID: " << m_clientID << "\n";
+
+          // Callback for ID packets
+          if (m_callbacks) {
+            m_callbacks->IDCallback();
+          }
+
           break;
         }
 
@@ -143,7 +151,9 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         }
 
         case games::PacketType::ListAvailableGames:
-          _listAllAvailableGames();
+          if (m_callbacks) {
+            m_callbacks->listAllAvailableGamesCallback();
+          }
           break;
 
         default:
@@ -203,9 +213,13 @@ bool ClientPacketHandler::_requestAsset() {
   return (retStatus == sf::Socket::Done);
 }
 
-
-void ClientPacketHandler::_listAllAvailableGames()
+void ClientPacketHandler::connectCallbacks(games::ICallbacks* callbacks)
 {
+  if (callbacks) {
+    m_callbacks = callbacks;
+  } else {
+    err_handler::ErrorLogger::printError("Given callbacks pointer is a nullptr!");
+  }
 }
 
 } // namespaces

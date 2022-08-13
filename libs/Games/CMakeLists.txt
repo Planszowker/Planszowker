@@ -3,14 +3,19 @@ set(LIB_NAME Games)
 project(${LIB_NAME})
 
 set(SOURCES
-        GraphicalView.cpp
         Objects.cpp
+        GameWindow.cpp
+        States/GameChoosingState.cpp
+        States/GameState.cpp
+
+        Callbacks/GameChoosingCallbacks.cpp
         )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
+                        PRIVATE GamesClient
 
                         PUBLIC lua5.3
 

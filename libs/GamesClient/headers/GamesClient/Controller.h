@@ -1,42 +1,55 @@
 #pragma once
 
 /* Generic */
-#include "Games/Controller.h"
-#include "NetworkHandler/ClientPacketHandler.h"
+#include "GraphicalView.h"
+#include <Games/Objects.h>
 
-/* DiceRoller specific */
-#include "ConsoleView.h"
-#include "ViewLogic.h"
+#include <NetworkHandler/ClientPacketHandler.h>
 
 /* SFML */
-#include "SFML/Network.hpp"
+#include <SFML/Network.hpp>
 
 /* STD */
 #include <memory>
 #include <any>
 #include <atomic>
 
-namespace pla::common::games::dice_roller {
+namespace pla::games_client {
 
-class DiceRollerController : public pla::games::Controller
+class GraphicalView;
+
+class Controller
 {
 public:
-  explicit DiceRollerController(sf::TcpSocket& serverSocket);
+  explicit Controller(sf::TcpSocket& serverSocket);
 
-  void run() final;
-  void viewCallback(std::any& object) final;
+  void run();
+  void viewCallback(std::any& object);
+
+  GraphicalView* getView()
+  {
+    return m_view.get();
+  }
+
+  network::ClientPacketHandler* getPacketHandler()
+  {
+    return &m_clientPacketHandler;
+  }
+
+  void sendRequest(games::PacketType type, const std::string& body = "");
 
 private:
   void update();
 
+  std::atomic_bool m_run {true}; ///< Flag used to sync threads.
+
+  std::mutex m_mutex; ///< Mutex for shared resources.
+
+  size_t m_clientID {0};
+
   network::ClientPacketHandler m_clientPacketHandler;
 
-  DiceRollerConsoleView m_view;
-  DiceRollerViewLogic m_logic;
-
-  size_t m_clientID{0};
-
-  std::atomic_bool m_run;
+  std::shared_ptr<GraphicalView> m_view;
 };
 
 } // namespaces

@@ -1,6 +1,8 @@
 #include "Command.h"
 #include "GamesInfoExtractor.h"
 
+#include <AssetsManager/AssetsTransmitter.h>
+#include <NetworkHandler/SupervisorPacketHandler.h>
 #include <PlametaParser/Parser.h>
 #include <easylogging++.h>
 
@@ -21,6 +23,9 @@ public:
 private:
   void _getUserInput();
   void _registerCommand(std::shared_ptr<Command>&& command);
+  void _processPackets(network::SupervisorPacketHandler& packetHandler);
+
+  void _listAvailableGamesHandler(size_t key, network::SupervisorPacketHandler& packetHandler);
 
   utils::plameta::Parser m_configParser;
 
@@ -28,7 +33,7 @@ private:
 
   std::vector<std::shared_ptr<Command>> m_commands;
 
-  GamesInfoExtractor ziuziu;
+  std::map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
 };
 
 }

@@ -1,30 +1,68 @@
 #pragma once
 
 /* Generic */
-#include "Games/GraphicalView.h"
+#include "Controller.h"
+
+#include <Games/GameWindow.h>
+#include <Games/States/IState.h>
 
 /* STD */
+#include <functional>
 #include <any>
-#include <mutex>
 #include <atomic>
+#include <deque>
+#include <memory>
 
-namespace pla::common::games::dice_roller {
+namespace pla::games_client {
 
-class DiceRollerConsoleView : public pla::games::GenericView
+class Controller;
+
+/*!
+ * @brief Graphical view class.
+ */
+class GraphicalView
 {
 public:
-  DiceRollerConsoleView() = default;
-  virtual ~DiceRollerConsoleView() = default;
+  GraphicalView() = delete;
+  explicit GraphicalView(Controller& controller, std::atomic_bool& run, const sf::Vector2i& windowDim, const std::string& windowName);
 
-  void init() final;
-  void update(const std::any& object) final;
+  ~GraphicalView() = default;
 
-  void runLoop(pla::games::Controller* controller, std::atomic_bool& runLoop) final;
+  void init();
+
+  /*!
+   * @brief Run view in loop (get user input, handle events, send callbacks).
+   */
+  void run();
+
+  void stop()
+  {
+    m_run = false;
+  }
+
+  const std::unique_ptr<games::GameWindow>& getGameWindow()
+  {
+    return m_gameWindow;
+  }
+
+  Controller& getController()
+  {
+    return m_controller;
+  }
 
 private:
-  void notifyController(std::function<void(std::any&)> callback) final;
+  void changeState(games::States newState);
 
-  int m_inputType{0};
+  void _recalculateActionBoxWindowSize();
+
+  Controller& m_controller;
+
+  std::deque<std::shared_ptr<games::IState>> m_states;
+
+  std::atomic_bool& m_run;
+
+  // Game window
+  std::unique_ptr<games::GameWindow> m_gameWindow;
 };
 
 } // namespaces

@@ -1,12 +1,14 @@
 #include <Supervisor/Supervisor.h>
 #include <PlametaParser/Entry.h>
-#include <NetworkHandler/ServerPacketHandler.h>
+#include <Games/Objects.h>
 
 #include <string>
 #include <iostream>
 #include <thread>
 
 namespace pla::supervisor {
+
+using namespace games;
 
 Supervisor::Supervisor(std::stringstream configStream)
   : m_configParser(std::move(configStream))
@@ -39,8 +41,6 @@ Supervisor::Supervisor(std::stringstream configStream)
 
 void Supervisor::run()
 {
-  // Do something...
-
   auto entryPtr = m_configParser["config:port"];
   std::cout << "[Config]:port = " << std::get<int>(entryPtr->getVariant()) << "\n";
 
@@ -48,8 +48,12 @@ void Supervisor::run()
   network::SupervisorPacketHandler supervisorPacketHandler {m_run, port};
 
   supervisorPacketHandler.runInBackground();
-
   std::thread inputThread {&Supervisor::_getUserInput, this};
+
+  // Do something...
+  while(m_run) {
+    _processPackets(supervisorPacketHandler);
+  }
 
   inputThread.join();
 }
@@ -87,6 +91,58 @@ void Supervisor::_getUserInput()
       std::cout << "Command not found!\n";
     }
   }
+}
+
+
+void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler)
+{
+  // TODO: Refactor this bulk...
+  std::vector<size_t> clientIdKeys;
+  auto packetsMap = packetHandler.getPackets(clientIdKeys);
+
+  for (const auto& clientIdKey: clientIdKeys) {
+    // Find map entry with client ID -> (size_t, deque) is received
+    const auto mapIt = packetsMap.find(clientIdKey);
+    if (mapIt == packetsMap.end()) {
+      continue;
+    }
+
+    // Iterate over all packets in deque
+    for (auto& packet: mapIt->second) {
+      Request request{};
+      packet >> request;
+
+      if (request.type == PacketType::Heartbeat) {
+        // We don't care about Heartbeat packets
+        continue;
+      } else if (request.type == PacketType::ID) {
+        // If we get ID request, we need to send client's ID
+        Reply idReply{
+                .type = PacketType::ID,
+                .status = ReplyType::Success,
+                .body = std::to_string(clientIdKey)
+        };
+        sf::Packet replyPacket;
+        replyPacket << idReply;
+
+        packetHandler.sendPacketToClient(clientIdKey, replyPacket);
+        continue;
+      } else if (request.type == PacketType::ListAvailableGames) {
+        std::cout << "TODO: Client wants to list all available games!\n";
+        _listAvailableGamesHandler(clientIdKey, packetHandler);
+        continue;
+      }
+
+      std::cout << "Type: " << static_cast<int>(request.type) << "\n";
+      std::cout << "Body: " << request.body << "\n";
+    }
+  }
+}
+
+
+void Supervisor::_listAvailableGamesHandler(size_t key, network::SupervisorPacketHandler& packetHandler)
+{
+  std::cout << "Ziuziuziu\n";
 }
 
 } // namespace

@@ -5,6 +5,8 @@
 #include "TimeMeasurement/TimeLogger.h"
 #include "CompilerUtils/FunctionInfoExtractor.h"
 
+#include <easylogging++.h>
+
 using namespace pla::logger;
 using namespace pla::err_handler;
 using namespace pla::client_info;
@@ -225,6 +227,8 @@ void SupervisorPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
   TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
 
+  LOG(DEBUG) << "Sending packet to every client...";
+
   for (const auto& client: m_clients) {
     sf::Socket::Status status = client.second->send(packet);
     while (status == sf::Socket::Partial) {
@@ -237,6 +241,8 @@ void SupervisorPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &pa
 {
   TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
   const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+
+  LOG(DEBUG) << "Sending packet to client " << clientId;
 
   auto clientIt = m_clients.find(clientId);
   if (clientIt != m_clients.end()) {
