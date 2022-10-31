@@ -25,7 +25,7 @@ private:
   void _registerCommand(std::shared_ptr<Command>&& command);
   void _processPackets(network::SupervisorPacketHandler& packetHandler);
 
-  void _listAvailableGamesHandler(size_t key, network::SupervisorPacketHandler& packetHandler);
+  void _listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
 
   utils::plameta::Parser m_configParser;
 

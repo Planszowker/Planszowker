@@ -1,19 +1,18 @@
 #include "Callbacks/GameChoosingCallbacks.h"
 
-// TODO: Remove this debug printouts...
-#include <iostream>
+#include <easylogging++.h>
 
 namespace pla::games {
 
 void GameChoosingCallbacks::IDCallback()
 {
-  std::cout << "[GameChoosingCallbacks] ID Callback invoked!\n";
+  LOG(DEBUG) << "[GameChoosingCallbacks] ID Callback invoked!";
 }
 
 
 void GameChoosingCallbacks::listAllAvailableGamesCallback()
 {
-  std::cout << "[GameChoosingCallbacks] List All Available Games Callback invoked!";
+  LOG(DEBUG) << "[GameChoosingCallbacks] List All Available Games Callback invoked!";
 }
 
 }

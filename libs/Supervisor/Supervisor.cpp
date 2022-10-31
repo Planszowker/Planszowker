@@ -1,10 +1,13 @@
 #include <Supervisor/Supervisor.h>
+#include <Supervisor/GamesInfoExtractor.h>
+
 #include <PlametaParser/Entry.h>
 #include <Games/Objects.h>
 
 #include <string>
 #include <iostream>
 #include <thread>
+#include <sstream>
 
 namespace pla::supervisor {
 
@@ -15,7 +18,7 @@ Supervisor::Supervisor(std::stringstream configStream)
 {
   auto helpCmd = std::make_shared<Command>(
           "help",
-          "List all available commands",
+          "Lists all available commands",
           [this]()
           {
             std::cout << "Available commands:\n";
@@ -140,9 +143,25 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
 }
 
 
-void Supervisor::_listAvailableGamesHandler(size_t key, network::SupervisorPacketHandler& packetHandler)
+void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
 {
   std::cout << "Ziuziuziu\n";
+  GamesInfoExtractor gamesInfoExtractor;
+
+  auto& entries = gamesInfoExtractor.getEntries();
+  auto& metaAssets = gamesInfoExtractor.getMetaAssets();
+
+  for(auto& metaAsset: metaAssets) {
+    Reply reply {.type = games::PacketType::ListAvailableGames, .status = games::ReplyType::Success};
+    std::ostringstream ss;
+    ss << metaAsset.second->rdbuf();
+    reply.body = metaAsset.first + "::" + ss.str();
+
+    sf::Packet packet;
+    packet << reply;
+
+    packetHandler.sendPacketToClient(clientIdKey, packet);
+  }
 }
 
 } // namespace

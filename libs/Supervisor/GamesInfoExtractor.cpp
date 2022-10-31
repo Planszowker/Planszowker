@@ -13,13 +13,16 @@ namespace pla::supervisor {
 
 GamesInfoExtractor::GamesInfoExtractor()
 {
+  // Iterate over all elements in `scripts/games` directory
   for (const auto& entry : std::filesystem::directory_iterator(GamesDir)) {
+    // Check if given directory entry is a `.plagame` file
     std::string filePath = entry.path();
     const std::regex plagameRegex {"\\.plagame"};
 
     if (std::regex_search(filePath, plagameRegex)) {
       LOG(DEBUG) << "Found PLAGAME: " << filePath;
 
+      // Add entry (relative path) to all available entries
       m_gameEntries.emplace_back(std::move(filePath));
     }
   }
@@ -47,6 +50,7 @@ void GamesInfoExtractor::_getMetaAssets()
 
     // Thumbnail does not have to be present
     if (thumbnailStream) {
+      LOG(DEBUG) << "   > " << plagameFilePath << " has custom Thumbnail!";
       m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, thumbnailStream});
     }
   }

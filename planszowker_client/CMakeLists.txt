@@ -9,6 +9,7 @@ add_executable(${EXEC_NAME} ${SOURCES})
 target_link_libraries(${EXEC_NAME}
                       PRIVATE ErrorHandler
                       PRIVATE GamesClient
+                      PRIVATE EasyLogging
 
                       sfml-graphics
                       sfml-network

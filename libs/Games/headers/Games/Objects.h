@@ -17,6 +17,7 @@ enum class PacketType : uint8_t
   EndTransaction, ///< Used to end asset transaction.
   ListAvailableGames, ///< Used to list all games the server is able to handle.
   ListOpenLobbies, ///< Used to list all open lobbies.
+  AssetTransaction, ///< Used to transmit a supported asset to client.
 };
 
 
@@ -45,6 +46,15 @@ struct Reply
   PacketType type = PacketType::GameSpecificData;
   ReplyType status = ReplyType::Invalid;
   std::string body;
+};
+
+
+/*!
+ * @brief Structure of supported assets extensions
+ */
+enum class SupportedAssetExtension : uint8_t
+{
+
 };
 
 } // namespaces

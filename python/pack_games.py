@@ -2,7 +2,7 @@ import shutil
 import os
 import sys
 
-GAMES_PATH = '../PlanszowkerServer/scripts/games/'
+GAMES_PATH = '../planszowker_server/scripts/games/'
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

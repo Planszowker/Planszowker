@@ -18,7 +18,7 @@ namespace pla::games_client {
 class Controller;
 
 /*!
- * @brief Graphical view class.
+ * @brief Graphical view class. It is responsible to create a window and render all provided data.
  */
 class GraphicalView
 {

@@ -47,9 +47,7 @@ void ClientPacketHandler::stop() {
 
 void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 {
-  /*
-   * This method will receive and send packets to server
-   */
+  // This method will receive and send packets to server
   while(m_run) {
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
 

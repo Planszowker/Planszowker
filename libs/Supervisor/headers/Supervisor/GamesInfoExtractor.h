@@ -16,11 +16,26 @@ public:
   static constexpr auto GamesDir = "scripts/games";
   static constexpr auto PlametaFile = ".plameta";
   static constexpr auto ThumbnailFile = "Thumbnail.png";
+
+  using GameEntriesContainer = std::vector<std::string>;
+  using GameMetaAssetsContainer = std::unordered_map<std::string, zipios::ZipFile::stream_pointer_t>;
+
+  GameEntriesContainer& getEntries()
+  {
+    return m_gameEntries;
+  }
+
+  GameMetaAssetsContainer& getMetaAssets()
+  {
+    return m_gameMetaAssets;
+  }
+
+
 private:
   void _getMetaAssets();
 
-  std::vector<std::string> m_gameEntries;
-  std::unordered_map<std::string, zipios::ZipFile::stream_pointer_t> m_gameMetaAssets;
+  GameEntriesContainer m_gameEntries;
+  GameMetaAssetsContainer m_gameMetaAssets;
 };
 
 }

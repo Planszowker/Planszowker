@@ -18,6 +18,11 @@ namespace pla::games_client {
 
 class GraphicalView;
 
+/*!
+ * @brief Controller is used to create threads for Graphical View and Network Packet Handler.
+ * Packet Handler is used to gather all requests/responses from the Server. Controller is responsible for parsing them and
+ * create appropriate response to the Server.
+ */
 class Controller
 {
 public:

@@ -20,7 +20,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(${LUA_INCLUDE_DIR})
 
-set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 include_directories(libs)
 
@@ -38,6 +38,10 @@ add_subdirectory(libs/Utils/PlametaParser)
 add_subdirectory(libs/Games)
 add_subdirectory(libs/GamesClient)
 add_subdirectory(libs/GamesServer)
-add_subdirectory(PlanszowkerServer)
-add_subdirectory(PlanszowkerClient)
-add_subdirectory(FunctionalTests)
+add_subdirectory(planszowker_client)
+add_subdirectory(planszowker_server)
+
+# Testing
+enable_testing()
+add_subdirectory(functional_tests) # Functional tests
+add_subdirectory(tests) # Unit tests
