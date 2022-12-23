@@ -14,7 +14,7 @@ GameState::GameState(games_client::GraphicalView& graphicalView)
   , m_logAreaBox(sfg::Box::Create())
   , m_actionAreaBox(sfg::Box::Create())
 {
-  // Divide area into two panels
+  // Divide area into panels
   // _________________________________
   // |                      | PLAYER |  / \
   // |    (ACTIONS AREA)    |  AREA  |  0.6

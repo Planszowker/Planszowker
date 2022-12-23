@@ -10,9 +10,15 @@ void GameChoosingCallbacks::IDCallback()
 }
 
 
-void GameChoosingCallbacks::listAllAvailableGamesCallback()
+void GameChoosingCallbacks::listAllAvailableGamesCallback(std::any& arg)
 {
   LOG(DEBUG) << "[GameChoosingCallbacks] List All Available Games Callback invoked!";
+
+  try {
+    m_state.updateAvailableGames(std::any_cast<std::string>(arg));
+  } catch (const std::bad_any_cast& e) {
+    LOG(DEBUG) << "=== BAD ANY CAST! ===";
+  }
 }
 
 }

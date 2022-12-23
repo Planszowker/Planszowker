@@ -5,6 +5,7 @@ project(${LIB_NAME})
 set(SOURCES
         Objects.cpp
         GameWindow.cpp
+        GamesMetaInfo.cpp
         States/GameChoosingState.cpp
         States/GameState.cpp
 
@@ -16,6 +17,8 @@ add_library(${LIB_NAME} STATIC ${SOURCES})
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
                         PRIVATE GamesClient
+                        PUBLIC PlametaParser
+                        PUBLIC Supervisor
 
                         PUBLIC lua5.3
 

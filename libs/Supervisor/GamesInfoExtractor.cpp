@@ -8,6 +8,7 @@
 #include <easylogging++.h>
 
 #include <sstream>
+#include <fstream>
 
 namespace pla::supervisor {
 
@@ -27,7 +28,8 @@ GamesInfoExtractor::GamesInfoExtractor()
     }
   }
 
-  _getMetaAssets();
+  _getDefaultAssets(); // Get default assets - Thumbnail and board so far
+  _getMetaAssets(); // Get meta assets from `.plagame` files - Thumbnail and .plameta file
 }
 
 
@@ -43,7 +45,7 @@ void GamesInfoExtractor::_getMetaAssets()
 
     // Add .plameta and thumbnail streams (if exist) to the meta assets map
     if (plametaStream) {
-      m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, plametaStream});
+      m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, std::move(plametaStream)});
     } else {
       err_handler::ErrorLogger::printError(".plameta file is mandatory!");
     }
@@ -51,8 +53,23 @@ void GamesInfoExtractor::_getMetaAssets()
     // Thumbnail does not have to be present
     if (thumbnailStream) {
       LOG(DEBUG) << "   > " << plagameFilePath << " has custom Thumbnail!";
-      m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, thumbnailStream});
+      m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, std::move(thumbnailStream)});
     }
+  }
+}
+
+
+void GamesInfoExtractor::_getDefaultAssets()
+{
+  // Iterate over all elements in `scripts/assets` directory
+  for (const auto& entry : std::filesystem::directory_iterator(AssetsDir)) {
+    std::string filePath = entry.path();
+
+    LOG(DEBUG) << "Found default asset: " << filePath;
+
+    std::shared_ptr<std::ifstream> filePtr = std::make_shared<std::ifstream>(filePath);
+
+    m_gameMetaAssets.insert(std::pair{filePath, std::move(filePtr)});
   }
 }
 

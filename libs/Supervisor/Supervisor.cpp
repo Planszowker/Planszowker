@@ -7,7 +7,6 @@
 #include <string>
 #include <iostream>
 #include <thread>
-#include <sstream>
 
 namespace pla::supervisor {
 
@@ -145,7 +144,6 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
 
 void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
 {
-  std::cout << "Ziuziuziu\n";
   GamesInfoExtractor gamesInfoExtractor;
 
   auto& entries = gamesInfoExtractor.getEntries();
@@ -156,6 +154,8 @@ void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::Supervi
     std::ostringstream ss;
     ss << metaAsset.second->rdbuf();
     reply.body = metaAsset.first + "::" + ss.str();
+
+    LOG(DEBUG) << "Reply length: " << reply.body.length();
 
     sf::Packet packet;
     packet << reply;

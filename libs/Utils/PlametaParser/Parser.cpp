@@ -95,6 +95,12 @@ Parser::Parser(std::stringstream plametaContent)
   }*/
 }
 
+Parser::Parser(const Parser& other)
+{
+  this->m_validEntries = other.m_validEntries;
+  this->m_entries = other.m_entries;
+  this->m_plametaContent << other.m_plametaContent.str();
+}
 
 void Parser::_setValidEntries()
 {
@@ -109,7 +115,7 @@ void Parser::_setValidEntries()
 }
 
 
-std::shared_ptr<Entry> Parser::operator[] (const std::string& key)
+std::shared_ptr<Entry> Parser::operator[] (const std::string& key) const
 {
   // Key is in given format:
   // section:entry

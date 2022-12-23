@@ -4,6 +4,7 @@
 #include "ErrorHandler/ErrorLogger.h"
 #include "Games/Objects.h"
 #include "NetworkHandler/ClientPacketHandler.h"
+#include "Games/GamesMetaInfo.h"
 
 #include <thread>
 #include <chrono>
@@ -11,6 +12,8 @@
 #include <sstream>
 
 #include <nlohmann/json.hpp>
+
+#include <easylogging++.h>
 
 using namespace pla;
 using namespace pla::err_handler;
@@ -43,36 +46,41 @@ void Controller::run() {
     const auto replies = m_clientPacketHandler.getReplies();
     for (const auto& reply: replies) {
 
+      LOG(DEBUG) << "Reply: " << reply.body << "\n";
+      LOG(DEBUG) << "Type: " << static_cast<int>(reply.type) << "\n";
+      LOG(DEBUG) << "Status: " << static_cast<int>(reply.status) << "\n";
+      LOG(DEBUG) << "== Controller Printout ==\n";
 
-      std::cout << "Reply: " << reply.body << "\n";
-      std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
-      std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
-      std::cout << "== Controller Printout ==\n";
-
+      // TODO: Is it needed? Reply status should be checked on Packet Handler level
       if (reply.status != ReplyType::Success) {
         continue;
       }
 
-      nlohmann::json j = nlohmann::json::parse(reply.body);
+//      nlohmann::json j = nlohmann::json::parse(reply.body);
+//
+//      for (auto pointsReply : j["PlayersInfo"]) {
+//        //std::cout << "I am client " << m_clientID << " and received ID is " << pointsReply["ID"] << "\n";
+//        std::stringstream ss;
+//        ss.str(pointsReply["ID"]);
+//
+//        size_t replyClientID {0};
+//        ss >> replyClientID;
+//
+//        if (replyClientID == m_clientID) {
+//          std::cout << "\nI have " << pointsReply["Points"] << " points.\n";
+//        }
+//      }
+//
+//      for (auto event : j["Events"]) {
+//        std::string eventString = event["EventString"];
+//        eventString.erase(std::remove(eventString.begin(), eventString.end(), '\"'), eventString.end());
+//        std::cout << "\n" << eventString << "\n";
+//      }
 
-      for (auto pointsReply : j["PlayersInfo"]) {
-        //std::cout << "I am client " << m_clientID << " and received ID is " << pointsReply["ID"] << "\n";
-        std::stringstream ss;
-        ss.str(pointsReply["ID"]);
 
-        size_t replyClientID {0};
-        ss >> replyClientID;
 
-        if (replyClientID == m_clientID) {
-          std::cout << "\nI have " << pointsReply["Points"] << " points.\n";
-        }
-      }
 
-      for (auto event : j["Events"]) {
-        std::string eventString = event["EventString"];
-        eventString.erase(std::remove(eventString.begin(), eventString.end(), '\"'), eventString.end());
-        std::cout << "\n" << eventString << "\n";
-      }
+
 
 //      DiceRollerReply reply = *reinterpret_cast<DiceRollerReply*>(const_cast<void*>(data));
 //

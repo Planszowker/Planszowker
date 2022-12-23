@@ -8,9 +8,9 @@
 #include <ErrorHandler/ErrorLogger.h>
 
 #include <chrono>
-#include <sstream>
+#include <any>
 
-#include <iostream> // TODO: remove debug
+#include <easylogging++.h>
 
 using namespace pla::time_measurement;
 
@@ -72,12 +72,12 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           m_receivedRawPackets.push_back(receivePacket);
           ++m_transactionCounter;
 
-          //std::cout << "[DEBUG] Transaction counter: " << m_transactionCounter << "\n";
+          //LOG(DEBUG) << "[DEBUG] Transaction counter: " << m_transactionCounter << "\n";
 
           if (m_transactionCounter == assets::CHUNK_QUANTITY) {
             // We have received enough chunks, we need to send a request for more data.
             // Cannot use SendPacket(), because it would require double mutex locking...
-            //std::cout << "[DEBUG] Requesting asset...\n";
+            //LOG(DEBUG) << "[DEBUG] Requesting asset...\n";
             m_transactionCounter = 0;
             _requestAsset();
           }
@@ -108,7 +108,7 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           m_validID = true;
           std::stringstream ss{reply.body};
           ss >> m_clientID;
-          std::cout << "\nReceived ClientID: " << m_clientID << "\n";
+          LOG(DEBUG) << "\nReceived ClientID: " << m_clientID << "\n";
 
           // Callback for ID packets
           if (m_callbacks) {
@@ -121,7 +121,7 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         case games::PacketType::StartTransaction:
         {
           if (m_transactionState == TransactionState::NotStarted) {
-            std::cout << "[DEBUG] Started transaction for " << reply.body << "!\n";
+            LOG(DEBUG) << "[DEBUG] Started transaction for " << reply.body << "!\n";
             m_currentAssetKey = reply.body;
             m_transactionState = TransactionState::InProgress;
             m_receivedRawPackets.clear();
@@ -132,7 +132,7 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         case games::PacketType::EndTransaction:
         {
           if (m_transactionState == TransactionState::InProgress) {
-            std::cout << "[DEBUG] Ended transaction for " << reply.body << "!\n";
+            LOG(DEBUG) << "[DEBUG] Ended transaction for " << reply.body << "!\n";
 
             if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
               std::cerr << "Error adding " << m_currentAssetKey << "!\n";
@@ -150,7 +150,8 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
         case games::PacketType::ListAvailableGames:
           if (m_callbacks) {
-            m_callbacks->listAllAvailableGamesCallback();
+            std::any arg = reply.body;
+            m_callbacks->listAllAvailableGamesCallback(arg);
           }
           break;
 
