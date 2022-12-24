@@ -15,7 +15,7 @@ target_link_libraries(${EXEC_NAME}
                       sfml-graphics
                       sfml-network
 
-                      PUBLIC nlohmann_json::nlohmann_json
+                      PRIVATE nlohmann_json::nlohmann_json
 
                       -static-libgcc
                       -static-libstdc++

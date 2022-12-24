@@ -11,9 +11,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(ImGui-SFML CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Sol2 REQUIRED)
 find_package(Lua REQUIRED)
-find_package(nlohmann_json 3.2.0 REQUIRED)
 
 configure_file("Config.h.in" "Config.h")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

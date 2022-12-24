@@ -15,7 +15,7 @@ target_link_libraries(${LIB_NAME}
 
                         sfml-graphics-d sfml-network-d sfml-system-d sfml-window-d
 
-                        SFGUI-d
+                        PRIVATE ImGui-SFML::ImGui-SFML
                       )
 
 target_include_directories(${LIB_NAME}
