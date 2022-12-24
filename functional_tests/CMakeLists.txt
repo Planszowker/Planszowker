@@ -11,3 +11,6 @@ target_link_libraries(AssetsTransferClient PUBLIC sfml-graphics-d sfml-network-d
 
 add_executable(AssetsTransferServer AssetsTransferServer.cpp)
 target_link_libraries(AssetsTransferServer PUBLIC sfml-graphics-d sfml-network-d sfml-system-d sfml-window-d)
+
+add_executable(ImGuiTest ImGuiTest.cpp)
+target_link_libraries(ImGuiTest PUBLIC sfml-graphics-d sfml-network-d sfml-system-d sfml-window-d ImGui-SFML::ImGui-SFML)
