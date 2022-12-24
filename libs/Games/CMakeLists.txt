@@ -20,7 +20,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC PlametaParser
                         PUBLIC Supervisor
 
-                        PUBLIC lua5.3
+                        PUBLIC lua
 
                         PUBLIC sfml-network
                       )

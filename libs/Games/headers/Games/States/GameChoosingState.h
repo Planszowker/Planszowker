@@ -8,9 +8,6 @@
 #include <NetworkHandler/ClientPacketHandler.h>
 #include <Games/GamesMetaInfo.h>
 
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Widgets.hpp>
-
 #include <vector>
 
 namespace pla::games {
@@ -37,14 +34,6 @@ private:
 
   GamesMetaInfo m_gamesMetaInfo;
   std::atomic_bool m_updateMetaInfo {false}; ///< Used to indicate whether all games info should be updated (re-rendered)
-
-  // SFGUI main objects
-  sfg::SFGUI m_sfgui;
-  sfg::Desktop m_desktop;
-  sfg::Window::Ptr m_gameChoosingWindow; ///< Main window for listing all available games
-  sfg::Box::Ptr m_gamesEntriesBox; ///< Main box that contains other boxes
-
-  sfg::Box::Ptr _getGameEntryBox(const std::string& key);
 };
 
 } // namespace

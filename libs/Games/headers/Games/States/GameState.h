@@ -34,23 +34,24 @@ private:
   sf::View m_mainWindowView;
   sf::View m_gameAreaView;
 
-  // SFGUI main objects
-  sfg::SFGUI m_sfgui;
-  sfg::Desktop m_desktop;
-
-  // We use 4 SFGUI windows to make a layout
-  sfg::Window::Ptr m_gameAreaWindow;
-  sfg::Window::Ptr m_playerAreaWindow;
-  sfg::Window::Ptr m_logAreaWindow;
-  sfg::Window::Ptr m_actionsAreaWindow;
-
-  // Game area
-  sfg::Canvas::Ptr m_gameAreaSfmlCanvas;
-
-  // Other areas
-  sfg::Box::Ptr m_playerAreaBox;
-  sfg::Box::Ptr m_logAreaBox;
-  sfg::Box::Ptr m_actionAreaBox;
+//  TODO: Use ImGui
+//  // SFGUI main objects
+//  sfg::SFGUI m_sfgui;
+//  sfg::Desktop m_desktop;
+//
+//  // We use 4 SFGUI windows to make a layout
+//  sfg::Window::Ptr m_gameAreaWindow;
+//  sfg::Window::Ptr m_playerAreaWindow;
+//  sfg::Window::Ptr m_logAreaWindow;
+//  sfg::Window::Ptr m_actionsAreaWindow;
+//
+//  // Game area
+//  sfg::Canvas::Ptr m_gameAreaSfmlCanvas;
+//
+//  // Other areas
+//  sfg::Box::Ptr m_playerAreaBox;
+//  sfg::Box::Ptr m_logAreaBox;
+//  sfg::Box::Ptr m_actionAreaBox;
 
   // Constants defining window split
   static constexpr float GameAreaWidthFactor = 0.8f;
