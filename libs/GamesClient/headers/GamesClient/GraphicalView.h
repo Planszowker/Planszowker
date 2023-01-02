@@ -2,9 +2,13 @@
 
 /* Generic */
 #include "Controller.h"
+#include "FontManager.h"
 
 #include <Games/GameWindow.h>
 #include <Games/States/IState.h>
+
+#include <imgui.h>
+#include <imgui-SFML.h>
 
 /* STD */
 #include <functional>
@@ -26,7 +30,7 @@ public:
   GraphicalView() = delete;
   explicit GraphicalView(Controller& controller, std::atomic_bool& run, const sf::Vector2i& windowDim, const std::string& windowName);
 
-  ~GraphicalView() = default;
+  ~GraphicalView();
 
   void init();
 
@@ -50,12 +54,16 @@ public:
     return m_controller;
   }
 
+  const FontManager& getFontManager() const
+  {
+    return m_fontManager;
+  }
+
 private:
   void changeState(games::States newState);
 
-  void _recalculateActionBoxWindowSize();
-
   Controller& m_controller;
+  FontManager m_fontManager;
 
   std::deque<std::shared_ptr<games::IState>> m_states;
 

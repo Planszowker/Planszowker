@@ -12,11 +12,15 @@ using namespace supervisor;
 
 void GamesMetaInfo::addMetaData(const std::string& combinedString)
 {
+  const std::scoped_lock scopedLock {m_lock};
+
   // Look for special character in received combined string
   size_t pos = combinedString.find(GamesInfoExtractor::CombinedStringDelimiter);
   if (pos != std::string::npos) {
     std::string filename = combinedString.substr(0, pos);
     std::string content = combinedString.substr(pos + std::strlen(GamesInfoExtractor::CombinedStringDelimiter));
+
+    LOG(DEBUG) << "[GamesMetaInfo] Handling " << filename;
 
     const std::regex plagameNameRegex {"([a-zA-Z0-9]+)(\\.plagame)"};
     const std::regex defaultAssetNameRegex {"(DefaultThumbnail)(\\.[a-zA-Z0-9]{1,6})"};
@@ -80,6 +84,8 @@ void GamesMetaInfo::addMetaData(const std::string& combinedString)
 
 void GamesMetaInfo::clear()
 {
+  const std::scoped_lock scopedLock {m_lock};
+
   m_thumbnails.clear();
   m_plametas.clear();
 }

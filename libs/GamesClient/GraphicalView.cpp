@@ -2,6 +2,9 @@
 
 #include <Games/States/GameChoosingState.h>
 #include <Games/States/GameState.h>
+#include <ErrorHandler/ErrorLogger.h>
+
+#include <SFML/Graphics.hpp>
 
 #include <iostream>
 
@@ -14,18 +17,36 @@ GraphicalView::GraphicalView(Controller& controller, std::atomic_bool& run, cons
   , m_controller(controller)
   , m_run(run)
 {
-  m_gameWindow->resetGLStates(); // Reset for SFGUI, since it uses OpenGL for rendering
+  m_gameWindow->setFramerateLimit(60.f);
 
-  // Todo: maybe this hard-coded FPS limit is not a good idea?
-  m_gameWindow->setFramerateLimit(60);
+  m_gameWindow->resetGLStates();
+}
 
-  // Set initial state
-  changeState(games::States::GameChoosing);
+GraphicalView::~GraphicalView()
+{
+  ImGui::SFML::Shutdown(*m_gameWindow);
 }
 
 
 void GraphicalView::init()
 {
+  if (not ImGui::SFML::Init(*m_gameWindow)) {
+    err_handler::ErrorLogger::printError("Could not initiate ImGui/SFML!");
+  }
+  ImGuiIO& io = ImGui::GetIO();
+
+  // Set INI filename to nullptr to disable imgui's .ini file saving
+  io.IniFilename = nullptr;
+
+  // Load fonts
+  m_fontManager.loadFonts();
+
+  if (not ImGui::SFML::UpdateFontTexture()) {
+    err_handler::ErrorLogger::printError("Could not initiate ImGui/SFML fonts!");
+  }
+
+  // Set initial state
+  changeState(games::States::GameChoosing);
 }
 
 
@@ -62,16 +83,6 @@ void GraphicalView::changeState(States newState)
 
   // Run init method from new state
   m_states[0]->init();
-}
-
-
-void GraphicalView::_recalculateActionBoxWindowSize()
-{
-//  sf::Vector2f pos = m_actionsAreaWindow->GetAbsolutePosition();
-//  std::cout << "Pozycja: " << pos.y << "\n";
-//  std::cout << "Req: " << m_actionsAreaWindow->GetAllocation().width << " " << m_actionsAreaWindow->GetAllocation().height << "\n";
-//  std::cout << "GameArea: " << m_gameAreaWindow->GetRequisition().x << " " << m_gameAreaWindow->GetRequisition().y << "\n";
-//  m_actionsAreaWindow->SetPosition(sf::Vector2f((m_gameAreaWindow->GetRequisition().x - m_actionsAreaWindow->GetRequisition().x) / 2.f, pos.y));
 }
 
 } // namespaces

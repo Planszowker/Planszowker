@@ -8,6 +8,9 @@
 #include <NetworkHandler/ClientPacketHandler.h>
 #include <Games/GamesMetaInfo.h>
 
+#include <imgui.h>
+#include <imgui-SFML.h>
+
 #include <vector>
 
 namespace pla::games {
@@ -24,7 +27,7 @@ public:
 
   void updateAvailableGames(const std::string& combinedString);
 private:
-  const sf::Vector2f ThumbnailSize = {20.f, 180.f};
+  void displayGameTile();
 
   games_client::GraphicalView& m_graphicalView;
   GameWindow& m_gameWindow;
@@ -33,7 +36,8 @@ private:
   std::shared_ptr<ICallbacks> m_callbacks;
 
   GamesMetaInfo m_gamesMetaInfo;
-  std::atomic_bool m_updateMetaInfo {false}; ///< Used to indicate whether all games info should be updated (re-rendered)
+
+  sf::Clock m_deltaClock;
 };
 
 } // namespace

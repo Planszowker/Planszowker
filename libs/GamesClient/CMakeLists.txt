@@ -3,6 +3,7 @@ set(LIB_NAME GamesClient)
 set(SOURCES
       Controller.cpp
       GraphicalView.cpp
+      FontManager.cpp
     )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

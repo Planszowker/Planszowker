@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <unordered_map>
+#include <mutex>
 
 namespace pla::games {
 
@@ -36,6 +37,8 @@ private:
   // Extracted from .plagame path
   PlametaContainer m_plametas;
   ThumbnailContainer m_thumbnails;
+
+  std::mutex m_lock;
 };
 
 } // namespace

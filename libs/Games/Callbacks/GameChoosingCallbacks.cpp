@@ -12,7 +12,7 @@ void GameChoosingCallbacks::IDCallback()
 
 void GameChoosingCallbacks::listAllAvailableGamesCallback(std::any& arg)
 {
-  LOG(DEBUG) << "[GameChoosingCallbacks] List All Available Games Callback invoked!";
+  //LOG(DEBUG) << "[GameChoosingCallbacks] List All Available Games Callback invoked!";
 
   try {
     m_state.updateAvailableGames(std::any_cast<std::string>(arg));
