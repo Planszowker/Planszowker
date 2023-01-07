@@ -14,7 +14,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC Games
                         PUBLIC AssetsManager
 
-                        sfml-graphics-d sfml-network-d sfml-system-d sfml-window-d
+                        sfml-graphics sfml-network sfml-system sfml-window
 
                         PRIVATE ImGui-SFML::ImGui-SFML
                       )

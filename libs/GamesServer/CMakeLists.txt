@@ -18,7 +18,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC CompilerUtils
                         PUBLIC AssetsManager
 
-                        PUBLIC lua5.3
+                        PUBLIC lua
 
                         PRIVATE zipios
                       )

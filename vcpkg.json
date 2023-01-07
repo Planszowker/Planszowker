@@ -7,6 +7,7 @@
     "imgui-sfml",
     "nlohmann-json",
     "lua",
-    "sol2"
+    "sol2",
+    "gtest"
   ]
 }

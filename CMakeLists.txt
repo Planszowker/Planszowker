@@ -16,11 +16,12 @@ find_package(ImGui-SFML CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Sol2 REQUIRED)
 find_package(Lua REQUIRED)
+find_package(ZipIos REQUIRED)
 
 configure_file("Config.h.in" "Config.h")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 include_directories(${LUA_INCLUDE_DIR})
+include_directories(${ZIPIOSCC_INCLUDE_DIR})
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 

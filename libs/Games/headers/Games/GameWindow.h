@@ -2,8 +2,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <SFGUI/SFGUI.hpp>
-
 namespace pla::games {
 
 class GameWindow : public sf::RenderWindow

@@ -8,10 +8,6 @@
 /* SFML */
 #include <SFML/Graphics.hpp>
 
-/* SFGUI */
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Widgets.hpp>
-
 namespace pla::games {
 
 class GameState final : public IState

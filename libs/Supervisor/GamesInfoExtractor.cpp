@@ -17,7 +17,7 @@ GamesInfoExtractor::GamesInfoExtractor()
   // Iterate over all elements in `scripts/games` directory
   for (const auto& entry : std::filesystem::directory_iterator(GamesDir)) {
     // Check if given directory entry is a `.plagame` file
-    std::string filePath = entry.path();
+    std::string filePath = entry.path().string();
     const std::regex plagameRegex {"\\.plagame"};
 
     if (std::regex_search(filePath, plagameRegex)) {
@@ -63,7 +63,7 @@ void GamesInfoExtractor::_getDefaultAssets()
 {
   // Iterate over all elements in `scripts/assets` directory
   for (const auto& entry : std::filesystem::directory_iterator(AssetsDir)) {
-    std::string filePath = entry.path();
+    std::string filePath = entry.path().string();
 
     LOG(DEBUG) << "Found default asset: " << filePath;
 
