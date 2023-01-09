@@ -16,7 +16,22 @@ find_package(ImGui-SFML CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Sol2 REQUIRED)
 find_package(Lua REQUIRED)
-find_package(ZipIos REQUIRED)
+
+if (WIN32)
+    # Dirty hack to get things working on Windows
+    include_directories("C:/PlanszowkerDeps/include")
+    set(windows_lib_dir CACHE INTERNAL "C:/PlanszowkerDeps/lib")
+
+    find_library(LZMA NAMES lzma HINTS ${windows_lib_dir})
+    find_library(BZIP2 NAMES bzip2 HINTS ${windows_lib_dir})
+    find_library(ZLIB NAMES zlib HINTS ${windows_lib_dir})
+    find_library(ZIPLIB NAMES ZipLib HINTS ${windows_lib_dir})
+else ()
+    set(LZMA CACHE INTERNAL lzma)
+    set(BZIP2 CACHE INTERNAL bzip2)
+    set(ZLIB CACHE INTERNAL zlib)
+    set(ZIPLIB CACHE INTERNAL ZipLib)
+endif()
 
 configure_file("Config.h.in" "Config.h")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -16,9 +16,6 @@ target_link_libraries(${EXEC_NAME}
                       sfml-network
 
                       PRIVATE nlohmann_json::nlohmann_json
-
-                      -static-libgcc
-                      -static-libstdc++
                       )
 
 target_include_directories(${EXEC_NAME}
