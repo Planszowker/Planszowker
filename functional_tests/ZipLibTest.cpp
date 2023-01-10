@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <streambuf>
 #include <regex>
 #include <sstream>
 
@@ -10,7 +9,7 @@
 int main() {
   auto zipFile = ZipFile::Open("../../planszowker_server/scripts/games/DiceRoller.plagame");
 
-  for (size_t idx = 0; idx < zipFile->GetEntriesCount(); ++idx) {
+  for (int idx = 0; idx < zipFile->GetEntriesCount(); ++idx) {
     std::string entryName = zipFile->GetEntry(idx)->GetFullName();
     std::cout << entryName << "\n";
     std::regex assetsRegex {"/Assets/"};

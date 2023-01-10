@@ -3,6 +3,8 @@
 #include <PlametaParser/Parser.h>
 #include <ErrorHandler/ErrorLogger.h>
 
+#include <ZipLib/ZipFile.h>
+
 #include <filesystem>
 #include <regex>
 #include <easylogging++.h>
@@ -38,22 +40,24 @@ void GamesInfoExtractor::_getMetaAssets()
   // Look for .plameta and Thumbnail in found games
   // Entry looks like this: `scripts/games/GameName.plagame`
   for (const auto& plagameFilePath : m_gameEntries) {
-    zipios::ZipFile plagameFile {plagameFilePath};
+    ZipArchive::Ptr plagameFile = ZipFile::Open(plagameFilePath);
 
-    zipios::ZipFile::stream_pointer_t plametaStream(plagameFile.getInputStream(PlametaFile));
-    zipios::ZipFile::stream_pointer_t thumbnailStream(plagameFile.getInputStream(ThumbnailFile));
+    auto plametaStream = plagameFile->GetEntry(PlametaFile)->GetDecompressionStream();
+    auto thumbnailStream = plagameFile->GetEntry(ThumbnailFile)->GetDecompressionStream();
 
     // Add .plameta and thumbnail streams (if exist) to the meta assets map
     if (plametaStream) {
-      m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, std::move(plametaStream)});
+      std::shared_ptr<std::istream> plametaStreamPtr (plametaStream);
+      m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, std::move(plametaStreamPtr)});
     } else {
       err_handler::ErrorLogger::printError(".plameta file is mandatory!");
     }
 
     // Thumbnail does not have to be present
     if (thumbnailStream) {
+      std::shared_ptr<std::istream> thumbnailStreamPtr (thumbnailStream);
       LOG(DEBUG) << "   > " << plagameFilePath << " has custom Thumbnail!";
-      m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, std::move(thumbnailStream)});
+      m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, std::move(thumbnailStreamPtr)});
     }
   }
 }
@@ -69,7 +73,7 @@ void GamesInfoExtractor::_getDefaultAssets()
 
     std::shared_ptr<std::ifstream> filePtr = std::make_shared<std::ifstream>(filePath);
 
-    m_gameMetaAssets.insert(std::pair{filePath, std::move(filePtr)});
+    m_gameMetaAssets.insert(std::pair{filePath, filePtr});
   }
 }
 

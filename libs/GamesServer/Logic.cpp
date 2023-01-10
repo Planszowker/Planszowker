@@ -1,6 +1,7 @@
 #include "Logic.h"
 
 #include <fstream>
+#include <utility>
 
 #include <Rng/RandomGenerator.h>
 #include <GamesHandler.h>
@@ -9,11 +10,11 @@ namespace pla::games_server {
 
 using namespace games;
 
-Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, zipios::ZipFile& zipFile)
+Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, ZipArchive::Ptr zipFile)
   : m_gameName(gameName)
   , m_clientsIDs(clientIds)
   , m_networkHandler(packetHandler)
-  , m_plaGameFile(zipFile)
+  , m_plaGameFile(std::move(zipFile))
 {
   for (auto const& clientId : clientIds) {
     m_clientsIDsAndPoints[clientId] = 0;
@@ -30,19 +31,14 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, networ
   try {
     // Create entries from the content of .plagame
     std::string gameDir = m_gameName + '/';
-    m_boardEntry = m_plaGameFile.getEntry(gameDir + GamesHandler::BOARD_DESCRIPTION_FILE);
-    m_gameEntry = m_plaGameFile.getEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_EXTENSION));
-    m_initEntry = m_plaGameFile.getEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_INIT_SUFFIX));
-
-    // Make pointers to file inside .plagame file
-    zipios::ZipFile::stream_pointer_t boardEntryStream(m_plaGameFile.getInputStream(m_boardEntry->getName()));
-    zipios::ZipFile::stream_pointer_t initEntryStream(m_plaGameFile.getInputStream(m_initEntry->getName()));
-    zipios::ZipFile::stream_pointer_t gameEntryStream(m_plaGameFile.getInputStream(m_gameEntry->getName()));
+    m_boardEntry = m_plaGameFile->GetEntry(gameDir + GamesHandler::BOARD_DESCRIPTION_FILE);
+    m_gameEntry = m_plaGameFile->GetEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_EXTENSION));
+    m_initEntry = m_plaGameFile->GetEntry((gameDir + m_gameName + GamesHandler::LUA_SCRIPT_INIT_SUFFIX));
 
     // Read content of files inside .plagame file into string streams
-    m_boardScript << boardEntryStream->rdbuf();
-    m_initScript << initEntryStream->rdbuf();
-    m_gameScript << gameEntryStream->rdbuf();
+    m_boardScript << m_boardEntry->GetDecompressionStream()->rdbuf();
+    m_initScript << m_gameEntry->GetDecompressionStream()->rdbuf();
+    m_gameScript << m_initEntry->GetDecompressionStream()->rdbuf();
 
     //
     m_luaVM["BoardDescriptionString"] = m_boardScript.str();
@@ -142,7 +138,7 @@ void Logic::_addPointsToCurrentClient(int points)
 }
 
 
-void Logic::handleGameLogic(size_t clientId, Request requestType)
+void Logic::handleGameLogic(size_t clientId, const Request& requestType)
 {
   for (const auto& client: m_clientsIDsAndPoints) {
     std::cout << "Available clientID: " << client.first << "\n";

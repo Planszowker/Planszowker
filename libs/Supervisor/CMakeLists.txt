@@ -12,9 +12,10 @@ add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
                         PUBLIC EasyLogging
-                        PUBLIC zipios
                         PUBLIC PlametaParser
                         PUBLIC NetworkHandler
+
+                        PRIVATE ${BZIP2} ${LZMA} ${ZLIB} ${ZIPLIB} # ZipLib
                       )
 
 target_include_directories(${LIB_NAME}

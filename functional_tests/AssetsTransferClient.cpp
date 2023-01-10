@@ -18,7 +18,7 @@ int main()
     socket.send(packet);
   }
 
-  std::ifstream textureStream {"../PlanszowkerServer/scripts/assets/default-board.jpg", std::ios::binary};
+  std::ifstream textureStream {"../../planszowker_server/scripts/assets/DefaultBoard.jpg", std::ios::binary};
 
   auto buf = std::make_shared<std::vector<char>>(4096);
   sf::Packet packet;

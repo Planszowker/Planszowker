@@ -4,7 +4,7 @@
 #include <string>
 #include <filesystem>
 
-#include <zipios/zipfile.hpp>
+#include <ZipLib/ZipFile.h>
 
 #include <NetworkHandler/ServerPacketHandler.h>
 
@@ -14,7 +14,7 @@ class GamesHandler {
 public:
   explicit GamesHandler(const std::string& gameName);
 
-  zipios::ZipFile& getPlagameFile() { return m_plagameFile; }
+  ZipArchive::Ptr getPlagameFile() { return m_plagameFile; }
 
   std::vector<std::string>& getAssetsEntries() { return m_assetsEntries; }
 
@@ -30,7 +30,7 @@ private:
 
   const std::string& m_gameName;
 
-  zipios::ZipFile m_plagameFile;
+  ZipArchive::Ptr m_plagameFile;
 
   std::vector<std::string> m_assetsEntries;
 };

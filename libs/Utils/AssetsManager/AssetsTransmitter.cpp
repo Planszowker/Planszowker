@@ -10,14 +10,14 @@ namespace pla::assets {
 using namespace games;
 
 // TODO: Remove debug printout ;)
-AssetsTransmitter::AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries)
-  : m_plagameFile(plagameFile)
+AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries)
+  : m_plagameFile(std::move(plagameFile))
   , m_packetHandler(packetHandler)
   , m_assetsEntries(assetsEntries)
   , m_currentAssetNameIter(assetsEntries.begin())
 {
   // Set stream pointer to the first asset available.
-  m_assetStreamPtr = m_plagameFile.getInputStream(*(m_currentAssetNameIter));
+  m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream();
 }
 
 
@@ -63,7 +63,7 @@ void AssetsTransmitter::transmitAssets(size_t clientKey)
       // Check if we have any more assets...
       if (m_currentAssetNameIter != m_assetsEntries.end()) {
         // Update asset stream
-        m_assetStreamPtr = m_plagameFile.getInputStream(*(m_currentAssetNameIter));
+        m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream();
       }
       m_transactionCounter = 0; // Reset transaction counter
       break;
@@ -84,7 +84,7 @@ bool AssetsTransmitter::transmitAsset(size_t clientKey, const std::string& asset
   if (m_transactionCounter == 0) {
     std::cout << "[DEBUG] Starting transaction...\n";
     // Update stream pointer to asset
-    m_assetStreamPtr = m_plagameFile.getInputStream(*(m_currentAssetNameIter));
+    m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream();
     _startTransaction(*m_currentAssetNameIter, clientKey);
   }
 
@@ -112,7 +112,7 @@ bool AssetsTransmitter::transmitAsset(size_t clientKey, const std::string& asset
       _endTransaction(*m_currentAssetNameIter, clientKey);
 
       m_currentAssetNameIter = m_assetsEntries.begin(); // Set iterator to the beginning of assets
-      m_assetStreamPtr = m_plagameFile.getInputStream(*(m_currentAssetNameIter)); // Update stream pointer
+      m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream(); // Update stream pointer
       m_transactionCounter = 0; // Reset transaction counter
 
       return true;
@@ -138,7 +138,7 @@ void AssetsTransmitter::_startTransaction(std::string assetName, size_t key)
 }
 
 
-void AssetsTransmitter::_transferFile(zipios::ZipFile::stream_pointer_t& fileStream)
+void AssetsTransmitter::_transferFile(ZipArchiveEntry::Ptr fileStream)
 {
   // TODO
 }
