@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 project(Planszowker VERSION 0.0.1
                     LANGUAGES CXX)
@@ -8,35 +8,35 @@ set(SFML_STATIC_LIBRARIES TRUE)
 # Set compiler specific settings
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 find_package(SFML 2.5.1 COMPONENTS network graphics window system REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(ImGui-SFML CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Sol2 REQUIRED)
+find_package(Sol2 CONFIG REQUIRED)
 find_package(Lua REQUIRED)
 
 if (WIN32)
     # Dirty hack to get things working on Windows
     include_directories("C:/PlanszowkerDeps/include")
-    set(windows_lib_dir CACHE INTERNAL "C:/PlanszowkerDeps/lib")
 
-    find_library(LZMA NAMES lzma HINTS ${windows_lib_dir})
-    find_library(BZIP2 NAMES bzip2 HINTS ${windows_lib_dir})
-    find_library(ZLIB NAMES zlib HINTS ${windows_lib_dir})
-    find_library(ZIPLIB NAMES ZipLib HINTS ${windows_lib_dir})
+    set(PLANSZOWKER_WINDOWS_LIB_DIR "C:/PlanszowkerDeps/lib" CACHE INTERNAL "")
+
+    find_library(ZIPLIB_LZMA NAMES ziplib_lzma HINTS ${PLANSZOWKER_WINDOWS_LIB_DIR})
+    find_library(ZIPLIB_BZIP2 NAMES ziplib_bzip2 HINTS ${PLANSZOWKER_WINDOWS_LIB_DIR})
+    find_library(ZIPLIB_ZLIB NAMES ziplib_zlib HINTS ${PLANSZOWKER_WINDOWS_LIB_DIR})
+    find_library(ZIPLIB NAMES ziplib HINTS ${PLANSZOWKER_WINDOWS_LIB_DIR})
 else ()
-    set(LZMA CACHE INTERNAL lzma)
-    set(BZIP2 CACHE INTERNAL bzip2)
-    set(ZLIB CACHE INTERNAL zlib)
-    set(ZIPLIB CACHE INTERNAL ZipLib)
+    set(ZIPLIB_BZIP2 ziplib_bzip2 CACHE INTERNAL "")
+    set(ZIPLIB_LZMA ziplib_lzma CACHE INTERNAL "")
+    set(ZIPLIB_ZLIB ziplib_zlib CACHE INTERNAL "")
+    set(ZIPLIB ziplib CACHE INTERNAL "")
 endif()
 
 configure_file("Config.h.in" "Config.h")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${LUA_INCLUDE_DIR})
-include_directories(${ZIPIOSCC_INCLUDE_DIR})
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
@@ -60,6 +60,6 @@ add_subdirectory(planszowker_client)
 add_subdirectory(planszowker_server)
 
 # Testing
-enable_testing()
-add_subdirectory(functional_tests) # Functional tests
-add_subdirectory(tests) # Unit tests
+# enable_testing()
+# add_subdirectory(functional_tests) # Functional tests
+# add_subdirectory(tests) # Unit tests

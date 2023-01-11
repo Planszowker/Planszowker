@@ -4,7 +4,7 @@ add_executable(LuaTest LuaTest.cpp)
 target_link_libraries(LuaTest PRIVATE lua)
 
 add_executable(ZipLibTest ZipLibTest.cpp)
-target_link_libraries(ZipLibTest PRIVATE ${BZIP2} ${LZMA} ${ZLIB} ${ZIPLIB})
+target_link_libraries(ZipLibTest PRIVATE ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB} ${ZIPLIB})
 
 add_executable(AssetsTransferClient AssetsTransferClient.cpp)
 target_link_libraries(AssetsTransferClient PUBLIC sfml-graphics sfml-network sfml-system sfml-window)

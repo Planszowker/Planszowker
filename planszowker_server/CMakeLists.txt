@@ -36,3 +36,8 @@ add_custom_target(PackGames ALL
         DEPEND always_rebuild
         VERBATIM
         )
+
+install(TARGETS ${EXEC_NAME} RUNTIME_DEPENDENCIES DESTINATION ${EXEC_NAME}
+        ARCHIVE DESTINATION ${EXEC_NAME}
+        LIBRARY DESTINATION ${EXEC_NAME}
+        RUNTIME DESTINATION ${EXEC_NAME})
