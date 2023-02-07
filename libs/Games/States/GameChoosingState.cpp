@@ -149,9 +149,11 @@ void GameChoosingState::displayGameTile()
       if (thumbnailIter == std::end(thumbnails)) {
         // We have NOT found special thumbnail file
         try {
+          ImGui::SetCursorPosX((ImGui::GetContentRegionMax().x - thumbnailSize.x ) / 2.f);
           ImGui::Image(*(thumbnails.at("DefaultThumbnail")), thumbnailSize);
         } catch (const std::out_of_range &e) {}
       } else {
+        ImGui::SetCursorPosX((ImGui::GetContentRegionMax().x - thumbnailSize.x ) / 2.f);
         ImGui::Image(*(thumbnailIter->second), thumbnailSize);
       }
 
