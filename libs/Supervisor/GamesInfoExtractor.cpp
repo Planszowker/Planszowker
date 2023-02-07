@@ -1,6 +1,5 @@
 #include <Supervisor/GamesInfoExtractor.h>
 
-#include <PlametaParser/Parser.h>
 #include <ErrorHandler/ErrorLogger.h>
 
 #include <ZipLib/ZipFile.h>
@@ -10,7 +9,6 @@
 #include <easylogging++.h>
 
 #include <sstream>
-#include <fstream>
 
 namespace pla::supervisor {
 
@@ -42,22 +40,30 @@ void GamesInfoExtractor::_getMetaAssets()
   for (const auto& plagameFilePath : m_gameEntries) {
     ZipArchive::Ptr plagameFile = ZipFile::Open(plagameFilePath);
 
-    auto plametaStream = plagameFile->GetEntry(PlametaFile)->GetDecompressionStream();
-    auto thumbnailStream = plagameFile->GetEntry(ThumbnailFile)->GetDecompressionStream();
+    auto plametaEntry = plagameFile->GetEntry(PlametaFile);
+    auto thumbnailEntry = plagameFile->GetEntry(ThumbnailFile);
 
-    // Add .plameta and thumbnail streams (if exist) to the meta assets map
-    if (plametaStream) {
-      std::shared_ptr<std::istream> plametaStreamPtr (plametaStream);
-      m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, std::move(plametaStreamPtr)});
+    // Add .plameta and thumbnail raw data (if exist) to the meta assets map
+    if (plametaEntry) {
+      auto plametaEntryStream = plametaEntry->GetDecompressionStream();
+      if (plametaEntryStream) {
+        std::stringstream ss;
+        ss << plametaEntryStream->rdbuf();
+        m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, ss.str()});
+      }
     } else {
       err_handler::ErrorLogger::printError(".plameta file is mandatory!");
     }
 
     // Thumbnail does not have to be present
-    if (thumbnailStream) {
-      std::shared_ptr<std::istream> thumbnailStreamPtr (thumbnailStream);
+    if (thumbnailEntry) {
       LOG(DEBUG) << "   > " << plagameFilePath << " has custom Thumbnail!";
-      m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, std::move(thumbnailStreamPtr)});
+      auto thumbnailEntryStream = thumbnailEntry->GetDecompressionStream();
+      if (thumbnailEntryStream) {
+        std::stringstream ss;
+        ss << thumbnailEntryStream->rdbuf();
+        m_gameMetaAssets.insert({plagameFilePath + "/" + ThumbnailFile, ss.str()});
+      }
     }
   }
 }
@@ -72,8 +78,10 @@ void GamesInfoExtractor::_getDefaultAssets()
     LOG(DEBUG) << "Found default asset: " << filePath;
 
     std::shared_ptr<std::ifstream> filePtr = std::make_shared<std::ifstream>(filePath);
+    std::stringstream ss;
+    ss << filePtr->rdbuf();
 
-    m_gameMetaAssets.insert(std::pair{filePath, filePtr});
+    m_gameMetaAssets.insert(std::pair{filePath, ss.str()});
   }
 }
 

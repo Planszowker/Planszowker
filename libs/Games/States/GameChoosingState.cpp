@@ -63,15 +63,9 @@ void GameChoosingState::display()
 {
   ImGui::SFML::Update(m_gameWindow, m_deltaClock.restart());
 
-  const auto& plametas = m_gamesMetaInfo.getPlametaParsers();
-  const auto& thumbnails = m_gamesMetaInfo.getThumbnails();
-
   displayGameTile();
 
   m_gameWindow.clear(sf::Color(55, 55, 55));
-
-  sf::CircleShape ziu {30.f};
-  m_gameWindow.draw(ziu);
 
   ImGui::SFML::Render(m_gameWindow);
   m_gameWindow.display();
@@ -104,29 +98,14 @@ void GameChoosingState::displayGameTile()
   // |   ======   ======   ======   ======   |
   // =========================================
 
-  ImGui::SetNextWindowSize(ImVec2(200.f, 200.f), ImGuiCond_FirstUseEver);
-  ImGui::Begin("Ziuziu", nullptr);
-  try {
-    ImGui::Image(*(m_gamesMetaInfo.getThumbnails().at("DefaultThumbnail")), sf::Vector2f {100.f, 100.f});
-    ImGui::Image(*(m_gamesMetaInfo.getThumbnails().at("DefaultThumbnail")), sf::Vector2f {200.f, 200.f});
-    ImGui::Image(*(m_gamesMetaInfo.getThumbnails().at("DefaultThumbnail")), sf::Vector2f {300.f, 300.f});
-  } catch (const std::out_of_range &e) {}
-
-//  ImGui::BeginChild("Fomfomf");
-//  try {
-//    ImGui::Image(*(m_gamesMetaInfo.getThumbnails().at("DefaultThumbnail")), sf::Vector2f {100.f, 100.f});
-//    ImGui::Image(*(m_gamesMetaInfo.getThumbnails().at("DefaultThumbnail")), sf::Vector2f {200.f, 200.f});
-//    ImGui::Image(*(m_gamesMetaInfo.getThumbnails().at("DefaultThumbnail")), sf::Vector2f {300.f, 300.f});
-//  } catch (const std::out_of_range &e) {}
-//  ImGui::EndChild();
-
-
-  ImGui::End();
 
   // Set main game choosing window position and size
-  ImGui::SetNextWindowPos(ImVec2{PADDING, PADDING}, ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSize(ImVec2(mainWindowSize.x - 2.f * PADDING, mainWindowSize.y - 2.f * PADDING), ImGuiCond_FirstUseEver);
-  ImGui::Begin("Main Game Choosing Window", nullptr);//ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->WorkPos);
+  ImGui::SetNextWindowSize(ImGui::GetMainViewport()->WorkSize);
+  ImGui::Begin("Main Game Choosing Window", nullptr, ImGuiWindowFlags_NoTitleBar |
+                                                                        ImGuiWindowFlags_NoCollapse |
+                                                                        ImGuiWindowFlags_NoResize |
+                                                                        ImGuiWindowFlags_NoMove);
 
   constexpr float GAME_ENTRY_WINDOW_WIDTH = 300.f;
   constexpr float GAME_ENTRY_WINDOW_HEIGHT = 360.f;
@@ -135,12 +114,14 @@ void GameChoosingState::displayGameTile()
 
   float numberOfEntriesInRow = std::floor(mainGameEntryWindowSize.x / (GAME_ENTRY_WINDOW_WIDTH + 2.f * PADDING));
   float interEntryPadding = 0.f;
-  if (numberOfEntriesInRow >= 2) {
+  if (numberOfEntriesInRow >= 2.f) {
     interEntryPadding = (mainGameEntryWindowSize.x - GAME_ENTRY_WINDOW_WIDTH * numberOfEntriesInRow - 2.f * PADDING) / (numberOfEntriesInRow - 1.f);
   }
 
+  ImGui::Indent(PADDING);
+
   size_t childrenCounter = 0;
-  for (int i = 0; i < 3; ++i) { // DEBUG
+  for (int i = 0; i < 99; ++i) { // DEBUG
     for (const auto &plameta: m_gamesMetaInfo.getPlametaParsers()) {
       const auto &key = plameta.first;
       const auto &parser = plameta.second;
@@ -149,26 +130,22 @@ void GameChoosingState::displayGameTile()
 
       /// Set child's window name to name received in `.plameta` file
       auto childrenCounterF = static_cast<float>(childrenCounter);
-      ImGui::SetNextWindowPos(ImVec2(mainGameEntryWindowPos.x + PADDING + childrenCounterF * GAME_ENTRY_WINDOW_WIDTH +
-                                     childrenCounterF * interEntryPadding,
-                                     mainGameEntryWindowPos.y + PADDING + std::floor(childrenCounterF / numberOfEntriesInRow) * 100.f),
-                              ImGuiCond_FirstUseEver);
       ImGui::BeginChild((gameName + std::to_string(i)).c_str(), // DEBUG
                         ImVec2(GAME_ENTRY_WINDOW_WIDTH, GAME_ENTRY_WINDOW_HEIGHT),
                         true);
 
-      //ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-24px"));
+      ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-24px"));
       float gameNameWidth = ImGui::CalcTextSize(gameName.c_str()).x;
-      //ImGui::SetCursorPosX((ImGui::GetWindowWidth() - gameNameWidth) * 0.5f);
+      ImGui::SetCursorPosX((ImGui::GetWindowWidth() - gameNameWidth) * 0.5f);
       ImGui::Text("%s", gameName.c_str());
       ImGui::Separator();
-      //ImGui::PopFont();
+      ImGui::PopFont();
 
-      //ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-18px"));
+      ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-18px"));
 
       const auto &thumbnails = m_gamesMetaInfo.getThumbnails();
       auto thumbnailIter = thumbnails.find(key);
-      const sf::Vector2f thumbnailSize{280.f, 380.f};
+      const sf::Vector2f thumbnailSize{220.f, 220.f};
       if (thumbnailIter == std::end(thumbnails)) {
         // We have NOT found special thumbnail file
         try {
@@ -182,10 +159,17 @@ void GameChoosingState::displayGameTile()
       ImGui::SameLine();
       ImGui::Button("Info", ImVec2(-FLT_MIN, 0.f));
 
-      //ImGui::PopFont();
+      ImGui::PopFont();
       ImGui::EndChild();
 
-      ImGui::SameLine();
+      auto numberOfEntriesInRowI = static_cast<size_t>(numberOfEntriesInRow);
+      if ((childrenCounter % numberOfEntriesInRowI) < (numberOfEntriesInRowI - 1)) {
+        auto childN = static_cast<float>((childrenCounter % numberOfEntriesInRowI) + 1);
+        ImGui::SameLine(mainGameEntryWindowPos.x + PADDING + childN * GAME_ENTRY_WINDOW_WIDTH + childN * interEntryPadding);
+      } else {
+        // We have reached row limit - create a separator
+        ImGui::NewLine();
+      }
 
       ++childrenCounter;
     }
@@ -194,12 +178,12 @@ void GameChoosingState::displayGameTile()
 
 //  ImGui::Begin("Debug");
 //  ImGui::Text("interEntryPadding %f", interEntryPadding);
-//  ImGui::Text("numberOfEntriesInRow %zu", numberOfEntriesInRow);
+//  ImGui::Text("numberOfEntriesInRow %f", numberOfEntriesInRow);
 //  ImGui::Text("number of plametas: %zu", m_gamesMetaInfo.getPlametaParsers().size());
 //  ImGui::End();
 
 //  ImGui::ShowFontSelector("Font selector");
-  ImGui::ShowDemoWindow();
+//  ImGui::ShowDemoWindow();
 //  ImGui::ShowStyleEditor();
 }
 

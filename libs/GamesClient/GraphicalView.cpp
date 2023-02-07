@@ -13,7 +13,7 @@ using namespace pla::games;
 namespace pla::games_client {
 
 GraphicalView::GraphicalView(Controller& controller, std::atomic_bool& run, const sf::Vector2i& windowDim, const std::string& windowName)
-  : m_gameWindow(std::make_unique<GameWindow>(sf::VideoMode(windowDim.x, windowDim.y, 32), windowName))
+  : m_gameWindow(std::make_unique<GameWindow>(sf::VideoMode(windowDim.x, windowDim.y, 32), windowName, sf::Style::Close | sf::Style::Titlebar))
   , m_controller(controller)
   , m_run(run)
 {

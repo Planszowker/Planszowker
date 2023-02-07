@@ -15,7 +15,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC PlametaParser
                         PUBLIC NetworkHandler
 
-                        PRIVATE ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB} ${ZIPLIB} # ZipLib
+                        PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
                       )
 
 target_include_directories(${LIB_NAME}

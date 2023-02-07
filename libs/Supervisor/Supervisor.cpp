@@ -149,11 +149,9 @@ void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::Supervi
   auto& entries = gamesInfoExtractor.getEntries();
   auto& metaAssets = gamesInfoExtractor.getMetaAssets();
 
-  for(auto& metaAsset: metaAssets) {
+  for(const auto& metaAsset: metaAssets) {
     Reply reply {.type = games::PacketType::ListAvailableGames, .status = games::ReplyType::Success};
-    std::ostringstream ss;
-    ss << metaAsset.second->rdbuf();
-    reply.body = metaAsset.first + "::" + ss.str();
+    reply.body = metaAsset.first + "::" + metaAsset.second;
 
     LOG(DEBUG) << "Reply length: " << reply.body.length();
 

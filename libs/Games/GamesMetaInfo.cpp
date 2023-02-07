@@ -50,11 +50,14 @@ void GamesMetaInfo::addMetaData(const std::string& combinedString)
 
         std::stringstream ss;
         ss << content;
+        LOG(DEBUG) << ss.str();
         utils::plameta::Parser parser {std::move(ss)};
         m_plametas.insert(std::pair(key, parser));
       } else if (std::regex_search(filename, matches, thumbnailRegex)) {
         // There's a Thumbnail.png file to handle
         LOG(DEBUG) << "\t>>> Thumbnail.png to handle!";
+
+        LOG(DEBUG) << content;
 
         std::shared_ptr<sf::Texture> texture = std::make_shared<sf::Texture>();
         texture->loadFromMemory(content.c_str(), content.size());
@@ -74,12 +77,6 @@ void GamesMetaInfo::addMetaData(const std::string& combinedString)
       m_thumbnails.insert(std::pair(key, std::move(texture)));
     }
   }
-
-  /*
-  for (const auto& ziu: m_thumbnails) {
-    LOG(DEBUG) << "\t >>> " << ziu.first;
-  }
-  */
 }
 
 void GamesMetaInfo::clear()

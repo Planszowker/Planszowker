@@ -1,6 +1,7 @@
 #pragma once
 
 #include <PlametaParser/Parser.h>
+#include <ZipLib/ZipFile.h>
 
 #include <vector>
 #include <sstream>
@@ -22,7 +23,7 @@ public:
   static constexpr auto DefaultThumbnail = "default-thumbnail.png";
 
   using GameEntriesContainer = std::vector<std::string>;
-  using GameMetaAssetsContainer = std::unordered_map<std::string, std::shared_ptr<std::istream>>;
+  using GameMetaAssetsContainer = std::unordered_map<std::string, std::string>;
 
   const GameEntriesContainer& getEntries()
   {
