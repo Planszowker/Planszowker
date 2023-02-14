@@ -50,14 +50,14 @@ void GamesMetaInfo::addMetaData(const std::string& combinedString)
 
         std::stringstream ss;
         ss << content;
-        LOG(DEBUG) << ss.str();
+        //LOG(DEBUG) << ss.str();
         utils::plameta::Parser parser {std::move(ss)};
         m_plametas.insert(std::pair(key, parser));
       } else if (std::regex_search(filename, matches, thumbnailRegex)) {
         // There's a Thumbnail.png file to handle
         LOG(DEBUG) << "\t>>> Thumbnail.png to handle!";
 
-        LOG(DEBUG) << content;
+        //LOG(DEBUG) << content;
 
         std::shared_ptr<sf::Texture> texture = std::make_shared<sf::Texture>();
         texture->loadFromMemory(content.c_str(), content.size());

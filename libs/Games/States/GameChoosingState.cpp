@@ -121,75 +121,62 @@ void GameChoosingState::displayGameTile()
   ImGui::Indent(PADDING);
 
   size_t childrenCounter = 0;
-  for (int i = 0; i < 99; ++i) { // DEBUG
-    for (const auto &plameta: m_gamesMetaInfo.getPlametaParsers()) {
-      const auto &key = plameta.first;
-      const auto &parser = plameta.second;
+  for (const auto &plameta: m_gamesMetaInfo.getPlametaParsers()) {
+    const auto &key = plameta.first;
+    const auto &parser = plameta.second;
 
-      std::string gameName = std::get<std::string>(parser["overview:name"]->getVariant());
+    std::string gameName = std::get<std::string>(parser["overview:name"]->getVariant());
 
-      /// Set child's window name to name received in `.plameta` file
-      auto childrenCounterF = static_cast<float>(childrenCounter);
-      ImGui::BeginChild((gameName + std::to_string(i)).c_str(), // DEBUG
-                        ImVec2(GAME_ENTRY_WINDOW_WIDTH, GAME_ENTRY_WINDOW_HEIGHT),
-                        true);
+    /// Set child's window name to name received in `.plameta` file
+    ImGui::BeginChild(gameName.c_str(),
+                      ImVec2(GAME_ENTRY_WINDOW_WIDTH, GAME_ENTRY_WINDOW_HEIGHT),
+                      true);
 
-      ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-24px"));
-      float gameNameWidth = ImGui::CalcTextSize(gameName.c_str()).x;
-      ImGui::SetCursorPosX((ImGui::GetWindowWidth() - gameNameWidth) * 0.5f);
-      ImGui::Text("%s", gameName.c_str());
-      ImGui::Separator();
-      ImGui::PopFont();
+    ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-24px"));
+    float gameNameWidth = ImGui::CalcTextSize(gameName.c_str()).x;
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - gameNameWidth) * 0.5f);
+    ImGui::Text("%s", gameName.c_str());
+    ImGui::Separator();
+    ImGui::PopFont();
 
-      ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-18px"));
+    ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-18px"));
 
-      const auto &thumbnails = m_gamesMetaInfo.getThumbnails();
-      auto thumbnailIter = thumbnails.find(key);
-      const sf::Vector2f thumbnailSize{220.f, 220.f};
-      if (thumbnailIter == std::end(thumbnails)) {
-        // We have NOT found special thumbnail file
-        try {
-          ImGui::SetCursorPosX((ImGui::GetContentRegionMax().x - thumbnailSize.x ) / 2.f);
-          ImGui::Image(*(thumbnails.at("DefaultThumbnail")), thumbnailSize);
-        } catch (const std::out_of_range &e) {}
-      } else {
+    const auto &thumbnails = m_gamesMetaInfo.getThumbnails();
+    auto thumbnailIter = thumbnails.find(key);
+    const sf::Vector2f thumbnailSize{220.f, 220.f};
+    if (thumbnailIter == std::end(thumbnails)) {
+      // We have NOT found special thumbnail file
+      try {
         ImGui::SetCursorPosX((ImGui::GetContentRegionMax().x - thumbnailSize.x ) / 2.f);
-        ImGui::Image(*(thumbnailIter->second), thumbnailSize);
-      }
-
-      if(ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.f)))
-      {
-        m_graphicalView.changeState(States::GameLobby);
-      }
-      ImGui::SameLine();
-      ImGui::Button("Info", ImVec2(-FLT_MIN, 0.f));
-
-      ImGui::PopFont();
-      ImGui::EndChild();
-
-      auto numberOfEntriesInRowI = static_cast<size_t>(numberOfEntriesInRow);
-      if ((childrenCounter % numberOfEntriesInRowI) < (numberOfEntriesInRowI - 1)) {
-        auto childN = static_cast<float>((childrenCounter % numberOfEntriesInRowI) + 1);
-        ImGui::SameLine(mainGameEntryWindowPos.x + PADDING + childN * GAME_ENTRY_WINDOW_WIDTH + childN * interEntryPadding);
-      } else {
-        // We have reached row limit - create a separator
-        ImGui::NewLine();
-      }
-
-      ++childrenCounter;
+        ImGui::Image(*(thumbnails.at("DefaultThumbnail")), thumbnailSize);
+      } catch (const std::out_of_range &e) {}
+    } else {
+      ImGui::SetCursorPosX((ImGui::GetContentRegionMax().x - thumbnailSize.x ) / 2.f);
+      ImGui::Image(*(thumbnailIter->second), thumbnailSize);
     }
+
+    if(ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.f)))
+    {
+      m_graphicalView.changeState(States::GameLobby);
+    }
+    ImGui::SameLine();
+    ImGui::Button("Info", ImVec2(-FLT_MIN, 0.f));
+
+    ImGui::PopFont();
+    ImGui::EndChild();
+
+    auto numberOfEntriesInRowI = static_cast<size_t>(numberOfEntriesInRow);
+    if ((childrenCounter % numberOfEntriesInRowI) < (numberOfEntriesInRowI - 1)) {
+      auto childN = static_cast<float>((childrenCounter % numberOfEntriesInRowI) + 1);
+      ImGui::SameLine(mainGameEntryWindowPos.x + PADDING + childN * GAME_ENTRY_WINDOW_WIDTH + childN * interEntryPadding);
+    } else {
+      // We have reached row limit - create a separator
+      ImGui::NewLine();
+    }
+
+    ++childrenCounter;
   }
   ImGui::End();
-
-//  ImGui::Begin("Debug");
-//  ImGui::Text("interEntryPadding %f", interEntryPadding);
-//  ImGui::Text("numberOfEntriesInRow %f", numberOfEntriesInRow);
-//  ImGui::Text("number of plametas: %zu", m_gamesMetaInfo.getPlametaParsers().size());
-//  ImGui::End();
-
-//  ImGui::ShowFontSelector("Font selector");
-//  ImGui::ShowDemoWindow();
-//  ImGui::ShowStyleEditor();
 }
 
 } // namespace
