@@ -5,7 +5,7 @@ namespace pla::games {
 enum class States
 {
   GameChoosing,
-  Lobby,
+  GameLobby,
   Game
 };
 

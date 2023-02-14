@@ -157,7 +157,10 @@ void GameChoosingState::displayGameTile()
         ImGui::Image(*(thumbnailIter->second), thumbnailSize);
       }
 
-      ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.f));
+      if(ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.f)))
+      {
+        m_graphicalView.changeState(States::GameLobby);
+      }
       ImGui::SameLine();
       ImGui::Button("Info", ImVec2(-FLT_MIN, 0.f));
 

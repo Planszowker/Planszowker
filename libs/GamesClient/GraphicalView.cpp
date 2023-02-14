@@ -2,6 +2,7 @@
 
 #include <Games/States/GameChoosingState.h>
 #include <Games/States/GameState.h>
+#include <Games/States/GameLobbyState.h>
 #include <ErrorHandler/ErrorLogger.h>
 
 #include <SFML/Graphics.hpp>
@@ -46,13 +47,17 @@ void GraphicalView::init()
   }
 
   // Set initial state
-  changeState(games::States::GameChoosing);
+  changeState(games::States::GameLobby);
 }
 
 
 void GraphicalView::run()
 {
   while (m_run && m_gameWindow->isOpen()) {
+    if (m_states.size() > 1) {
+      m_states.pop_front();
+      m_states[m_states.size() - 1]->init();
+    }
     m_states[0]->eventHandling();
     m_states[0]->display();
   }
@@ -71,18 +76,12 @@ void GraphicalView::changeState(States newState)
     case States::Game:
       newStatePtr = std::make_shared<GameState>(*this);
       break;
-    case States::Lobby:
+    case States::GameLobby:
+      newStatePtr = std::make_shared<GameLobbyState>(*this);
       break;
   }
 
   m_states.emplace_back(std::move(newStatePtr));
-
-  if (m_states.size() > 1) {
-    m_states.pop_front();
-  }
-
-  // Run init method from new state
-  m_states[0]->init();
 }
 
 } // namespaces

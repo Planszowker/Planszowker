@@ -8,6 +8,7 @@ set(SOURCES
         GamesMetaInfo.cpp
         States/GameChoosingState.cpp
         States/GameState.cpp
+        States/GameLobbyState.cpp
 
         Callbacks/GameChoosingCallbacks.cpp
         )

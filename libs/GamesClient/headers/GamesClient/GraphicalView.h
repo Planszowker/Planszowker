@@ -59,9 +59,9 @@ public:
     return m_fontManager;
   }
 
-private:
   void changeState(games::States newState);
 
+private:
   Controller& m_controller;
   FontManager m_fontManager;
 
