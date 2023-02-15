@@ -16,6 +16,7 @@ enum class PacketType : uint8_t
   StartTransaction, ///< Used to start asset transaction.
   EndTransaction, ///< Used to end asset transaction.
   ListAvailableGames, ///< Used to list all games the server is able to handle.
+  CreateLobby, ///< Used to create a lobby with given name
   ListOpenLobbies, ///< Used to list all open lobbies.
   AssetTransaction, ///< Used to transmit a supported asset to client.
 };

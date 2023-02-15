@@ -1,12 +1,16 @@
 #include <States/GameChoosingState.h>
 
 #include <Games/Callbacks/GameChoosingCallbacks.h>
+#include <GamesClient/SharedObjects.h>
+#include <Games/States/GameLobbyState.h>
 
 #include <easylogging++.h>
 
 #include <cmath>
 
 namespace pla::games {
+
+using namespace pla::games_client;
 
 GameChoosingState::GameChoosingState(games_client::GraphicalView& graphicalView)
   : m_graphicalView(graphicalView)
@@ -44,14 +48,14 @@ void GameChoosingState::eventHandling()
 
     // TODO: Remove it later
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G) {
-      m_gamesMetaInfo.clear();
+      shared::getGamesMetaInfo().clear();
 
       m_controller.sendRequest(games::PacketType::ListAvailableGames);
     }
 
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::H) {
       LOG(DEBUG) << "Content of m_gamesMetaInfo:";
-      for (const auto& ziu : m_gamesMetaInfo.getPlametaParsers()) {
+      for (const auto& ziu : shared::getGamesMetaInfo().getPlametaParsers()) {
         LOG(DEBUG) << ziu.first;
       }
     }
@@ -74,14 +78,13 @@ void GameChoosingState::display()
 
 void GameChoosingState::updateAvailableGames(const std::string& combinedString)
 {
-  m_gamesMetaInfo.addMetaData(combinedString);
+  shared::getGamesMetaInfo().addMetaData(combinedString);
 }
 
 
 void GameChoosingState::displayGameTile()
 {
   constexpr float PADDING = 30.f; // Padding used to display main game choosing window
-  sf::Vector2f mainWindowSize = static_cast<sf::Vector2f >(m_gameWindow.getSize());
 
   // Main game choosing window is split into smaller children
   // Amount of children depends on the main window size
@@ -121,7 +124,7 @@ void GameChoosingState::displayGameTile()
   ImGui::Indent(PADDING);
 
   size_t childrenCounter = 0;
-  for (const auto &plameta: m_gamesMetaInfo.getPlametaParsers()) {
+  for (const auto &plameta: shared::getGamesMetaInfo().getPlametaParsers()) {
     const auto &key = plameta.first;
     const auto &parser = plameta.second;
 
@@ -141,7 +144,7 @@ void GameChoosingState::displayGameTile()
 
     ImGui::PushFont(m_graphicalView.getFontManager().getFont("Roboto-Light-18px"));
 
-    const auto &thumbnails = m_gamesMetaInfo.getThumbnails();
+    const auto &thumbnails = shared::getGamesMetaInfo().getThumbnails();
     auto thumbnailIter = thumbnails.find(key);
     const sf::Vector2f thumbnailSize{220.f, 220.f};
     if (thumbnailIter == std::end(thumbnails)) {
@@ -157,7 +160,9 @@ void GameChoosingState::displayGameTile()
 
     if(ImGui::Button("Play", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.f)))
     {
-      m_graphicalView.changeState(States::GameLobby);
+      GameLobbyStateArguments arg;
+      arg.gameName = key;
+      m_graphicalView.changeState(States::GameLobby, std::any(arg));
     }
     ImGui::SameLine();
     ImGui::Button("Info", ImVec2(-FLT_MIN, 0.f));

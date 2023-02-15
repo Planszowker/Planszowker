@@ -47,7 +47,9 @@ void GraphicalView::init()
   }
 
   // Set initial state
-  changeState(games::States::GameLobby);
+  changeState(games::States::GameChoosing);
+
+  m_states[0]->init();
 }
 
 
@@ -64,7 +66,7 @@ void GraphicalView::run()
 }
 
 
-void GraphicalView::changeState(States newState)
+void GraphicalView::changeState(States newState, const std::any& arg)
 {
   std::shared_ptr<IState> newStatePtr;
 
@@ -77,7 +79,7 @@ void GraphicalView::changeState(States newState)
       newStatePtr = std::make_shared<GameState>(*this);
       break;
     case States::GameLobby:
-      newStatePtr = std::make_shared<GameLobbyState>(*this);
+      newStatePtr = std::make_shared<GameLobbyState>(*this, std::any_cast<GameLobbyStateArguments>(arg));
       break;
   }
 

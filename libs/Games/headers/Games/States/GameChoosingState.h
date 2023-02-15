@@ -6,7 +6,6 @@
 #include <Games/GameWindow.h>
 #include <GamesClient/GraphicalView.h>
 #include <NetworkHandler/ClientPacketHandler.h>
-#include <Games/GamesMetaInfo.h>
 
 #include <imgui.h>
 #include <imgui-SFML.h>
@@ -26,6 +25,8 @@ public:
   void init() final;
 
   void updateAvailableGames(const std::string& combinedString);
+
+
 private:
   void displayGameTile();
 
@@ -34,8 +35,6 @@ private:
   games_client::Controller& m_controller;
 
   std::shared_ptr<ICallbacks> m_callbacks;
-
-  GamesMetaInfo m_gamesMetaInfo;
 
   sf::Clock m_deltaClock;
 };

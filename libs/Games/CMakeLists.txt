@@ -11,6 +11,7 @@ set(SOURCES
         States/GameLobbyState.cpp
 
         Callbacks/GameChoosingCallbacks.cpp
+        Callbacks/GameLobbyCallbacks.cpp
         )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

@@ -3,6 +3,7 @@
 /* Generic */
 #include "GraphicalView.h"
 #include <Games/Objects.h>
+#include <Games/GamesMetaInfo.h>
 
 #include <NetworkHandler/ClientPacketHandler.h>
 
@@ -55,6 +56,8 @@ private:
   network::ClientPacketHandler m_clientPacketHandler;
 
   std::shared_ptr<GraphicalView> m_view;
+
+  games::GamesMetaInfo m_gamesMetaInfo;
 };
 
 } // namespaces

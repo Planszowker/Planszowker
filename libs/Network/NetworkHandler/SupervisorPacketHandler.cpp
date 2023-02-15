@@ -73,7 +73,7 @@ bool SupervisorPacketHandler::_addClient(std::shared_ptr<sf::TcpSocket>& newSock
   }
 
   // If client doesn't exist, add him to container.
-  auto[it, inserted] = m_clients.emplace(std::make_pair(m_lastClientId, newSocket));
+  auto[it, inserted] = m_clients.emplace(m_lastClientId, newSocket);
   if (!inserted) {
     return false;
   }

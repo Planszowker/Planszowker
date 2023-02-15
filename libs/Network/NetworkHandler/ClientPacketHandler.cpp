@@ -155,6 +155,12 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           }
           break;
 
+        case games::PacketType::CreateLobby:
+          if (m_callbacks) {
+            std::any arg = reply;
+            m_callbacks->createLobbyCallback(arg);
+          }
+
         default:
           break;
       }

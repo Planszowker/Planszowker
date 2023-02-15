@@ -130,8 +130,10 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
         packetHandler.sendPacketToClient(clientIdKey, replyPacket);
         continue;
       } else if (request.type == PacketType::ListAvailableGames) {
-        std::cout << "TODO: Client wants to list all available games!\n";
         _listAvailableGamesHandler(clientIdKey, packetHandler);
+        continue;
+      } else if (request.type == PacketType::CreateLobby) {
+        _createLobbyHandler(clientIdKey, packetHandler);
         continue;
       }
 
@@ -160,6 +162,22 @@ void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::Supervi
 
     packetHandler.sendPacketToClient(clientIdKey, packet);
   }
+}
+
+
+void Supervisor::_createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
+{
+  Reply reply {
+    .type = games::PacketType::CreateLobby,
+    .status = games::ReplyType::Success, // TODO: Change it
+  };
+
+  LOG(DEBUG) << "[Create Lobby Handler]";
+
+  sf::Packet packet;
+  packet << reply;
+
+  packetHandler.sendPacketToClient(clientIdKey, packet);
 }
 
 } // namespace

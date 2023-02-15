@@ -4,6 +4,7 @@ set(SOURCES
       Controller.cpp
       GraphicalView.cpp
       FontManager.cpp
+      SharedObjects.cpp
     )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

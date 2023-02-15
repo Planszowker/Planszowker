@@ -59,7 +59,7 @@ public:
     return m_fontManager;
   }
 
-  void changeState(games::States newState);
+  void changeState(games::States newState, const std::any& arg = 0);
 
 private:
   Controller& m_controller;

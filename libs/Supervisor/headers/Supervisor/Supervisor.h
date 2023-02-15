@@ -26,6 +26,7 @@ private:
   void _processPackets(network::SupervisorPacketHandler& packetHandler);
 
   void _listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
+  void _createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
 
   utils::plameta::Parser m_configParser;
 

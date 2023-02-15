@@ -15,21 +15,43 @@
 
 namespace pla::games {
 
+struct GameLobbyStateArguments
+{
+  std::string gameName;
+};
+
+enum class LobbyState
+{
+  Main,
+  CreateLobby,
+  JoinLobby,
+  LobbyDetails
+};
+
 class GameLobbyState final : public IState
 {
 public:
   GameLobbyState() = delete;
-  explicit GameLobbyState(games_client::GraphicalView& graphicalView);
+  explicit GameLobbyState(games_client::GraphicalView& graphicalView, GameLobbyStateArguments gameLobbyStateArguments);
 
   void eventHandling() final;
   void display() final;
   void init() final;
 private:
-  games_client::GraphicalView& m_graphicalView;
-  GameWindow& m_gameWindow;
-  games_client::Controller& m_controller;
+  void _guiDisplayMainGui();
+  void _guiDisplayCreateNewLobby();
+  void _guiDisplayJoinLobby();
+  void _guiDisplayLobby();
 
-  //GamesMetaInfo m_gamesMetaInfo;
+  games_client::GraphicalView& m_graphicalView;
+  games_client::Controller& m_controller;
+  GameWindow& m_gameWindow;
+
+  std::shared_ptr<ICallbacks> m_callbacks;
+
+  GameLobbyStateArguments m_gameArguments;
+
+  LobbyState m_lobbyState = LobbyState::Main;
 
   sf::Clock m_deltaClock;
 };

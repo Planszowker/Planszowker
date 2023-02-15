@@ -4,14 +4,19 @@
 
 namespace pla::games {
 
+/*
+ * Callbacks interface
+ * You can override only needed methods
+ */
 class ICallbacks
 {
 public:
   virtual ~ICallbacks() = default;
 
-  virtual void IDCallback() = 0;
-  virtual void listAllAvailableGamesCallback(std::any&) = 0;
-  // TODO: Increase callbacks if needed here...
+  virtual void IDCallback() { };
+  virtual void listAllAvailableGamesCallback(std::any&) { };
+  virtual void createLobbyCallback(std::any&) { };
+  // Increase callbacks if needed here...
 protected:
   ICallbacks() = default;
 };
