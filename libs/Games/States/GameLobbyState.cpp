@@ -2,6 +2,7 @@
 #include <Callbacks/GameLobbyCallbacks.h>
 
 #include <easylogging++.h>
+#include <nlohmann/json.hpp>
 
 #include <imgui_stdlib.h>
 
@@ -118,6 +119,7 @@ void GameLobbyState::_guiDisplayLobby()
   ImGui::TableNextColumn();
   ImGui::Text("Example 6");
   ImGui::EndTable();
+
   // Back button
   if(ImGui::Button("Back"))
   {
@@ -140,21 +142,31 @@ void GameLobbyState::_guiDisplayCreateNewLobby()
 {
   constexpr size_t MAX_LOBBY_NAME_SIZE = 32;
   static std::string lobbyName;
-  static std::string errorString;
 
   ImGui::InputText("Lobby name", &lobbyName);
   if (ImGui::Button("Create lobby"))
   {
     LOG(DEBUG) << lobbyName;
     if (lobbyName.empty()) {
-      errorString = "Lobby name cannot be empty!";
+      m_createNewLobbyErrorString = "Lobby name cannot be empty!";
     } else if (lobbyName.size() > MAX_LOBBY_NAME_SIZE) {
-      errorString = "Lobby name too long!";
-    }
+      m_createNewLobbyErrorString = "Lobby name too long!";
+    } else {
+      nlohmann::json createLobbyRequestJson;
+      createLobbyRequestJson["LobbyName"] = lobbyName;
+      createLobbyRequestJson["GameKey"] = m_gameArguments.gameName;
 
-    m_controller.sendRequest(PacketType::CreateLobby);
+      m_controller.sendRequest(PacketType::CreateLobby, createLobbyRequestJson.dump());
+
+      nlohmann::json getLobbyDetailsJson;
+      getLobbyDetailsJson["ClientID"] =
+      m_controller.sendRequest(PacketType::GetLobbyDetails, R"({"ClientID": })");
+
+      m_lobbyState = LobbyState::LobbyDetails;
+    }
   }
-  ImGui::Text("%s", errorString.c_str());
+
+  ImGui::Text("%s", m_createNewLobbyErrorString.c_str());
 
   // Back button
   if(ImGui::Button("Back"))

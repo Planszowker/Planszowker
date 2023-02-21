@@ -54,6 +54,8 @@ private:
   LobbyState m_lobbyState = LobbyState::Main;
 
   sf::Clock m_deltaClock;
+
+  std::string m_createNewLobbyErrorString; /// String with error to be displayed when creating new lobby.
 };
 
 } // namespace

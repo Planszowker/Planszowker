@@ -5,6 +5,7 @@
 #include <NetworkHandler/SupervisorPacketHandler.h>
 #include <PlametaParser/Parser.h>
 #include <easylogging++.h>
+#include <nlohmann/json.hpp>
 
 #include <atomic>
 #include <memory>
@@ -26,7 +27,7 @@ private:
   void _processPackets(network::SupervisorPacketHandler& packetHandler);
 
   void _listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
-  void _createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
+  void _createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
 
   utils::plameta::Parser m_configParser;
 

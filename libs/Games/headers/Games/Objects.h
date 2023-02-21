@@ -16,7 +16,8 @@ enum class PacketType : uint8_t
   StartTransaction, ///< Used to start asset transaction.
   EndTransaction, ///< Used to end asset transaction.
   ListAvailableGames, ///< Used to list all games the server is able to handle.
-  CreateLobby, ///< Used to create a lobby with given name
+  CreateLobby, ///< Used to create a lobby with given name.
+  GetLobbyDetails, ///< Used to retrieve details about a specific lobby.
   ListOpenLobbies, ///< Used to list all open lobbies.
   AssetTransaction, ///< Used to transmit a supported asset to client.
 };
@@ -24,8 +25,8 @@ enum class PacketType : uint8_t
 
 enum class ReplyType : uint8_t
 {
-  Invalid, ///< Invalid reply, received when some action cannot be performed.
-  Success ///< Successful reply, queried action has been done successfully.
+  Success = 0, ///< Successful reply, queried action has been done successfully.
+  Invalid ///< Invalid reply, received when some action cannot be performed.
 };
 
 

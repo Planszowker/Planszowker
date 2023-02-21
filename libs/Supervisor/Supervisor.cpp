@@ -1,5 +1,6 @@
 #include <Supervisor/Supervisor.h>
 #include <Supervisor/GamesInfoExtractor.h>
+#include <Supervisor/Lobbies.h>
 
 #include <PlametaParser/Entry.h>
 #include <Games/Objects.h>
@@ -133,7 +134,7 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
         _listAvailableGamesHandler(clientIdKey, packetHandler);
         continue;
       } else if (request.type == PacketType::CreateLobby) {
-        _createLobbyHandler(clientIdKey, packetHandler);
+        _createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
         continue;
       }
 
@@ -165,14 +166,16 @@ void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::Supervi
 }
 
 
-void Supervisor::_createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
+void Supervisor::_createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
 {
   Reply reply {
     .type = games::PacketType::CreateLobby,
-    .status = games::ReplyType::Success, // TODO: Change it
+    .status = games::ReplyType::Success,
   };
 
   LOG(DEBUG) << "[Create Lobby Handler]";
+
+  Lobbies::createNewLobby(clientIdKey, requestJson.at("LobbyName"), requestJson.at("GameKey"));
 
   sf::Packet packet;
   packet << reply;

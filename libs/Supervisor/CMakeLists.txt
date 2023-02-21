@@ -6,6 +6,8 @@ set(SOURCES
         Supervisor.cpp
         Command.cpp
         GamesInfoExtractor.cpp
+        Lobby.cpp
+        Lobbies.cpp
    )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

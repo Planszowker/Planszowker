@@ -55,7 +55,7 @@ protected:
   std::unordered_map<size_t, std::shared_ptr<sf::TcpSocket>> m_clients; ///< Container to hold information about clients
   std::vector<size_t> m_clientIds;
 
-  std::size_t m_lastClientId {0}; ///< Last client ID. TODO: Possible issue with overflowing
+  std::size_t m_lastClientId {1}; ///< Last client ID. TODO: Possible issue with overflowing
 
   packetMap m_packets;
 
