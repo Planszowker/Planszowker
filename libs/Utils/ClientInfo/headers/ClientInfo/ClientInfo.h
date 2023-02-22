@@ -41,13 +41,24 @@ public:
 
 
   /*!
-   * @brief Getter of client's id.
+   * @brief Getter of client's ID.
    *
    * @return Client's ID.
    */
    [[nodiscard]] inline size_t getId() const
   {
      return m_id;
+  }
+
+
+  /*!
+   * @brief Setter of client's ID.
+   *
+   * @param updatedClientID Updated client's ID.
+   */
+  void setId(size_t updatedClientID)
+  {
+    m_id = updatedClientID;
   }
 
 

@@ -13,8 +13,7 @@ public:
   explicit GameChoosingCallbacks(GameChoosingState& state) : m_state(state) { }
   ~GameChoosingCallbacks() final = default;
 
-  void IDCallback() final;
-  void listAllAvailableGamesCallback(std::any& arg) final;
+  void listAllAvailableGamesCallback(const std::any& arg) final;
 private:
   GameChoosingState& m_state;
 };

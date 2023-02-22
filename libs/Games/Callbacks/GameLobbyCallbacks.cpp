@@ -1,19 +1,30 @@
 #include <Callbacks/GameLobbyCallbacks.h>
 
+#include <ErrorHandler/ErrorLogger.h>
 #include <easylogging++.h>
 
 namespace pla::games {
 
-void GameLobbyCallbacks::IDCallback()
-{
-  LOG(DEBUG) << "[GameLobbyCallbacks]::IDCallback";
-  m_state.
+void GameLobbyCallbacks::getLobbyDetailsCallback(const std::any& arg) {
+  LOG(DEBUG) << "[GameLobbyCallbacks]::getLobbyDetailsCallback";
+  try {
+    auto lobbyDetailsJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
+    m_state.updateLobbyDetails(lobbyDetailsJson);
+  } catch (std::exception& e) {
+    err_handler::ErrorLogger::printError("[GameLobbyCallbacks] Bad any cast!");
+  }
 }
 
 
-void GameLobbyCallbacks::createLobbyCallback(std::any &arg)
+void GameLobbyCallbacks::listOpenLobbiesCallback(const std::any& arg)
 {
-  LOG(DEBUG) << "[GameLobbyCallbacks]::createLobbyCallback";
+  LOG(DEBUG) << "[GameLobbyCallbacks]::listOpenLobbiesCallback";
+  try {
+    auto lobbiesListJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
+    m_state.updateLobbiesList(lobbiesListJson);
+  } catch (std::exception& e) {
+    err_handler::ErrorLogger::printError("[GameLobbyCallbacks] Bad any cast!");
+  }
 }
 
 }

@@ -1,6 +1,8 @@
 #include <States/GameLobbyState.h>
 #include <Callbacks/GameLobbyCallbacks.h>
 
+#include <GamesClient/SharedObjects.h>
+
 #include <easylogging++.h>
 #include <nlohmann/json.hpp>
 
@@ -9,6 +11,8 @@
 #include <utility>
 
 namespace pla::games {
+
+using namespace games_client;
 
 GameLobbyState::GameLobbyState(games_client::GraphicalView& graphicalView, GameLobbyStateArguments gameLobbyStateArguments)
   : m_graphicalView(graphicalView)
@@ -82,6 +86,17 @@ void GameLobbyState::display()
 }
 
 
+void GameLobbyState::updateLobbyDetails(const nlohmann::json& updateJson)
+{
+  m_lobbyDetailsJson = updateJson;
+  try {
+    if (m_lobbyDetailsJson.at("Valid").get<bool>()) {
+      m_lobbyState = LobbyState::LobbyDetails;
+    }
+  } catch (const std::exception& e) { }
+}
+
+
 void GameLobbyState::_guiDisplayMainGui()
 {
   if(ImGui::Button("Create Lobby"))
@@ -91,6 +106,9 @@ void GameLobbyState::_guiDisplayMainGui()
 
   if(ImGui::Button("Join Lobby"))
   {
+    nlohmann::json requestJson;
+    requestJson["GameKey"] = m_gameArguments.gameName;
+    m_controller.sendRequest(PacketType::ListOpenLobbies, requestJson.dump());
     m_lobbyState = LobbyState::JoinLobby;
   }
 }
@@ -98,26 +116,27 @@ void GameLobbyState::_guiDisplayMainGui()
 
 void GameLobbyState::_guiDisplayLobby()
 {
-  // TODO: Change it
-  ImGui::BeginTable("Players", 3);
+  ImGui::BeginTable("Players", 1);
   ImGui::TableSetupColumn("Player");
-  ImGui::TableSetupColumn("Something");
-  ImGui::TableSetupColumn("Something else");
   ImGui::TableHeadersRow();
   ImGui::TableNextRow();
   ImGui::TableNextColumn();
-  ImGui::Text("Example");
-  ImGui::TableNextColumn();
-  ImGui::Text("Example 2");
-  ImGui::TableNextColumn();
-  ImGui::Text("Example 3");
-  ImGui::TableNextRow();
-  ImGui::TableNextColumn();
-  ImGui::Text("Example 4");
-  ImGui::TableNextColumn();
-  ImGui::Text("Example 5");
-  ImGui::TableNextColumn();
-  ImGui::Text("Example 6");
+
+  try {
+    auto clientsIDs = m_lobbyDetailsJson.at("ClientIDs").get<std::vector<size_t>>();
+    auto creatorID = m_lobbyDetailsJson.at("CreatorID").get<size_t>();
+
+    for (const auto clientID: clientsIDs) {
+      if (clientID == creatorID) {
+        ImGui::Text("[Owner] %lu", clientID);
+      } else {
+        ImGui::Text("%lu", clientID);
+      }
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+    }
+  } catch (std::exception& e) {
+  }
   ImGui::EndTable();
 
   // Back button
@@ -130,6 +149,37 @@ void GameLobbyState::_guiDisplayLobby()
 
 void GameLobbyState::_guiDisplayJoinLobby()
 {
+  ImGui::BeginTable("Lobbies", 3);
+  ImGui::TableSetupColumn("Lobby Name");
+  ImGui::TableSetupColumn("Players");
+  ImGui::TableHeadersRow();
+  ImGui::TableNextRow();
+  ImGui::TableNextColumn();
+
+  try {
+    auto lobbiesJson = m_lobbiesListJson.at("Lobbies");
+
+    for (const auto& lobbyJson: lobbiesJson) {
+      auto lobbyNameStr = lobbyJson.at("LobbyName").get<std::string>();
+      auto lobbyMinPlayers = lobbyJson.at("MinPlayers").get<int>();
+      auto lobbyCurrentPlayers = lobbyJson.at("CurrentPlayers").get<int>();
+      auto lobbyMaxPlayers = lobbyJson.at("MaxPlayers").get<int>();
+      ImGui::Text("%s", lobbyNameStr.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("[%d / %d] (min. %d)", lobbyCurrentPlayers, lobbyMaxPlayers, lobbyMinPlayers);
+      ImGui::TableNextColumn();
+      if (ImGui::Button("Join -->")) {
+        nlohmann::json getLobbyDetailsJson;
+        getLobbyDetailsJson["CreatorID"] = lobbyJson.at("CreatorID").get<std::string>();
+        m_controller.sendRequest(PacketType::GetLobbyDetails, getLobbyDetailsJson.dump());
+      }
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+    }
+  } catch (std::exception& e) {
+  }
+  ImGui::EndTable();
+
   // Back button
   if(ImGui::Button("Back"))
   {
@@ -159,10 +209,8 @@ void GameLobbyState::_guiDisplayCreateNewLobby()
       m_controller.sendRequest(PacketType::CreateLobby, createLobbyRequestJson.dump());
 
       nlohmann::json getLobbyDetailsJson;
-      getLobbyDetailsJson["ClientID"] =
-      m_controller.sendRequest(PacketType::GetLobbyDetails, R"({"ClientID": })");
-
-      m_lobbyState = LobbyState::LobbyDetails;
+      getLobbyDetailsJson["CreatorID"] = shared::getClientInfo().getId();
+      m_controller.sendRequest(PacketType::GetLobbyDetails, getLobbyDetailsJson.dump());
     }
   }
 
@@ -173,6 +221,12 @@ void GameLobbyState::_guiDisplayCreateNewLobby()
   {
     m_lobbyState = LobbyState::Main;
   }
+}
+
+
+void GameLobbyState::updateLobbiesList(const nlohmann::json &updateJson)
+{
+  m_lobbiesListJson = updateJson;
 }
 
 } // namespace

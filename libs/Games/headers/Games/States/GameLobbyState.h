@@ -37,6 +37,9 @@ public:
   void eventHandling() final;
   void display() final;
   void init() final;
+
+  void updateLobbyDetails(const nlohmann::json& updateJson);
+  void updateLobbiesList(const nlohmann::json& updateJson);
 private:
   void _guiDisplayMainGui();
   void _guiDisplayCreateNewLobby();
@@ -56,6 +59,9 @@ private:
   sf::Clock m_deltaClock;
 
   std::string m_createNewLobbyErrorString; /// String with error to be displayed when creating new lobby.
+
+  nlohmann::json m_lobbyDetailsJson; ///< JSON to hold information about specific lobby's details.
+  nlohmann::json m_lobbiesListJson; ///< JSON to hold information about available lobbies for given game key.
 };
 
 } // namespace

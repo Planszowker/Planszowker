@@ -36,8 +36,6 @@ public:
 
   void connectCallbacks(games::ICallbacks* callbacks);
 
-  bool getClientID(size_t& id);
-
 private:
 
   void _backgroundTask(std::mutex& tcpSocketsMutex) final;
@@ -48,9 +46,6 @@ private:
   sf::TcpSocket& m_serverSocket;
   std::deque<games::Reply> m_receivedReplies;
   std::deque<sf::Packet> m_receivedRawPackets;
-
-  bool m_validID{false};
-  size_t m_clientID{0};
 
   TransactionState m_transactionState;
   std::string m_currentAssetKey;

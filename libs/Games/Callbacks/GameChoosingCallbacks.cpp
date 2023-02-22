@@ -4,13 +4,7 @@
 
 namespace pla::games {
 
-void GameChoosingCallbacks::IDCallback()
-{
-  LOG(DEBUG) << "[GameChoosingCallbacks] ID Callback invoked!";
-}
-
-
-void GameChoosingCallbacks::listAllAvailableGamesCallback(std::any& arg)
+void GameChoosingCallbacks::listAllAvailableGamesCallback(const std::any& arg)
 {
   try {
     m_state.updateAvailableGames(std::any_cast<std::string>(arg));

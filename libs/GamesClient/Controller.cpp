@@ -35,8 +35,6 @@ void Controller::run() {
 
   m_clientPacketHandler.runInBackground();
 
-  m_clientPacketHandler.getClientID(m_clientID);
-
   while (m_run) {
     // TODO
 

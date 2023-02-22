@@ -13,8 +13,8 @@ public:
   explicit GameLobbyCallbacks(GameLobbyState& state) : m_state(state) { }
   ~GameLobbyCallbacks() final = default;
 
-  void IDCallback() final;
-  void createLobbyCallback(std::any& arg) final;
+  void getLobbyDetailsCallback(const std::any& arg) final;
+  void listOpenLobbiesCallback(const std::any& arg) final;
 private:
   GameLobbyState& m_state;
 };

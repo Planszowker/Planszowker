@@ -10,6 +10,7 @@ set(SOURCES
         States/GameState.cpp
         States/GameLobbyState.cpp
 
+        Callbacks/ICallbacks.cpp
         Callbacks/GameChoosingCallbacks.cpp
         Callbacks/GameLobbyCallbacks.cpp
         )

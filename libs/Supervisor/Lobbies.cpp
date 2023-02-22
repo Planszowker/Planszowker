@@ -18,4 +18,27 @@ void Lobbies::createNewLobby(size_t creatorClientId, std::string lobbyName, std:
   }
 }
 
+
+Lobby* Lobbies::getLobby(size_t creatorClientId) {
+  auto it = m_lobbies.find(creatorClientId);
+  if (it == m_lobbies.end()) {
+    return nullptr;
+  } else {
+    return &(it->second);
+  }
+}
+
+
+const std::unordered_map<size_t, Lobby> &Lobbies::getLobbies() {
+  return m_lobbies;
+}
+
+
+void Lobbies::removeLobby(size_t creatorClientId) {
+  auto it = m_lobbies.find(creatorClientId);
+  if (it != m_lobbies.end()) {
+    m_lobbies.erase(it);
+  }
+}
+
 }

@@ -49,7 +49,9 @@ void GamesInfoExtractor::_getMetaAssets()
       if (plametaEntryStream) {
         std::stringstream ss;
         ss << plametaEntryStream->rdbuf();
-        m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, ss.str()});
+        auto ss_str = ss.str();
+        m_gamePlametas.insert({plagameFilePath, utils::plameta::Parser{std::move(ss)}});
+        m_gameMetaAssets.insert({plagameFilePath + "/" + PlametaFile, ss_str});
       }
     } else {
       err_handler::ErrorLogger::printError(".plameta file is mandatory!");

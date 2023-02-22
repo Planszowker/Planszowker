@@ -24,6 +24,7 @@ public:
 
   using GameEntriesContainer = std::vector<std::string>;
   using GameMetaAssetsContainer = std::unordered_map<std::string, std::string>;
+  using GamePlametasContainer = std::unordered_map<std::string, utils::plameta::Parser>;
 
   const GameEntriesContainer& getEntries()
   {
@@ -35,12 +36,18 @@ public:
     return m_gameMetaAssets;
   }
 
+  const GamePlametasContainer& getPlametas()
+  {
+    return m_gamePlametas;
+  }
+
 private:
   void _getMetaAssets();
   void _getDefaultAssets();
 
   GameEntriesContainer m_gameEntries;
   GameMetaAssetsContainer m_gameMetaAssets;
+  GamePlametasContainer m_gamePlametas;
 };
 
 }

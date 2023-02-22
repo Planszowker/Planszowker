@@ -18,7 +18,8 @@ enum class PacketType : uint8_t
   ListAvailableGames, ///< Used to list all games the server is able to handle.
   CreateLobby, ///< Used to create a lobby with given name.
   GetLobbyDetails, ///< Used to retrieve details about a specific lobby.
-  ListOpenLobbies, ///< Used to list all open lobbies.
+  ListOpenLobbies, ///< Used to list all open lobbies for a specific game.
+  JoinLobby, ///< Used to connect a Client to a specific lobby (not self created).
   AssetTransaction, ///< Used to transmit a supported asset to client.
 };
 

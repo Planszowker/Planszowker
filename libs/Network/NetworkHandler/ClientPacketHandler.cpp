@@ -10,6 +10,7 @@
 #include <chrono>
 #include <any>
 
+#include <nlohmann/json.hpp>
 #include <easylogging++.h>
 
 using namespace pla::time_measurement;
@@ -91,8 +92,14 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
       }
 
       // If received status is not Success, we shouldn't handle it.
-      if (reply.status != games::ReplyType::Success) {
+      if (reply.status != games::ReplyType::Success || reply.type == games::PacketType::Heartbeat) {
         continue;
+      }
+
+      try {
+        LOG(DEBUG) << "Reply:\n" << nlohmann::json::parse(reply.body).dump(4);
+      } catch (std::exception& e) {
+        LOG(DEBUG) << "Reply:\n " << reply.body;
       }
 
       // Handle other packets type.
@@ -105,16 +112,11 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
         case games::PacketType::ID:
         {
-          m_validID = true;
-          std::stringstream ss{reply.body};
-          ss >> m_clientID;
-          LOG(DEBUG) << "\nReceived ClientID: " << m_clientID << "\n";
-
           // Callback for ID packets
           if (m_callbacks) {
-            m_callbacks->IDCallback();
+            std::any arg = reply.body;
+            m_callbacks->IDCallback(arg);
           }
-
           break;
         }
 
@@ -157,8 +159,22 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
         case games::PacketType::CreateLobby:
           if (m_callbacks) {
-            std::any arg = reply;
+            std::any arg = reply.body;
             m_callbacks->createLobbyCallback(arg);
+          }
+          break;
+
+        case games::PacketType::GetLobbyDetails:
+          if (m_callbacks) {
+            std::any arg = reply.body;
+            m_callbacks->getLobbyDetailsCallback(arg);
+          }
+          break;
+
+        case games::PacketType::ListOpenLobbies:
+          if (m_callbacks) {
+            std::any arg = reply.body;
+            m_callbacks->listOpenLobbiesCallback(arg);
           }
 
         default:
@@ -190,15 +206,6 @@ std::deque<games::Reply> ClientPacketHandler::getReplies() {
   m_receivedReplies.clear();
 
   return std::move(returnDeque);
-}
-
-
-bool ClientPacketHandler::getClientID(size_t& id) {
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex); // TODO: Check if needed
-
-  id = m_clientID;
-
-  return m_validID;
 }
 
 

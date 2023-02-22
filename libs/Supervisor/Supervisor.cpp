@@ -5,6 +5,8 @@
 #include <PlametaParser/Entry.h>
 #include <Games/Objects.h>
 
+#include <nlohmann/json.hpp>
+
 #include <string>
 #include <iostream>
 #include <thread>
@@ -120,26 +122,37 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
         continue;
       } else if (request.type == PacketType::ID) {
         // If we get ID request, we need to send client's ID
+        nlohmann::json replyJson;
+        replyJson["ClientID"] = clientIdKey;
+
         Reply idReply{
                 .type = PacketType::ID,
                 .status = ReplyType::Success,
-                .body = std::to_string(clientIdKey)
+                .body = replyJson.dump()
         };
+
         sf::Packet replyPacket;
         replyPacket << idReply;
 
         packetHandler.sendPacketToClient(clientIdKey, replyPacket);
-        continue;
       } else if (request.type == PacketType::ListAvailableGames) {
-        _listAvailableGamesHandler(clientIdKey, packetHandler);
-        continue;
+        Supervisor::_listAvailableGamesHandler(clientIdKey, packetHandler);
       } else if (request.type == PacketType::CreateLobby) {
-        _createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
-        continue;
+        Supervisor::_createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+      } else if (request.type == PacketType::GetLobbyDetails) {
+        Supervisor::_getLobbyDetailsHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+      } else if (request.type == PacketType::ListOpenLobbies) {
+        Supervisor::_listOpenLobbiesHandler(clientIdKey, clientIdKeys, packetHandler, nlohmann::json::parse(request.body));
+      } else if (request.type == PacketType::JoinLobby) {
+        Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";
-      std::cout << "Body: " << request.body << "\n";
+      try {
+        std::cout << "Request JSON:\n" << nlohmann::json::parse(request.body).dump(4) << "\n";
+      } catch (std::exception& e) {
+        std::cout << "Request:" << request.body << "\n";
+      }
     }
   }
 }
@@ -147,7 +160,10 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
 
 void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
 {
-  GamesInfoExtractor gamesInfoExtractor;
+  // Remove a lobby from a list if exists
+  Lobbies::removeLobby(clientIdKey);
+
+  static GamesInfoExtractor gamesInfoExtractor;
 
   auto& entries = gamesInfoExtractor.getEntries();
   auto& metaAssets = gamesInfoExtractor.getMetaAssets();
@@ -181,6 +197,113 @@ void Supervisor::_createLobbyHandler(size_t clientIdKey, network::SupervisorPack
   packet << reply;
 
   packetHandler.sendPacketToClient(clientIdKey, packet);
+}
+
+
+void Supervisor::_getLobbyDetailsHandler(size_t clientIdKey, network::SupervisorPacketHandler &packetHandler, const nlohmann::json &requestJson)
+{
+  Reply reply {
+    .type = games::PacketType::GetLobbyDetails,
+    .status = games::ReplyType::Success,
+  };
+
+  LOG(DEBUG) << "[Get Lobby Details Handler]";
+
+  auto lobby = Lobbies::getLobby(requestJson["CreatorID"]);
+  if (lobby) {
+    LOG(DEBUG) << "[LobbyDetailsHandler] CreatorID: " << lobby->getCreatorClientId();
+    LOG(DEBUG) << "[LobbyDetailsHandler] Lobby Name: " << lobby->getLobbyName();
+    LOG(DEBUG) << "[LobbyDetailsHandler] Game Key: " << lobby->getGameKey();
+
+    nlohmann::json replyJson;
+    replyJson["CreatorID"] = lobby->getCreatorClientId();
+    replyJson["ClientIDs"] = lobby->getClients();
+    replyJson["LobbyName"] = lobby->getLobbyName();
+    replyJson["GameKey"] = lobby->getGameKey();
+    replyJson["Valid"] = true;
+    reply.body = replyJson.dump();
+
+    sf::Packet packet;
+    packet << reply;
+
+    packetHandler.sendPacketToClient(clientIdKey, packet);
+  }
+}
+
+
+void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, const std::vector<size_t>& clientIds, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
+{
+  Reply reply {
+    .type = games::PacketType::ListOpenLobbies,
+    .status = games::ReplyType::Success,
+  };
+
+  LOG(DEBUG) << "[List Open Lobbies Handler]";
+
+  // Remove a lobby from a list if exists
+  Lobbies::removeLobby(clientIdKey);
+
+  // Check if there are lobbies with non-existing clients
+  for (const auto& [creatorId, _]: Lobbies::getLobbies()) {
+    // If Creator ID is not found in current Clients, we need to remove its lobby - client might have disconnected.
+    if (std::find(clientIds.begin(), clientIds.end(), creatorId) == std::end(clientIds)) {
+      Lobbies::removeLobby(creatorId);
+    }
+  }
+
+  try {
+    auto gameKey = requestJson["GameKey"].get<std::string>();
+
+    nlohmann::json replyJson;
+    replyJson["GameKey"] = gameKey;
+    replyJson["Lobbies"] = nlohmann::json::array();
+    for (const auto& [creatorID, lobby]: Lobbies::getLobbies()) {
+      // Only look for lobbies with given game key
+      if (lobby.getGameKey() == gameKey) {
+        replyJson["Lobbies"].push_back({
+          {"CreatorID", lobby.getCreatorClientId()},
+          {"LobbyName", lobby.getLobbyName()},
+          {"MinPlayers", lobby.getMinPlayers()},
+          {"CurrentPlayers", lobby.getCurrentPlayers()},
+          {"MaxPlayers", lobby.getMaxPlayers()}
+        });
+      }
+    }
+    reply.body = replyJson.dump();
+
+    LOG(DEBUG) << "Reply:\n" << replyJson.dump(4);
+
+    sf::Packet packet;
+    packet << reply;
+
+    packetHandler.sendPacketToClient(clientIdKey, packet);
+  } catch (const std::exception& e) {
+
+  }
+}
+
+
+void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler &packetHandler, const nlohmann::json &requestJson)
+{
+  Reply reply {
+    .type = games::PacketType::JoinLobby,
+    .status = games::ReplyType::Success,
+  };
+
+  LOG(DEBUG) << "[Join Lobby Handler]";
+
+  auto lobby = Lobbies::getLobby(requestJson["CreatorID"]);
+  if (lobby and requestJson["CreatorID"].get<size_t>() != clientIdKey) {
+    //lobby->addClient(clientIdKey);
+    nlohmann::json replyJson;
+    replyJson["Valid"] = true; // TODO
+    reply.body = replyJson.dump();
+
+    sf::Packet packet;
+    packet << reply;
+
+    packetHandler.sendPacketToClient(clientIdKey, packet);
+  }
 }
 
 } // namespace
