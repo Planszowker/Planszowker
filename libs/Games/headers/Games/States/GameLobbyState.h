@@ -3,6 +3,7 @@
 #include "IState.h"
 
 #include <Games/Callbacks/ICallbacks.h>
+#include <Games/Callbacks/GameLobbyCallbacks.h>
 #include <Games/GameWindow.h>
 #include <GamesClient/GraphicalView.h>
 #include <NetworkHandler/ClientPacketHandler.h>
@@ -62,6 +63,8 @@ private:
 
   nlohmann::json m_lobbyDetailsJson; ///< JSON to hold information about specific lobby's details.
   nlohmann::json m_lobbiesListJson; ///< JSON to hold information about available lobbies for given game key.
+
+  friend class GameLobbyCallbacks;
 };
 
 } // namespace

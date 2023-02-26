@@ -169,14 +169,19 @@ void GameLobbyState::_guiDisplayJoinLobby()
       ImGui::Text("[%d / %d] (min. %d)", lobbyCurrentPlayers, lobbyMaxPlayers, lobbyMinPlayers);
       ImGui::TableNextColumn();
       if (ImGui::Button("Join -->")) {
-        nlohmann::json getLobbyDetailsJson;
-        getLobbyDetailsJson["CreatorID"] = lobbyJson.at("CreatorID").get<std::string>();
-        m_controller.sendRequest(PacketType::GetLobbyDetails, getLobbyDetailsJson.dump());
+        LOG(DEBUG) << "Join for " << shared::getClientInfo().getId() << " pushed!";
+        LOG(DEBUG) << lobbyJson.dump(4);
+
+        nlohmann::json requestJson;
+        requestJson["CreatorID"] = lobbyJson.at("CreatorID").get<size_t>();
+        m_controller.sendRequest(PacketType::JoinLobby, requestJson.dump());
+        m_controller.sendRequest(PacketType::GetLobbyDetails, requestJson.dump());
       }
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
     }
   } catch (std::exception& e) {
+    //LOG(DEBUG) << "[GuiDisplayJoinLobby] Exception!";
   }
   ImGui::EndTable();
 

@@ -42,9 +42,14 @@ void Lobby::_extractGameMetadata()
 }
 
 
-void Lobby::addClient(size_t clientId)
+bool Lobby::addClient(size_t clientId)
 {
-  m_clients.emplace_back(clientId);
+  if (m_clients.size() <= m_maxPlayers) {
+    m_clients.emplace_back(clientId);
+    return true;
+  }
+
+  return false;
 }
 
 

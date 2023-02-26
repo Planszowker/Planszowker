@@ -102,6 +102,8 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         LOG(DEBUG) << "Reply:\n " << reply.body;
       }
 
+      std::any arg = reply.body;
+
       // Handle other packets type.
       switch (reply.type) {
         case games::PacketType::GameSpecificData:
@@ -114,7 +116,6 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         {
           // Callback for ID packets
           if (m_callbacks) {
-            std::any arg = reply.body;
             m_callbacks->IDCallback(arg);
           }
           break;
@@ -152,30 +153,33 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
         case games::PacketType::ListAvailableGames:
           if (m_callbacks) {
-            std::any arg = reply.body;
             m_callbacks->listAllAvailableGamesCallback(arg);
           }
           break;
 
         case games::PacketType::CreateLobby:
           if (m_callbacks) {
-            std::any arg = reply.body;
             m_callbacks->createLobbyCallback(arg);
           }
           break;
 
         case games::PacketType::GetLobbyDetails:
           if (m_callbacks) {
-            std::any arg = reply.body;
             m_callbacks->getLobbyDetailsCallback(arg);
           }
           break;
 
         case games::PacketType::ListOpenLobbies:
           if (m_callbacks) {
-            std::any arg = reply.body;
             m_callbacks->listOpenLobbiesCallback(arg);
           }
+          break;
+
+        case games::PacketType::JoinLobby:
+          if (m_callbacks) {
+            m_callbacks->joinLobbyCallback(arg);
+          }
+          break;
 
         default:
           break;

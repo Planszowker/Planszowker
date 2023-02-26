@@ -142,7 +142,7 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
       } else if (request.type == PacketType::GetLobbyDetails) {
         Supervisor::_getLobbyDetailsHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       } else if (request.type == PacketType::ListOpenLobbies) {
-        Supervisor::_listOpenLobbiesHandler(clientIdKey, clientIdKeys, packetHandler, nlohmann::json::parse(request.body));
+        Supervisor::_listOpenLobbiesHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       } else if (request.type == PacketType::JoinLobby) {
         Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       }
@@ -165,7 +165,6 @@ void Supervisor::_listAvailableGamesHandler(size_t clientIdKey, network::Supervi
 
   static GamesInfoExtractor gamesInfoExtractor;
 
-  auto& entries = gamesInfoExtractor.getEntries();
   auto& metaAssets = gamesInfoExtractor.getMetaAssets();
 
   for(const auto& metaAsset: metaAssets) {
@@ -231,7 +230,7 @@ void Supervisor::_getLobbyDetailsHandler(size_t clientIdKey, network::Supervisor
 }
 
 
-void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, const std::vector<size_t>& clientIds, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
+void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
 {
   Reply reply {
     .type = games::PacketType::ListOpenLobbies,
@@ -243,13 +242,13 @@ void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, const std::vector<s
   // Remove a lobby from a list if exists
   Lobbies::removeLobby(clientIdKey);
 
-  // Check if there are lobbies with non-existing clients
-  for (const auto& [creatorId, _]: Lobbies::getLobbies()) {
-    // If Creator ID is not found in current Clients, we need to remove its lobby - client might have disconnected.
-    if (std::find(clientIds.begin(), clientIds.end(), creatorId) == std::end(clientIds)) {
-      Lobbies::removeLobby(creatorId);
-    }
-  }
+//  // Check if there are lobbies with non-existing clients
+//  for (const auto& [creatorId, _]: Lobbies::getLobbies()) {
+//    // If Creator ID is not found in current Clients, we need to remove its lobby - client might have disconnected.
+//    if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
+//      Lobbies::removeLobby(creatorId);
+//    }
+//  }
 
   try {
     auto gameKey = requestJson["GameKey"].get<std::string>();
@@ -278,7 +277,7 @@ void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, const std::vector<s
 
     packetHandler.sendPacketToClient(clientIdKey, packet);
   } catch (const std::exception& e) {
-
+    LOG(DEBUG) << "[ListOpenLobbiesHandler] Exception!";
   }
 }
 
@@ -292,11 +291,15 @@ void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacket
 
   LOG(DEBUG) << "[Join Lobby Handler]";
 
-  auto lobby = Lobbies::getLobby(requestJson["CreatorID"]);
+  auto lobby = Lobbies::getLobby(requestJson["CreatorID"].get<size_t>());
   if (lobby and requestJson["CreatorID"].get<size_t>() != clientIdKey) {
-    //lobby->addClient(clientIdKey);
     nlohmann::json replyJson;
-    replyJson["Valid"] = true; // TODO
+    replyJson["Valid"] = false;
+
+    if (lobby->addClient(clientIdKey)) {
+      replyJson["Valid"] = true;
+    }
+
     reply.body = replyJson.dump();
 
     sf::Packet packet;

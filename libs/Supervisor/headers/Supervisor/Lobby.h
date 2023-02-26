@@ -12,7 +12,7 @@ public:
   Lobby() = delete;
   Lobby(size_t creatorClientId, std::string lobbyName, std::string gameKey);
 
-  void addClient(size_t clientId);
+  bool addClient(size_t clientId);
   void removeClient(size_t clientId);
 
   [[maybe_unused]] [[nodiscard]]

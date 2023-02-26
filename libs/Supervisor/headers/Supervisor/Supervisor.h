@@ -29,7 +29,7 @@ private:
   static void _listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
   static void _createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
   static void _getLobbyDetailsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
-  static void _listOpenLobbiesHandler(size_t clientIdKey, const std::vector<size_t>& clientIds, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  static void _listOpenLobbiesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
   static void _joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
 
   utils::plameta::Parser m_configParser;
