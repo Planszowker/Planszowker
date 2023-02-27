@@ -1,5 +1,7 @@
 #include <Lobbies.h>
 
+#include <Games/Objects.h>
+
 #include <utility>
 #include <chrono>
 
@@ -53,14 +55,11 @@ const std::unordered_map<size_t, Lobby>& Lobbies::getLobbies() {
 void Lobbies::removeLobby(size_t creatorClientId) {
   std::scoped_lock lock(m_watchdogMutex);
 
-  auto it = m_lobbies.find(creatorClientId);
-  if (it != m_lobbies.end()) {
-    m_lobbies.erase(it);
-  }
+  m_lobbies.erase(creatorClientId);
 }
 
 
-void Lobbies::_watchdogThread()
+void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
 {
   constexpr int WatchdogSleepTime = 5;
   constexpr double WatchdogExceedMultiplier = 3.0;
@@ -71,14 +70,41 @@ void Lobbies::_watchdogThread()
 
     std::scoped_lock lock(m_watchdogMutex);
 
+    // First of all, check if any created lobby has exceeded its time for heartbeat packets
+    check_lobbies:
     for (const auto& [creatorClientId, lobby] : m_lobbies) {
       std::chrono::duration<double> lastResponseTime = std::chrono::steady_clock::now() - lobby.getLastResponseTime();
       if (lastResponseTime.count() > WatchdogExceedMultiplier * WatchdogSleepTime) {
         LOG(DEBUG) << "Lobby for client " << creatorClientId << " has exceeded watchdog time! Removing lobby...";
 
-        auto it = m_lobbies.find(creatorClientId);
-        if (it != m_lobbies.end()) {
-          m_lobbies.erase(it);
+        m_lobbies.erase(creatorClientId);
+        goto check_lobbies;
+      }
+    }
+
+    // Later, check if lobbies' clients have exceeded their time for heartbeat packets
+    for (auto& [creatorClientId, lobby] : m_lobbies) {
+      check_clients:
+      for (const auto& [clientId, timestamp] : lobby.getClientsWithTimestamps()) {
+        if (clientId == creatorClientId) {
+          // We don't want to check client that is a creator of given lobby
+          continue;
+        }
+
+        std::chrono::duration<double> lastResponseTime = std::chrono::steady_clock::now() - timestamp;
+        if (lastResponseTime.count() > WatchdogExceedMultiplier * WatchdogSleepTime) {
+          LOG(DEBUG) << "Lobby with ClientID " << clientId << " has exceeded watchdog time! Removing client from lobby...";
+
+          sf::Packet packet;
+          games::Reply reply {
+            .type = games::PacketType::ClientDisconnected,
+            .status = games::ReplyType::Success
+          };
+          packet << reply;
+
+          packetHandler.sendPacketToClient(clientId, packet);
+          lobby.removeClient(clientId);
+          goto check_clients;
         }
       }
     }
@@ -86,10 +112,10 @@ void Lobbies::_watchdogThread()
 }
 
 
-void Lobbies::startWatchdogThread()
+void Lobbies::startWatchdogThread(network::SupervisorPacketHandler& packetHandler)
 {
   Lobbies::m_runWatchdogThread = true;
-  static auto _thread = std::thread(&Lobbies::_watchdogThread);
+  static auto _thread = std::thread(&Lobbies::_watchdogThread, std::ref(packetHandler));
   Lobbies::m_watchdogThread = std::move(_thread);
 }
 

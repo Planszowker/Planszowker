@@ -1,5 +1,6 @@
 #pragma once
 
+#include <NetworkHandler/SupervisorPacketHandler.h>
 #include <Lobby.h>
 
 #include <cstdlib>
@@ -48,8 +49,10 @@ public:
    * Start watchdog thread.
    * It is used to check if we have received heartbeat from Creator ID. If specified time is exceeded,
    * we remove given lobby.
+   *
+   * @param packetHandler Supervisor Packet Handler used to send replies to client.
    */
-  static void startWatchdogThread();
+  static void startWatchdogThread(network::SupervisorPacketHandler& packetHandler);
 
   /*!
    * Stop watchdog thread.
@@ -68,7 +71,7 @@ private:
 
   static std::atomic<bool> m_runWatchdogThread;
   static std::mutex m_watchdogMutex;
-  static void _watchdogThread();
+  static void _watchdogThread(network::SupervisorPacketHandler& packetHandler);
 
   static std::thread m_watchdogThread;
 };

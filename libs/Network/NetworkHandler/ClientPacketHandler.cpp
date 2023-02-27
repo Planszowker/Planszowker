@@ -181,6 +181,11 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           }
           break;
 
+        case games::PacketType::ClientDisconnected:
+          if (m_callbacks) {
+            m_callbacks->clientDisconnectedCallback(arg);
+          }
+
         default:
           break;
       }

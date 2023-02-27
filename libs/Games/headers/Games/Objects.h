@@ -21,6 +21,7 @@ enum class PacketType : uint8_t
   ListOpenLobbies, ///< Used to list all open lobbies for a specific game.
   JoinLobby, ///< Used to connect a Client to a specific lobby (not self created).
   LobbyHeartbeat, ///< Used for keeping lobby alive. If we stop sending this packets for defined amount of time, lobby for current Client is destroyed.
+  ClientDisconnected, ///< Used to inform Client that he was disconnected from lobby, so GUI could be updated.
   AssetTransaction, ///< Used to transmit a supported asset to client.
 };
 

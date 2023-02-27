@@ -19,6 +19,7 @@ public:
   void listOpenLobbiesCallback(const std::any& arg) final;
   void joinLobbyCallback(const std::any& arg) final;
   void createLobbyCallback(const std::any& arg) final;
+  void clientDisconnectedCallback(const std::any& arg) final;
 private:
   GameLobbyState& m_state;
 };

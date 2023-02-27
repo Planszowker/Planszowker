@@ -20,6 +20,7 @@ public:
   virtual void getLobbyDetailsCallback(const std::any&) { };
   virtual void listOpenLobbiesCallback(const std::any&) { };
   virtual void joinLobbyCallback(const std::any&) { };
+  virtual void clientDisconnectedCallback(const std::any&) { };
   // Increase callbacks if needed here...
 protected:
   ICallbacks() = default;

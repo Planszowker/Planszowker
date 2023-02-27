@@ -12,6 +12,9 @@ namespace pla::supervisor {
 class Lobby
 {
 public:
+  using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+  using ClientContainer = std::unordered_map<size_t, TimePoint>;
+
   Lobby() = delete;
   Lobby(size_t creatorClientId, std::string lobbyName, std::string gameKey);
 
@@ -28,7 +31,10 @@ public:
   std::string_view getGameKey() const { return m_gameKey; };
 
   [[maybe_unused]] [[nodiscard]]
-  const std::vector<size_t>& getClients() const { return m_clients; }
+  std::vector<size_t> getClients() const;
+
+  [[maybe_unused]] [[nodiscard]]
+  ClientContainer getClientsWithTimestamps() const { return m_clients; }
 
   [[maybe_unused]] [[nodiscard]]
   int getMinPlayers() const { return m_minPlayers; }
@@ -61,9 +67,8 @@ private:
   int m_minPlayers;
   int m_maxPlayers;
 
-  std::vector<size_t> m_clients;
-
-  std::chrono::time_point<std::chrono::steady_clock> m_lastResponseTime; ///< Last time receiving lobby heartbeat from Client.
+  ClientContainer m_clients;
+  TimePoint m_lastResponseTime; ///< Last time receiving lobby heartbeat from Client.
 };
 
 }

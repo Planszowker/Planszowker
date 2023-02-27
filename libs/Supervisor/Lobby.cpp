@@ -15,7 +15,7 @@ Lobby::Lobby(size_t creatorClientId, std::string lobbyName, std::string gameKey)
   , m_gameKey(std::move(gameKey))
   , m_lastResponseTime(std::chrono::steady_clock::now())
 {
-  m_clients.emplace_back(m_creatorClientId);
+  m_clients.insert({creatorClientId, std::chrono::steady_clock::now()});
 
   _extractGameMetadata();
 }
@@ -49,9 +49,9 @@ bool Lobby::addClient(size_t clientId)
 {
   if (m_clients.size() < m_maxPlayers) {
     // Check if ClientID is not already inserted
-    if (std::find(m_clients.begin(), m_clients.end(), clientId) == std::end(m_clients)) {
+    if (m_clients.find(clientId) == m_clients.end()) {
       // If ClientID doesn't exist in the container, add it
-      m_clients.emplace_back(clientId);
+      m_clients.insert({clientId, std::chrono::steady_clock::now()});
       return true;
     }
   }
@@ -62,7 +62,7 @@ bool Lobby::addClient(size_t clientId)
 
 void Lobby::removeClient(size_t clientId)
 {
-  std::remove(m_clients.begin(), m_clients.end(), clientId);
+  m_clients.erase(clientId);
 }
 
 
@@ -76,7 +76,7 @@ void Lobby::sendUpdate(network::SupervisorPacketHandler& packetHandler) const
 
   nlohmann::json replyJson;
   replyJson["CreatorID"] = m_creatorClientId;
-  replyJson["ClientIDs"] = m_clients;
+  replyJson["ClientIDs"] = getClients();
   replyJson["LobbyName"] = m_lobbyName;
   replyJson["GameKey"] = m_gameKey;
   replyJson["Valid"] = true;
@@ -84,9 +84,18 @@ void Lobby::sendUpdate(network::SupervisorPacketHandler& packetHandler) const
 
   packet << reply;
 
-  for (const auto& client: m_clients) {
+  for (const auto& [client, _]: m_clients) {
     packetHandler.sendPacketToClient(client, packet);
   }
+}
+
+
+std::vector<size_t> Lobby::getClients() const {
+  std::vector<size_t> returnVector;
+  for (const auto& [clientId, _] : m_clients) {
+    returnVector.push_back(clientId);
+  }
+  return returnVector;
 }
 
 }

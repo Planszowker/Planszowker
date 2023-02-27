@@ -55,7 +55,7 @@ void Supervisor::run()
   supervisorPacketHandler.runInBackground();
   std::thread inputThread {&Supervisor::_getUserInput, this};
 
-  Lobbies::startWatchdogThread();
+  Lobbies::startWatchdogThread(supervisorPacketHandler);
 
   while(m_run) {
     _processPackets(supervisorPacketHandler);
@@ -149,8 +149,7 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
       } else if (request.type == PacketType::JoinLobby) {
         Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       } else if (request.type == PacketType::LobbyHeartbeat) {
-        // Update last response time if we receive lobby heartbeat packets
-        Lobbies::updateLobbyLastResponseTime(clientIdKey);
+        Supervisor::_lobbyHeartbeatHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";
@@ -314,6 +313,19 @@ void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacket
     packetHandler.sendPacketToClient(clientIdKey, packet);
 
     lobby->sendUpdate(packetHandler);
+  }
+}
+
+
+void Supervisor::_lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
+{
+  try {
+    auto type = requestJson["Type"].get<std::string>();
+    if (type == "Creator") {
+      // Update last response time for lobby
+      Lobbies::updateLobbyLastResponseTime(clientIdKey);
+    }
+  } catch (std::exception& e) {
   }
 }
 

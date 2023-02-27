@@ -244,10 +244,21 @@ void GameLobbyState::_lobbyHeartbeat()
 {
   constexpr size_t HeartbeatSleepTime = 10;
 
+  nlohmann::json requestJson;
+
   while (m_runLobbyHeartbeatThread) {
+    switch (m_heartbeatType) {
+      case LobbyHeartbeatType::Creator:
+        requestJson["Type"] = "Creator";
+        break;
+      case LobbyHeartbeatType::Client:
+        requestJson["Type"] = "Client";
+        break;
+    }
+
     if (m_sendLobbyHeartbeat) {
-      m_controller.sendRequest(PacketType::LobbyHeartbeat);
-      LOG(DEBUG) << "Sending lobby heartbeat";
+      m_controller.sendRequest(PacketType::LobbyHeartbeat, requestJson.dump());
+      LOG(DEBUG) << "Sending lobby heartbeat for " << (m_heartbeatType == LobbyHeartbeatType::Creator ? "Creator" : "Client");
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(HeartbeatSleepTime));

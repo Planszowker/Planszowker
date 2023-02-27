@@ -32,6 +32,7 @@ enum class LobbyState
   LobbyDetails
 };
 
+
 class GameLobbyState final : public IState
 {
 public:
@@ -47,6 +48,12 @@ public:
   void updateLobbyDetails(const nlohmann::json& updateJson);
   void updateLobbiesList(const nlohmann::json& updateJson);
 private:
+  enum class LobbyHeartbeatType
+  {
+    Creator, ///< Lobby creator heartbeat.
+    Client ///< Lobby client heartbeat.
+  };
+
   void _guiDisplayMainGui();
   void _guiDisplayCreateNewLobby();
   void _guiDisplayJoinLobby();
@@ -74,6 +81,7 @@ private:
   std::atomic<bool> m_sendLobbyHeartbeat = false;
   std::atomic<bool> m_runLobbyHeartbeatThread = true;
   std::thread m_lobbyHeartbeatThread;
+  std::atomic<LobbyHeartbeatType> m_heartbeatType {LobbyHeartbeatType::Creator};
 
   friend class GameLobbyCallbacks; ///< Callbacks class declared as a friend to access lobby's state.
 };
