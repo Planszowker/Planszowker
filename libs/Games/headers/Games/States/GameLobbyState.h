@@ -13,6 +13,9 @@
 #include <imgui-SFML.h>
 
 #include <vector>
+#include <thread>
+#include <atomic>
+#include <functional>
 
 namespace pla::games {
 
@@ -35,6 +38,8 @@ public:
   GameLobbyState() = delete;
   explicit GameLobbyState(games_client::GraphicalView& graphicalView, GameLobbyStateArguments gameLobbyStateArguments);
 
+  virtual ~GameLobbyState();
+
   void eventHandling() final;
   void display() final;
   void init() final;
@@ -46,6 +51,8 @@ private:
   void _guiDisplayCreateNewLobby();
   void _guiDisplayJoinLobby();
   void _guiDisplayLobby();
+
+  void _lobbyHeartbeat();
 
   games_client::GraphicalView& m_graphicalView;
   games_client::Controller& m_controller;
@@ -64,7 +71,11 @@ private:
   nlohmann::json m_lobbyDetailsJson; ///< JSON to hold information about specific lobby's details.
   nlohmann::json m_lobbiesListJson; ///< JSON to hold information about available lobbies for given game key.
 
-  friend class GameLobbyCallbacks;
+  std::atomic<bool> m_sendLobbyHeartbeat = false;
+  std::atomic<bool> m_runLobbyHeartbeatThread = true;
+  std::thread m_lobbyHeartbeatThread;
+
+  friend class GameLobbyCallbacks; ///< Callbacks class declared as a friend to access lobby's state.
 };
 
 } // namespace

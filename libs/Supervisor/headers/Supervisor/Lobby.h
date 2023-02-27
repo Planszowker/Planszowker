@@ -1,8 +1,11 @@
 #pragma once
 
+#include <NetworkHandler/SupervisorPacketHandler.h>
+
 #include <string>
 #include <vector>
 #include <utility>
+#include <chrono>
 
 namespace pla::supervisor {
 
@@ -35,6 +38,21 @@ public:
 
   [[maybe_unused]] [[nodiscard]]
   int getCurrentPlayers() const { return static_cast<int>(m_clients.size()); }
+
+  [[maybe_unused]] [[nodiscard]]
+  std::chrono::time_point<std::chrono::steady_clock> getLastResponseTime() const { return m_lastResponseTime; }
+
+  [[maybe_unused]]
+  void updateLastResponseTime() { m_lastResponseTime = std::chrono::steady_clock::now(); }
+
+  /*!
+   * Send update to every Client connected to specific lobby.
+   * All Clients connected to given lobby will receive new JSON
+   * with details about the lobby.
+   *
+   * @param packetHandler Supervisor Packet Handler used to send details over network.
+   */
+  void sendUpdate(network::SupervisorPacketHandler& packetHandler) const;
 private:
   void _extractGameMetadata();
   size_t m_creatorClientId;
@@ -44,6 +62,8 @@ private:
   int m_maxPlayers;
 
   std::vector<size_t> m_clients;
+
+  std::chrono::time_point<std::chrono::steady_clock> m_lastResponseTime; ///< Last time receiving lobby heartbeat from Client.
 };
 
 }

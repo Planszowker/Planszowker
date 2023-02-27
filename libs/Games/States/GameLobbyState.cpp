@@ -9,6 +9,7 @@
 #include <imgui_stdlib.h>
 
 #include <utility>
+#include <chrono>
 
 namespace pla::games {
 
@@ -23,6 +24,17 @@ GameLobbyState::GameLobbyState(games_client::GraphicalView& graphicalView, GameL
 {
   // Connect GameChoosing callbacks to packet handler
   m_controller.getPacketHandler()->connectCallbacks(m_callbacks.get());
+
+  // Create thread to send heartbeats to keep lobby alive
+  m_lobbyHeartbeatThread = std::thread(&GameLobbyState::_lobbyHeartbeat, this);
+}
+
+
+GameLobbyState::~GameLobbyState()
+{
+  m_runLobbyHeartbeatThread = false;
+  m_sendLobbyHeartbeat = false;
+  m_lobbyHeartbeatThread.join();
 }
 
 
@@ -65,15 +77,19 @@ void GameLobbyState::display()
   //ImGui::SetCursorPos(ImVec2(-FLT_MIN, 60.f));
   switch(m_lobbyState){
     case LobbyState::Main:
+      m_sendLobbyHeartbeat = false;
       _guiDisplayMainGui();
       break;
     case LobbyState::JoinLobby:
+      m_sendLobbyHeartbeat = false;
       _guiDisplayJoinLobby();
       break;
     case LobbyState::CreateLobby:
+      m_sendLobbyHeartbeat = false;
       _guiDisplayCreateNewLobby();
       break;
     case LobbyState::LobbyDetails:
+      m_sendLobbyHeartbeat = true;
       _guiDisplayLobby();
       break;
   }
@@ -89,11 +105,6 @@ void GameLobbyState::display()
 void GameLobbyState::updateLobbyDetails(const nlohmann::json& updateJson)
 {
   m_lobbyDetailsJson = updateJson;
-  try {
-    if (m_lobbyDetailsJson.at("Valid").get<bool>()) {
-      m_lobbyState = LobbyState::LobbyDetails;
-    }
-  } catch (const std::exception& e) { }
 }
 
 
@@ -175,13 +186,11 @@ void GameLobbyState::_guiDisplayJoinLobby()
         nlohmann::json requestJson;
         requestJson["CreatorID"] = lobbyJson.at("CreatorID").get<size_t>();
         m_controller.sendRequest(PacketType::JoinLobby, requestJson.dump());
-        m_controller.sendRequest(PacketType::GetLobbyDetails, requestJson.dump());
       }
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
     }
   } catch (std::exception& e) {
-    //LOG(DEBUG) << "[GuiDisplayJoinLobby] Exception!";
   }
   ImGui::EndTable();
 
@@ -212,10 +221,6 @@ void GameLobbyState::_guiDisplayCreateNewLobby()
       createLobbyRequestJson["GameKey"] = m_gameArguments.gameName;
 
       m_controller.sendRequest(PacketType::CreateLobby, createLobbyRequestJson.dump());
-
-      nlohmann::json getLobbyDetailsJson;
-      getLobbyDetailsJson["CreatorID"] = shared::getClientInfo().getId();
-      m_controller.sendRequest(PacketType::GetLobbyDetails, getLobbyDetailsJson.dump());
     }
   }
 
@@ -232,6 +237,21 @@ void GameLobbyState::_guiDisplayCreateNewLobby()
 void GameLobbyState::updateLobbiesList(const nlohmann::json &updateJson)
 {
   m_lobbiesListJson = updateJson;
+}
+
+
+void GameLobbyState::_lobbyHeartbeat()
+{
+  constexpr size_t HeartbeatSleepTime = 10;
+
+  while (m_runLobbyHeartbeatThread) {
+    if (m_sendLobbyHeartbeat) {
+      m_controller.sendRequest(PacketType::LobbyHeartbeat);
+      LOG(DEBUG) << "Sending lobby heartbeat";
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(HeartbeatSleepTime));
+  }
 }
 
 } // namespace

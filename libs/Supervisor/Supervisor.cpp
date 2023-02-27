@@ -55,10 +55,13 @@ void Supervisor::run()
   supervisorPacketHandler.runInBackground();
   std::thread inputThread {&Supervisor::_getUserInput, this};
 
-  // Do something...
+  Lobbies::startWatchdogThread();
+
   while(m_run) {
     _processPackets(supervisorPacketHandler);
   }
+
+  Lobbies::stopWatchdogThread();
 
   inputThread.join();
 }
@@ -145,6 +148,9 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
         Supervisor::_listOpenLobbiesHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
       } else if (request.type == PacketType::JoinLobby) {
         Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+      } else if (request.type == PacketType::LobbyHeartbeat) {
+        // Update last response time if we receive lobby heartbeat packets
+        Lobbies::updateLobbyLastResponseTime(clientIdKey);
       }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";
@@ -190,12 +196,19 @@ void Supervisor::_createLobbyHandler(size_t clientIdKey, network::SupervisorPack
 
   LOG(DEBUG) << "[Create Lobby Handler]";
 
-  Lobbies::createNewLobby(clientIdKey, requestJson.at("LobbyName"), requestJson.at("GameKey"));
+  auto lobby = Lobbies::createNewLobby(clientIdKey, requestJson.at("LobbyName"), requestJson.at("GameKey"));
 
   sf::Packet packet;
+
+  nlohmann::json replyJson;
+  replyJson["Valid"] = true;
+  reply.body = replyJson.dump();
+
   packet << reply;
 
   packetHandler.sendPacketToClient(clientIdKey, packet);
+
+  lobby->sendUpdate(packetHandler);
 }
 
 
@@ -242,14 +255,6 @@ void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, network::Supervisor
   // Remove a lobby from a list if exists
   Lobbies::removeLobby(clientIdKey);
 
-//  // Check if there are lobbies with non-existing clients
-//  for (const auto& [creatorId, _]: Lobbies::getLobbies()) {
-//    // If Creator ID is not found in current Clients, we need to remove its lobby - client might have disconnected.
-//    if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
-//      Lobbies::removeLobby(creatorId);
-//    }
-//  }
-
   try {
     auto gameKey = requestJson["GameKey"].get<std::string>();
 
@@ -268,6 +273,7 @@ void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, network::Supervisor
         });
       }
     }
+    replyJson["Valid"] = true;
     reply.body = replyJson.dump();
 
     LOG(DEBUG) << "Reply:\n" << replyJson.dump(4);
@@ -282,7 +288,7 @@ void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, network::Supervisor
 }
 
 
-void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler &packetHandler, const nlohmann::json &requestJson)
+void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
 {
   Reply reply {
     .type = games::PacketType::JoinLobby,
@@ -306,6 +312,8 @@ void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacket
     packet << reply;
 
     packetHandler.sendPacketToClient(clientIdKey, packet);
+
+    lobby->sendUpdate(packetHandler);
   }
 }
 

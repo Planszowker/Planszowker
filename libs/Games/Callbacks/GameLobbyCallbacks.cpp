@@ -34,7 +34,21 @@ void GameLobbyCallbacks::joinLobbyCallback(const std::any& arg)
   try {
     auto replyJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
     if(replyJson["Valid"].get<bool>()) {
-      m_state.m_lobbyState = LobbyState::JoinLobby;
+      m_state.m_lobbyState = LobbyState::LobbyDetails;
+    }
+  } catch (const std::exception& e) {
+  }
+}
+
+
+void GameLobbyCallbacks::createLobbyCallback(const std::any& arg)
+{
+  LOG(DEBUG) << "[GameLobbyCallbacks]::createLobbyCallback";
+
+  try {
+    auto replyJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
+    if(replyJson["Valid"].get<bool>()) {
+      m_state.m_lobbyState = LobbyState::LobbyDetails;
     }
   } catch (const std::exception& e) {
   }

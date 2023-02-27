@@ -17,9 +17,9 @@ public:
   void IDCallback(std::any& arg);
   virtual void listAllAvailableGamesCallback(const std::any&) { };
   virtual void createLobbyCallback(const std::any&) { };
-  virtual void getLobbyDetailsCallback(const std::any& arg) { };
-  virtual void listOpenLobbiesCallback(const std::any& arg) { };
-  virtual void joinLobbyCallback(const std::any& arg) { };
+  virtual void getLobbyDetailsCallback(const std::any&) { };
+  virtual void listOpenLobbiesCallback(const std::any&) { };
+  virtual void joinLobbyCallback(const std::any&) { };
   // Increase callbacks if needed here...
 protected:
   ICallbacks() = default;
