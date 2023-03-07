@@ -324,6 +324,9 @@ void Supervisor::_lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorP
     if (type == "Creator") {
       // Update last response time for lobby
       Lobbies::updateLobbyLastResponseTime(clientIdKey);
+    } else if (type == "Client") {
+      auto creatorId = requestJson["CreatorID"].get<size_t>();
+      Lobbies::updateClientLastResponseTime(creatorId, clientIdKey);
     }
   } catch (std::exception& e) {
   }

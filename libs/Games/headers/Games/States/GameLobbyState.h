@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <atomic>
 #include <functional>
 
@@ -80,8 +81,9 @@ private:
 
   std::atomic<bool> m_sendLobbyHeartbeat = false;
   std::atomic<bool> m_runLobbyHeartbeatThread = true;
-  std::thread m_lobbyHeartbeatThread;
   std::atomic<LobbyHeartbeatType> m_heartbeatType {LobbyHeartbeatType::Creator};
+  std::thread m_lobbyHeartbeatThread;
+  std::mutex m_lobbyHeartbeatMutex;
 
   friend class GameLobbyCallbacks; ///< Callbacks class declared as a friend to access lobby's state.
 };

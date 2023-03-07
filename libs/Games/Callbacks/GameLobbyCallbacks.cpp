@@ -61,7 +61,9 @@ void GameLobbyCallbacks::clientDisconnectedCallback(const std::any& arg)
 {
   LOG(DEBUG) << "[GameLobbyCallbacks]::clientDisconnectedCallback";
 
-  m_state.m_lobbyState = LobbyState::Main;
+  if (m_state.m_lobbyState == LobbyState::LobbyDetails) {
+    m_state.m_lobbyState = LobbyState::Main;
+  }
 }
 
 }

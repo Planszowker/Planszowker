@@ -66,7 +66,12 @@ public:
    * @param CreatorClientID Lobby's Creator ID to update last response time.
    */
   static void updateLobbyLastResponseTime(size_t creatorClientId);
+
+  static void updateClientLastResponseTime(size_t creatorClientId, size_t clientId);
 private:
+  static void _removeLobby(size_t creatorId, network::SupervisorPacketHandler& packetHandler);
+  static void _sendDisconnect(size_t clientId, network::SupervisorPacketHandler& packetHandler);
+
   static std::unordered_map<size_t, Lobby> m_lobbies;
 
   static std::atomic<bool> m_runWatchdogThread;

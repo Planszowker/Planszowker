@@ -98,4 +98,13 @@ std::vector<size_t> Lobby::getClients() const {
   return returnVector;
 }
 
+
+void Lobby::updateClientLastResponseTime(size_t clientId)
+{
+  auto it = m_clients.find(clientId);
+  if (it != m_clients.end()) {
+    it->second = Clock::now();
+  }
+}
+
 }

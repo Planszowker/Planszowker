@@ -6,6 +6,7 @@
 #include <easylogging++.h>
 #include <nlohmann/json.hpp>
 
+#include <imgui.h>
 #include <imgui_stdlib.h>
 
 #include <utility>
@@ -94,8 +95,7 @@ void GameLobbyState::display()
       break;
   }
 
-  //m_gameWindow.clear(sf::Color(55, 55, 55));
-  m_gameWindow.clear(sf::Color::Magenta);
+  m_gameWindow.clear(sf::Color(55, 55, 55));
 
   ImGui::SFML::Render(m_gameWindow);
   m_gameWindow.display();
@@ -104,6 +104,8 @@ void GameLobbyState::display()
 
 void GameLobbyState::updateLobbyDetails(const nlohmann::json& updateJson)
 {
+  std::scoped_lock lock{m_lobbyHeartbeatMutex};
+
   m_lobbyDetailsJson = updateJson;
 }
 
@@ -134,12 +136,14 @@ void GameLobbyState::_guiDisplayLobby()
   ImGui::TableNextColumn();
 
   try {
+    std::scoped_lock lock{m_lobbyHeartbeatMutex};
+
     auto clientsIDs = m_lobbyDetailsJson.at("ClientIDs").get<std::vector<size_t>>();
     auto creatorID = m_lobbyDetailsJson.at("CreatorID").get<size_t>();
 
     for (const auto clientID: clientsIDs) {
       if (clientID == creatorID) {
-        ImGui::Text("[Owner] %lu", clientID);
+        ImGui::Text("[Creator] %lu", clientID);
       } else {
         ImGui::Text("%lu", clientID);
       }
@@ -149,6 +153,10 @@ void GameLobbyState::_guiDisplayLobby()
   } catch (std::exception& e) {
   }
   ImGui::EndTable();
+
+  ImGui::BeginDisabled();
+  ImGui::Button("Start game");
+  ImGui::EndDisabled();
 
   // Back button
   if(ImGui::Button("Back"))
@@ -247,21 +255,26 @@ void GameLobbyState::_lobbyHeartbeat()
   nlohmann::json requestJson;
 
   while (m_runLobbyHeartbeatThread) {
-    switch (m_heartbeatType) {
-      case LobbyHeartbeatType::Creator:
-        requestJson["Type"] = "Creator";
-        break;
-      case LobbyHeartbeatType::Client:
-        requestJson["Type"] = "Client";
-        break;
-    }
-
-    if (m_sendLobbyHeartbeat) {
-      m_controller.sendRequest(PacketType::LobbyHeartbeat, requestJson.dump());
-      LOG(DEBUG) << "Sending lobby heartbeat for " << (m_heartbeatType == LobbyHeartbeatType::Creator ? "Creator" : "Client");
-    }
-
     std::this_thread::sleep_for(std::chrono::seconds(HeartbeatSleepTime));
+    std::scoped_lock lock{m_lobbyHeartbeatMutex};
+
+    try {
+      if (m_sendLobbyHeartbeat) {
+        switch (m_heartbeatType) {
+          case LobbyHeartbeatType::Creator:
+            requestJson["Type"] = "Creator";
+            break;
+          case LobbyHeartbeatType::Client:
+            requestJson["Type"] = "Client";
+            requestJson["CreatorID"] = m_lobbyDetailsJson.at("CreatorID").get<size_t>();
+            break;
+        }
+
+        m_controller.sendRequest(PacketType::LobbyHeartbeat, requestJson.dump());
+        LOG(DEBUG) << "Sending lobby heartbeat for "
+                   << (m_heartbeatType == LobbyHeartbeatType::Creator ? "Creator" : "Client");
+      }
+    } catch (std::exception& e) { }
   }
 }
 

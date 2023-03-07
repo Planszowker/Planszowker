@@ -77,7 +77,7 @@ void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
       if (lastResponseTime.count() > WatchdogExceedMultiplier * WatchdogSleepTime) {
         LOG(DEBUG) << "Lobby for client " << creatorClientId << " has exceeded watchdog time! Removing lobby...";
 
-        m_lobbies.erase(creatorClientId);
+        _removeLobby(creatorClientId, packetHandler);
         goto check_lobbies;
       }
     }
@@ -93,7 +93,6 @@ void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
 
         std::chrono::duration<double> lastResponseTime = std::chrono::steady_clock::now() - timestamp;
         if (lastResponseTime.count() > WatchdogExceedMultiplier * WatchdogSleepTime) {
-          LOG(DEBUG) << "Lobby with ClientID " << clientId << " has exceeded watchdog time! Removing client from lobby...";
 
           sf::Packet packet;
           games::Reply reply {
@@ -135,6 +134,44 @@ void Lobbies::updateLobbyLastResponseTime(size_t creatorClientId)
   if (it != m_lobbies.end()) {
     it->second.updateLastResponseTime();
   }
+}
+
+
+void Lobbies::updateClientLastResponseTime(size_t creatorClientId, size_t clientId)
+{
+  std::scoped_lock lock(m_watchdogMutex);
+
+  auto it = m_lobbies.find(creatorClientId);
+  if (it != m_lobbies.end()) {
+    auto& lobby = it->second;
+    lobby.updateClientLastResponseTime(clientId);
+  }
+}
+
+
+void Lobbies::_removeLobby(size_t creatorId, network::SupervisorPacketHandler& packetHandler) {
+  // Non thread safe method to remove a lobby. Shouldn't be used outside Lobbies class.
+  auto it = m_lobbies.find(creatorId);
+  if (it != m_lobbies.end()) {
+    auto& lobby = it->second;
+    for (const auto& clientId : lobby.getClients()) {
+      // Send ClientDisconnected reply to every connected client
+      _sendDisconnect(clientId, packetHandler);
+    }
+    m_lobbies.erase(creatorId);
+  }
+}
+
+
+void Lobbies::_sendDisconnect(size_t clientId, network::SupervisorPacketHandler& packetHandler) {
+  sf::Packet packet;
+  games::Reply reply {
+    .type = games::PacketType::ClientDisconnected,
+    .status = games::ReplyType::Success
+  };
+  packet << reply;
+
+  packetHandler.sendPacketToClient(clientId, packet);
 }
 
 }

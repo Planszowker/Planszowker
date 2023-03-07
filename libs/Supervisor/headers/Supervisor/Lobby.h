@@ -12,7 +12,8 @@ namespace pla::supervisor {
 class Lobby
 {
 public:
-  using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+  using Clock = std::chrono::steady_clock;
+  using TimePoint = std::chrono::time_point<Clock>;
   using ClientContainer = std::unordered_map<size_t, TimePoint>;
 
   Lobby() = delete;
@@ -48,7 +49,6 @@ public:
   [[maybe_unused]] [[nodiscard]]
   std::chrono::time_point<std::chrono::steady_clock> getLastResponseTime() const { return m_lastResponseTime; }
 
-  [[maybe_unused]]
   void updateLastResponseTime() { m_lastResponseTime = std::chrono::steady_clock::now(); }
 
   /*!
@@ -59,6 +59,14 @@ public:
    * @param packetHandler Supervisor Packet Handler used to send details over network.
    */
   void sendUpdate(network::SupervisorPacketHandler& packetHandler) const;
+
+  /*!
+   * Update Client last response time.
+   * Last response time is used in watchdog thread to check if user still wants to be in lobby.
+   *
+   * @param
+   */
+  void updateClientLastResponseTime(size_t clientId);
 private:
   void _extractGameMetadata();
   size_t m_creatorClientId;
