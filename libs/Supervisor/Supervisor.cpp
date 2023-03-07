@@ -14,6 +14,7 @@
 namespace pla::supervisor {
 
 using namespace games;
+using namespace games::json_entries;
 
 Supervisor::Supervisor(std::stringstream configStream)
   : m_configParser(std::move(configStream))
@@ -126,7 +127,7 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
       } else if (request.type == PacketType::ID) {
         // If we get ID request, we need to send client's ID
         nlohmann::json replyJson;
-        replyJson["ClientID"] = clientIdKey;
+        replyJson[CLIENT_ID] = clientIdKey;
 
         Reply idReply{
                 .type = PacketType::ID,
@@ -194,20 +195,21 @@ void Supervisor::_createLobbyHandler(size_t clientIdKey, network::SupervisorPack
   };
 
   LOG(DEBUG) << "[Create Lobby Handler]";
+  try {
+    auto lobby = Lobbies::createNewLobby(clientIdKey, requestJson.at(LOBBY_NAME), requestJson.at(GAME_KEY));
 
-  auto lobby = Lobbies::createNewLobby(clientIdKey, requestJson.at("LobbyName"), requestJson.at("GameKey"));
+    sf::Packet packet;
 
-  sf::Packet packet;
+    nlohmann::json replyJson;
+    replyJson[VALID] = true;
+    reply.body = replyJson.dump();
 
-  nlohmann::json replyJson;
-  replyJson["Valid"] = true;
-  reply.body = replyJson.dump();
+    packet << reply;
 
-  packet << reply;
+    packetHandler.sendPacketToClient(clientIdKey, packet);
 
-  packetHandler.sendPacketToClient(clientIdKey, packet);
-
-  lobby->sendUpdate(packetHandler);
+    lobby->sendUpdate(packetHandler);
+  } catch (std::exception& e) { }
 }
 
 
@@ -220,18 +222,21 @@ void Supervisor::_getLobbyDetailsHandler(size_t clientIdKey, network::Supervisor
 
   LOG(DEBUG) << "[Get Lobby Details Handler]";
 
-  auto lobby = Lobbies::getLobby(requestJson["CreatorID"]);
+  auto lobby = Lobbies::getLobby(requestJson[CREATOR_ID]);
   if (lobby) {
     LOG(DEBUG) << "[LobbyDetailsHandler] CreatorID: " << lobby->getCreatorClientId();
     LOG(DEBUG) << "[LobbyDetailsHandler] Lobby Name: " << lobby->getLobbyName();
     LOG(DEBUG) << "[LobbyDetailsHandler] Game Key: " << lobby->getGameKey();
 
     nlohmann::json replyJson;
-    replyJson["CreatorID"] = lobby->getCreatorClientId();
-    replyJson["ClientIDs"] = lobby->getClients();
-    replyJson["LobbyName"] = lobby->getLobbyName();
-    replyJson["GameKey"] = lobby->getGameKey();
-    replyJson["Valid"] = true;
+    replyJson[CREATOR_ID] = lobby->getCreatorClientId();
+    replyJson[CLIENT_IDS] = lobby->getClients();
+    replyJson[LOBBY_NAME] = lobby->getLobbyName();
+    replyJson[GAME_KEY] = lobby->getGameKey();
+    replyJson[MAX_PLAYERS] = lobby->getMaxPlayers();
+    replyJson[MIN_PLAYERS] = lobby->getMinPlayers();
+    replyJson[CURRENT_PLAYERS] = lobby->getCurrentPlayers();
+    replyJson[VALID] = true;
     reply.body = replyJson.dump();
 
     sf::Packet packet;
@@ -255,24 +260,24 @@ void Supervisor::_listOpenLobbiesHandler(size_t clientIdKey, network::Supervisor
   Lobbies::removeLobby(clientIdKey);
 
   try {
-    auto gameKey = requestJson["GameKey"].get<std::string>();
+    auto gameKey = requestJson[GAME_KEY].get<std::string>();
 
     nlohmann::json replyJson;
-    replyJson["GameKey"] = gameKey;
-    replyJson["Lobbies"] = nlohmann::json::array();
+    replyJson[GAME_KEY] = gameKey;
+    replyJson[LOBBIES] = nlohmann::json::array();
     for (const auto& [creatorID, lobby]: Lobbies::getLobbies()) {
       // Only look for lobbies with given game key
       if (lobby.getGameKey() == gameKey) {
-        replyJson["Lobbies"].push_back({
-          {"CreatorID", lobby.getCreatorClientId()},
-          {"LobbyName", lobby.getLobbyName()},
-          {"MinPlayers", lobby.getMinPlayers()},
-          {"CurrentPlayers", lobby.getCurrentPlayers()},
-          {"MaxPlayers", lobby.getMaxPlayers()}
+        replyJson[LOBBIES].push_back({
+          {CREATOR_ID, lobby.getCreatorClientId()},
+          {LOBBY_NAME, lobby.getLobbyName()},
+          {MIN_PLAYERS, lobby.getMinPlayers()},
+          {CURRENT_PLAYERS, lobby.getCurrentPlayers()},
+          {MAX_PLAYERS, lobby.getMaxPlayers()}
         });
       }
     }
-    replyJson["Valid"] = true;
+    replyJson[VALID] = true;
     reply.body = replyJson.dump();
 
     LOG(DEBUG) << "Reply:\n" << replyJson.dump(4);
@@ -296,13 +301,13 @@ void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacket
 
   LOG(DEBUG) << "[Join Lobby Handler]";
 
-  auto lobby = Lobbies::getLobby(requestJson["CreatorID"].get<size_t>());
-  if (lobby and requestJson["CreatorID"].get<size_t>() != clientIdKey) {
+  auto lobby = Lobbies::getLobby(requestJson[CREATOR_ID].get<size_t>());
+  if (lobby and requestJson[CREATOR_ID].get<size_t>() != clientIdKey) {
     nlohmann::json replyJson;
-    replyJson["Valid"] = false;
+    replyJson[VALID] = false;
 
     if (lobby->addClient(clientIdKey)) {
-      replyJson["Valid"] = true;
+      replyJson[VALID] = true;
     }
 
     reply.body = replyJson.dump();
@@ -320,12 +325,12 @@ void Supervisor::_joinLobbyHandler(size_t clientIdKey, network::SupervisorPacket
 void Supervisor::_lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson)
 {
   try {
-    auto type = requestJson["Type"].get<std::string>();
+    auto type = requestJson[LOBBY_HEARTBEAT_TYPE].get<std::string>();
     if (type == "Creator") {
       // Update last response time for lobby
       Lobbies::updateLobbyLastResponseTime(clientIdKey);
     } else if (type == "Client") {
-      auto creatorId = requestJson["CreatorID"].get<size_t>();
+      auto creatorId = requestJson[CREATOR_ID].get<size_t>();
       Lobbies::updateClientLastResponseTime(creatorId, clientIdKey);
     }
   } catch (std::exception& e) {

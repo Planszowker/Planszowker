@@ -1,9 +1,12 @@
 #include <Callbacks/GameLobbyCallbacks.h>
 
+#include <Games/Objects.h>
 #include <ErrorHandler/ErrorLogger.h>
 #include <easylogging++.h>
 
 namespace pla::games {
+
+using namespace json_entries;
 
 void GameLobbyCallbacks::getLobbyDetailsCallback(const std::any& arg) {
   LOG(DEBUG) << "[GameLobbyCallbacks]::getLobbyDetailsCallback";
@@ -33,7 +36,7 @@ void GameLobbyCallbacks::joinLobbyCallback(const std::any& arg)
   LOG(DEBUG) << "[GameLobbyCallbacks]::joinLobbyCallback";
   try {
     auto replyJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
-    if(replyJson["Valid"].get<bool>()) {
+    if(replyJson[VALID].get<bool>()) {
       m_state.m_heartbeatType = GameLobbyState::LobbyHeartbeatType::Client;
       m_state.m_lobbyState = LobbyState::LobbyDetails;
     }
@@ -48,7 +51,7 @@ void GameLobbyCallbacks::createLobbyCallback(const std::any& arg)
 
   try {
     auto replyJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
-    if(replyJson["Valid"].get<bool>()) {
+    if(replyJson[VALID].get<bool>()) {
       m_state.m_heartbeatType = GameLobbyState::LobbyHeartbeatType::Creator;
       m_state.m_lobbyState = LobbyState::LobbyDetails;
     }

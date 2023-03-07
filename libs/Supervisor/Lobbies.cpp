@@ -96,13 +96,14 @@ void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
 
           sf::Packet packet;
           games::Reply reply {
-            .type = games::PacketType::ClientDisconnected,
+            .type = games::PacketType::DisconnectClient,
             .status = games::ReplyType::Success
           };
           packet << reply;
 
           packetHandler.sendPacketToClient(clientId, packet);
           lobby.removeClient(clientId);
+          lobby.sendUpdate(packetHandler);
           goto check_clients;
         }
       }
@@ -166,7 +167,7 @@ void Lobbies::_removeLobby(size_t creatorId, network::SupervisorPacketHandler& p
 void Lobbies::_sendDisconnect(size_t clientId, network::SupervisorPacketHandler& packetHandler) {
   sf::Packet packet;
   games::Reply reply {
-    .type = games::PacketType::ClientDisconnected,
+    .type = games::PacketType::DisconnectClient,
     .status = games::ReplyType::Success
   };
   packet << reply;

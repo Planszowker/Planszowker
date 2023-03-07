@@ -9,6 +9,8 @@
 
 namespace pla::supervisor {
 
+using namespace games::json_entries;
+
 Lobby::Lobby(size_t creatorClientId, std::string lobbyName, std::string gameKey)
   : m_creatorClientId(creatorClientId)
   , m_lobbyName(std::move(lobbyName))
@@ -75,11 +77,14 @@ void Lobby::sendUpdate(network::SupervisorPacketHandler& packetHandler) const
   };
 
   nlohmann::json replyJson;
-  replyJson["CreatorID"] = m_creatorClientId;
-  replyJson["ClientIDs"] = getClients();
-  replyJson["LobbyName"] = m_lobbyName;
-  replyJson["GameKey"] = m_gameKey;
-  replyJson["Valid"] = true;
+  replyJson[CREATOR_ID] = m_creatorClientId;
+  replyJson[CLIENT_IDS] = getClients();
+  replyJson[LOBBY_NAME] = m_lobbyName;
+  replyJson[GAME_KEY] = m_gameKey;
+  replyJson[MAX_PLAYERS] = m_maxPlayers;
+  replyJson[MIN_PLAYERS] = m_minPlayers;
+  replyJson[CURRENT_PLAYERS] = m_clients.size();
+  replyJson[VALID] = true;
   reply.body = replyJson.dump();
 
   packet << reply;

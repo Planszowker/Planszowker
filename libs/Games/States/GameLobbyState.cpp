@@ -2,6 +2,7 @@
 #include <Callbacks/GameLobbyCallbacks.h>
 
 #include <GamesClient/SharedObjects.h>
+#include <Games/Objects.h>
 
 #include <easylogging++.h>
 #include <nlohmann/json.hpp>
@@ -15,6 +16,7 @@
 namespace pla::games {
 
 using namespace games_client;
+using namespace json_entries;
 
 GameLobbyState::GameLobbyState(games_client::GraphicalView& graphicalView, GameLobbyStateArguments gameLobbyStateArguments)
   : m_graphicalView(graphicalView)
@@ -120,7 +122,7 @@ void GameLobbyState::_guiDisplayMainGui()
   if(ImGui::Button("Join Lobby"))
   {
     nlohmann::json requestJson;
-    requestJson["GameKey"] = m_gameArguments.gameName;
+    requestJson[GAME_KEY] = m_gameArguments.gameName;
     m_controller.sendRequest(PacketType::ListOpenLobbies, requestJson.dump());
     m_lobbyState = LobbyState::JoinLobby;
   }
@@ -138,8 +140,8 @@ void GameLobbyState::_guiDisplayLobby()
   try {
     std::scoped_lock lock{m_lobbyHeartbeatMutex};
 
-    auto clientsIDs = m_lobbyDetailsJson.at("ClientIDs").get<std::vector<size_t>>();
-    auto creatorID = m_lobbyDetailsJson.at("CreatorID").get<size_t>();
+    auto clientsIDs = m_lobbyDetailsJson.at(CLIENT_IDS).get<std::vector<size_t>>();
+    auto creatorID = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();
 
     for (const auto clientID: clientsIDs) {
       if (clientID == creatorID) {
@@ -154,9 +156,22 @@ void GameLobbyState::_guiDisplayLobby()
   }
   ImGui::EndTable();
 
-  ImGui::BeginDisabled();
-  ImGui::Button("Start game");
-  ImGui::EndDisabled();
+  try {
+    auto creatorID = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();
+    auto minPlayers = m_lobbyDetailsJson.at(MIN_PLAYERS).get<size_t>();
+    auto currentPlayers = m_lobbyDetailsJson.at(CURRENT_PLAYERS).get<size_t>();
+
+    bool shouldDisable = (creatorID != shared::getClientInfo().getId()) || (currentPlayers < minPlayers);
+    if (shouldDisable) {
+      ImGui::BeginDisabled();
+    }
+
+    ImGui::Button("Start game");
+
+    if (shouldDisable) {
+      ImGui::EndDisabled();
+    }
+  } catch (std::exception& e) { }
 
   // Back button
   if(ImGui::Button("Back"))
@@ -176,13 +191,13 @@ void GameLobbyState::_guiDisplayJoinLobby()
   ImGui::TableNextColumn();
 
   try {
-    auto lobbiesJson = m_lobbiesListJson.at("Lobbies");
+    auto lobbiesJson = m_lobbiesListJson.at(LOBBIES);
 
     for (const auto& lobbyJson: lobbiesJson) {
-      auto lobbyNameStr = lobbyJson.at("LobbyName").get<std::string>();
-      auto lobbyMinPlayers = lobbyJson.at("MinPlayers").get<int>();
-      auto lobbyCurrentPlayers = lobbyJson.at("CurrentPlayers").get<int>();
-      auto lobbyMaxPlayers = lobbyJson.at("MaxPlayers").get<int>();
+      auto lobbyNameStr = lobbyJson.at(LOBBY_NAME).get<std::string>();
+      auto lobbyMinPlayers = lobbyJson.at(MIN_PLAYERS).get<int>();
+      auto lobbyCurrentPlayers = lobbyJson.at(CURRENT_PLAYERS).get<int>();
+      auto lobbyMaxPlayers = lobbyJson.at(MAX_PLAYERS).get<int>();
       ImGui::Text("%s", lobbyNameStr.c_str());
       ImGui::TableNextColumn();
       ImGui::Text("[%d / %d] (min. %d)", lobbyCurrentPlayers, lobbyMaxPlayers, lobbyMinPlayers);
@@ -192,7 +207,7 @@ void GameLobbyState::_guiDisplayJoinLobby()
         LOG(DEBUG) << lobbyJson.dump(4);
 
         nlohmann::json requestJson;
-        requestJson["CreatorID"] = lobbyJson.at("CreatorID").get<size_t>();
+        requestJson[CREATOR_ID] = lobbyJson.at(CREATOR_ID).get<size_t>();
         m_controller.sendRequest(PacketType::JoinLobby, requestJson.dump());
       }
       ImGui::TableNextRow();
@@ -225,8 +240,8 @@ void GameLobbyState::_guiDisplayCreateNewLobby()
       m_createNewLobbyErrorString = "Lobby name too long!";
     } else {
       nlohmann::json createLobbyRequestJson;
-      createLobbyRequestJson["LobbyName"] = lobbyName;
-      createLobbyRequestJson["GameKey"] = m_gameArguments.gameName;
+      createLobbyRequestJson[LOBBY_NAME] = lobbyName;
+      createLobbyRequestJson[GAME_KEY] = m_gameArguments.gameName;
 
       m_controller.sendRequest(PacketType::CreateLobby, createLobbyRequestJson.dump());
     }
@@ -262,11 +277,11 @@ void GameLobbyState::_lobbyHeartbeat()
       if (m_sendLobbyHeartbeat) {
         switch (m_heartbeatType) {
           case LobbyHeartbeatType::Creator:
-            requestJson["Type"] = "Creator";
+            requestJson[LOBBY_HEARTBEAT_TYPE] = "Creator";
             break;
           case LobbyHeartbeatType::Client:
-            requestJson["Type"] = "Client";
-            requestJson["CreatorID"] = m_lobbyDetailsJson.at("CreatorID").get<size_t>();
+            requestJson[LOBBY_HEARTBEAT_TYPE] = "Client";
+            requestJson[CREATOR_ID] = m_lobbyDetailsJson.at("CreatorID").get<size_t>();
             break;
         }
 

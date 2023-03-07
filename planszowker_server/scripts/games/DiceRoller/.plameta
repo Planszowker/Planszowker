@@ -9,4 +9,4 @@ version: 0.1
 
 [settings]
 min_players: 2
-max_players: 4
+max_players: 8
