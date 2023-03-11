@@ -112,4 +112,21 @@ void Lobby::updateClientLastResponseTime(size_t clientId)
   }
 }
 
+
+void Lobby::sendToAllClients(network::SupervisorPacketHandler& packetHandler, games::PacketType type, const std::string& body)
+{
+  games::Reply reply {
+    .type = type,
+    .status = games::ReplyType::Success,
+    .body = body,
+  };
+
+  sf::Packet packet;
+  packet << reply;
+
+  for (const auto [clientId, _] : m_clients) {
+    packetHandler.sendPacketToClient(clientId, packet);
+  }
+}
+
 }

@@ -183,8 +183,15 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
 
         case games::PacketType::DisconnectClient:
           if (m_callbacks) {
-            m_callbacks->clientDisconnectedCallback(arg);
+            m_callbacks->disconnectClientCallback(arg);
           }
+          break;
+
+        case games::PacketType::StartGame:
+          if (m_callbacks) {
+            m_callbacks->startGameCallback(arg);
+          }
+          break;
 
         default:
           break;
@@ -238,8 +245,6 @@ void ClientPacketHandler::connectCallbacks(games::ICallbacks* callbacks)
 {
   if (callbacks) {
     m_callbacks = callbacks;
-  } else {
-    err_handler::ErrorLogger::printError("Given callbacks pointer is a nullptr!");
   }
 }
 

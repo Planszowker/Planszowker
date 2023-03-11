@@ -10,11 +10,16 @@
 
 namespace pla::games {
 
+struct GameStateArguments
+{
+  std::string gameName;
+};
+
 class GameState final : public IState
 {
 public:
   GameState() = delete;
-  explicit GameState(games_client::GraphicalView& graphicalView);
+  GameState(games_client::GraphicalView& graphicalView, GameStateArguments gameStateArguments);
 
   void eventHandling() final;
   void display() final;
@@ -22,7 +27,12 @@ public:
 
 private:
   games_client::GraphicalView& m_graphicalView;
+  games_client::Controller& m_controller;
   GameWindow& m_gameWindow;
+
+  std::shared_ptr<ICallbacks> m_callbacks;
+
+  GameStateArguments m_gameArguments;
 
   // State specific parameters
 

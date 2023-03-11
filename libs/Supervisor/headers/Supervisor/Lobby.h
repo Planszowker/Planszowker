@@ -2,6 +2,8 @@
 
 #include <NetworkHandler/SupervisorPacketHandler.h>
 
+#include <Games/Objects.h>
+
 #include <string>
 #include <vector>
 #include <utility>
@@ -59,6 +61,8 @@ public:
    * @param packetHandler Supervisor Packet Handler used to send details over network.
    */
   void sendUpdate(network::SupervisorPacketHandler& packetHandler) const;
+
+  void sendToAllClients(network::SupervisorPacketHandler& packetHandler, games::PacketType type, const std::string& body);
 
   /*!
    * Update Client last response time.

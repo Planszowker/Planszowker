@@ -13,6 +13,7 @@ set(SOURCES
         Callbacks/ICallbacks.cpp
         Callbacks/GameChoosingCallbacks.cpp
         Callbacks/GameLobbyCallbacks.cpp
+        Callbacks/GameCallbacks.cpp
         )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

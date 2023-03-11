@@ -121,36 +121,42 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
       Request request{};
       packet >> request;
 
-      if (request.type == PacketType::Heartbeat) {
-        // We don't care about Heartbeat packets
-        continue;
-      } else if (request.type == PacketType::ID) {
-        // If we get ID request, we need to send client's ID
-        nlohmann::json replyJson;
-        replyJson[CLIENT_ID] = clientIdKey;
+      try {
+        if (request.type == PacketType::Heartbeat) {
+          // We don't care about Heartbeat packets
+          continue;
+        } else if (request.type == PacketType::ID) {
+          // If we get ID request, we need to send client's ID
+          nlohmann::json replyJson;
+          replyJson[CLIENT_ID] = clientIdKey;
 
-        Reply idReply{
-                .type = PacketType::ID,
-                .status = ReplyType::Success,
-                .body = replyJson.dump()
-        };
+          Reply idReply{
+                  .type = PacketType::ID,
+                  .status = ReplyType::Success,
+                  .body = replyJson.dump()
+          };
 
-        sf::Packet replyPacket;
-        replyPacket << idReply;
+          sf::Packet replyPacket;
+          replyPacket << idReply;
 
-        packetHandler.sendPacketToClient(clientIdKey, replyPacket);
-      } else if (request.type == PacketType::ListAvailableGames) {
-        Supervisor::_listAvailableGamesHandler(clientIdKey, packetHandler);
-      } else if (request.type == PacketType::CreateLobby) {
-        Supervisor::_createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
-      } else if (request.type == PacketType::GetLobbyDetails) {
-        Supervisor::_getLobbyDetailsHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
-      } else if (request.type == PacketType::ListOpenLobbies) {
-        Supervisor::_listOpenLobbiesHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
-      } else if (request.type == PacketType::JoinLobby) {
-        Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
-      } else if (request.type == PacketType::LobbyHeartbeat) {
-        Supervisor::_lobbyHeartbeatHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+          packetHandler.sendPacketToClient(clientIdKey, replyPacket);
+        } else if (request.type == PacketType::ListAvailableGames) {
+          Supervisor::_listAvailableGamesHandler(clientIdKey, packetHandler);
+        } else if (request.type == PacketType::CreateLobby) {
+          Supervisor::_createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+        } else if (request.type == PacketType::GetLobbyDetails) {
+          Supervisor::_getLobbyDetailsHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+        } else if (request.type == PacketType::ListOpenLobbies) {
+          Supervisor::_listOpenLobbiesHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+        } else if (request.type == PacketType::JoinLobby) {
+          Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+        } else if (request.type == PacketType::LobbyHeartbeat) {
+          Supervisor::_lobbyHeartbeatHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+        } else if (request.type == PacketType::StartGame) {
+          Supervisor::_startGameHandler(clientIdKey, packetHandler);
+        }
+      } catch (std::exception& e) {
+        LOG(DEBUG) << "[Supervisor] Exception in _processPackets";
       }
 
       std::cout << "Type: " << static_cast<int>(request.type) << "\n";
@@ -335,6 +341,21 @@ void Supervisor::_lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorP
     }
   } catch (std::exception& e) {
   }
+}
+
+
+void Supervisor::_startGameHandler(size_t clientIdKey, network::SupervisorPacketHandler &packetHandler)
+{
+  nlohmann::json replyJson;
+  replyJson[VALID] = false;
+
+  // We should check whether a lobby has enough clients connected
+  auto lobby = Lobbies::getLobby(clientIdKey);
+  if (lobby->getCreatorClientId() == clientIdKey && lobby->getCurrentPlayers() >= lobby->getMinPlayers()) {
+    replyJson[VALID] = true;
+  }
+
+  lobby->sendToAllClients(packetHandler, games::PacketType::StartGame, replyJson.dump());
 }
 
 } // namespace

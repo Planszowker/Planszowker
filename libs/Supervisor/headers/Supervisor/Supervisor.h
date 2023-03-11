@@ -32,6 +32,7 @@ private:
   static void _listOpenLobbiesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
   static void _joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
   static void _lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  static void _startGameHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
 
   utils::plameta::Parser m_configParser;
 

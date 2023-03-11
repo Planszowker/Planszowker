@@ -76,7 +76,7 @@ void GraphicalView::changeState(States newState, const std::any& arg)
       newStatePtr = std::make_shared<GameChoosingState>(*this);
       break;
     case States::Game:
-      newStatePtr = std::make_shared<GameState>(*this);
+      newStatePtr = std::make_shared<GameState>(*this, std::any_cast<GameStateArguments>(arg));
       break;
     case States::GameLobby:
       newStatePtr = std::make_shared<GameLobbyState>(*this, std::any_cast<GameLobbyStateArguments>(arg));
@@ -84,6 +84,9 @@ void GraphicalView::changeState(States newState, const std::any& arg)
   }
 
   m_states.emplace_back(std::move(newStatePtr));
+
+  // Invalidate callbacks
+  m_controller.getPacketHandler()->connectCallbacks(nullptr);
 }
 
 } // namespaces

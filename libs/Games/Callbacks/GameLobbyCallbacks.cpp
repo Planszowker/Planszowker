@@ -55,18 +55,29 @@ void GameLobbyCallbacks::createLobbyCallback(const std::any& arg)
       m_state.m_heartbeatType = GameLobbyState::LobbyHeartbeatType::Creator;
       m_state.m_lobbyState = LobbyState::LobbyDetails;
     }
-  } catch (const std::exception& e) {
-  }
+  } catch (const std::exception& e) { }
 }
 
 
-void GameLobbyCallbacks::clientDisconnectedCallback(const std::any& arg)
+void GameLobbyCallbacks::disconnectClientCallback(const std::any& arg)
 {
-  LOG(DEBUG) << "[GameLobbyCallbacks]::clientDisconnectedCallback";
+  LOG(DEBUG) << "[GameLobbyCallbacks]::disconnectClientCallback";
 
   if (m_state.m_lobbyState == LobbyState::LobbyDetails) {
     m_state.m_lobbyState = LobbyState::Main;
   }
+}
+
+
+void GameLobbyCallbacks::startGameCallback(const std::any& arg) {
+  LOG(DEBUG) << "[GameLobbyCallbacks]::startGameCallback";
+
+  try {
+    auto replyJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
+    if(replyJson[VALID].get<bool>()) {
+      m_state.m_lobbyState = LobbyState::StartGame;
+    }
+  } catch (const std::exception& e) { }
 }
 
 }

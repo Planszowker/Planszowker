@@ -3,7 +3,6 @@
 #include "IState.h"
 
 #include <Games/Callbacks/ICallbacks.h>
-#include <Games/Callbacks/GameLobbyCallbacks.h>
 #include <Games/GameWindow.h>
 #include <GamesClient/GraphicalView.h>
 #include <NetworkHandler/ClientPacketHandler.h>
@@ -30,7 +29,8 @@ enum class LobbyState
   Main,
   CreateLobby,
   JoinLobby,
-  LobbyDetails
+  LobbyDetails,
+  StartGame
 };
 
 
@@ -38,7 +38,7 @@ class GameLobbyState final : public IState
 {
 public:
   GameLobbyState() = delete;
-  explicit GameLobbyState(games_client::GraphicalView& graphicalView, GameLobbyStateArguments gameLobbyStateArguments);
+  GameLobbyState(games_client::GraphicalView& graphicalView, GameLobbyStateArguments gameLobbyStateArguments);
 
   virtual ~GameLobbyState();
 

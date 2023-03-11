@@ -1,8 +1,9 @@
 #include <States/GameLobbyState.h>
-#include <Callbacks/GameLobbyCallbacks.h>
 
+#include <Callbacks/GameLobbyCallbacks.h>
 #include <GamesClient/SharedObjects.h>
 #include <Games/Objects.h>
+#include <Games/States/GameState.h>
 
 #include <easylogging++.h>
 #include <nlohmann/json.hpp>
@@ -95,6 +96,12 @@ void GameLobbyState::display()
       m_sendLobbyHeartbeat = true;
       _guiDisplayLobby();
       break;
+    case LobbyState::StartGame:
+      m_sendLobbyHeartbeat = false;
+      GameStateArguments arg;
+      arg.gameName = m_gameArguments.gameName;
+      m_graphicalView.changeState(States::Game, arg);
+      break;
   }
 
   m_gameWindow.clear(sf::Color(55, 55, 55));
@@ -166,7 +173,9 @@ void GameLobbyState::_guiDisplayLobby()
       ImGui::BeginDisabled();
     }
 
-    ImGui::Button("Start game");
+    if (ImGui::Button("Start game")) {
+      m_controller.sendRequest(PacketType::StartGame);
+    }
 
     if (shouldDisable) {
       ImGui::EndDisabled();

@@ -1,10 +1,17 @@
 #include <States/GameState.h>
 
+#include <Callbacks/GameCallbacks.h>
+#include <GamesClient/SharedObjects.h>
+#include <Games/Objects.h>
+
 namespace pla::games {
 
-GameState::GameState(games_client::GraphicalView& graphicalView)
+GameState::GameState(games_client::GraphicalView& graphicalView, GameStateArguments gameStateArguments)
   : m_graphicalView(graphicalView)
   , m_gameWindow(*graphicalView.getGameWindow())
+  , m_controller(graphicalView.getController())
+  , m_gameArguments(std::move(gameStateArguments))
+  , m_callbacks(std::make_shared<GameCallbacks>())
 //  , m_gameAreaWindow(sfg::Window::Create(sf::Style::None))
 //  , m_playerAreaWindow(sfg::Window::Create(sf::Style::None))
 //  , m_logAreaWindow(sfg::Window::Create(sf::Style::None))
@@ -14,6 +21,9 @@ GameState::GameState(games_client::GraphicalView& graphicalView)
 //  , m_logAreaBox(sfg::Box::Create())
 //  , m_actionAreaBox(sfg::Box::Create())
 {
+  // Connect GameChoosing callbacks to packet handler
+  m_controller.getPacketHandler()->connectCallbacks(m_callbacks.get());
+
   // Divide area into panels
   // _________________________________
   // |                      | PLAYER |  / \
