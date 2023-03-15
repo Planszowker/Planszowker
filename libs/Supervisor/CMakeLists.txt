@@ -16,6 +16,8 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC EasyLogging
                         PUBLIC PlametaParser
                         PUBLIC NetworkHandler
+                        PUBLIC ThreadSafeQueue
+                        PUBLIC GamesServer
 
                         PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
                       )

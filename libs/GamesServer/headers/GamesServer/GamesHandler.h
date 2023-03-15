@@ -6,8 +6,6 @@
 
 #include <ZipLib/ZipFile.h>
 
-#include <NetworkHandler/ServerPacketHandler.h>
-
 namespace pla::games_server {
 
 class GamesHandler {

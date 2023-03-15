@@ -10,7 +10,7 @@ namespace pla::games_server {
 
 using namespace games;
 
-Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, ZipArchive::Ptr zipFile)
+Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::SupervisorPacketHandler& packetHandler, ZipArchive::Ptr zipFile)
   : m_gameName(gameName)
   , m_clientsIDs(clientIds)
   , m_networkHandler(packetHandler)

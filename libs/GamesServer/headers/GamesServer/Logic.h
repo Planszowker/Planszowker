@@ -2,7 +2,7 @@
 
 /* Generic */
 //#include "Games/ServerHandler.h"
-#include "NetworkHandler/ServerPacketHandler.h"
+#include "NetworkHandler/SupervisorPacketHandler.h"
 #include "Games/Objects.h"
 #include "Rng/RandomGenerator.h"
 
@@ -24,7 +24,7 @@ class Logic
 public:
   using ClientIDsAndPointsMap = std::unordered_map<size_t, int>;
 
-  Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, ZipArchive::Ptr zipFile);
+  Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::SupervisorPacketHandler& packetHandler, ZipArchive::Ptr zipFile);
 
   void handleGameLogic(size_t clientId, const games::Request& requestType);
 
@@ -46,7 +46,7 @@ private:
   int _getClientPoints(size_t clientID) const;
 
   const std::string& m_gameName;
-  network::ServerPacketHandler& m_networkHandler;
+  network::SupervisorPacketHandler& m_networkHandler;
 
   ZipArchive::Ptr m_plaGameFile;
 

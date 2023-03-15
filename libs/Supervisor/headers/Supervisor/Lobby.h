@@ -51,6 +51,9 @@ public:
   [[maybe_unused]] [[nodiscard]]
   std::chrono::time_point<std::chrono::steady_clock> getLastResponseTime() const { return m_lastResponseTime; }
 
+  [[maybe_unused]] [[nodiscard]]
+  bool hasEnoughClients() const { return m_clients.size() >= m_minPlayers; }
+
   void updateLastResponseTime() { m_lastResponseTime = std::chrono::steady_clock::now(); }
 
   /*!

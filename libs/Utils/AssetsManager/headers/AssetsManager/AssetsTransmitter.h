@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ZipLib/ZipFile.h>
-#include <NetworkHandler/ServerPacketHandler.h>
+#include <NetworkHandler/SupervisorPacketHandler.h>
 
 #include "AssetsDefines.h"
 
@@ -13,7 +13,7 @@ namespace pla::assets {
 class AssetsTransmitter
 {
 public:
-  AssetsTransmitter(ZipArchive::Ptr plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries);
+  AssetsTransmitter(ZipArchive::Ptr plagameFile, network::SupervisorPacketHandler& packetHandler, std::vector<std::string>& assetsEntries);
 
   // Transmit all available assets in chunks - to not overflow eth fifo on client's side
   void transmitAssets(size_t clientKey);
@@ -26,7 +26,7 @@ private:
   void _transferFile(ZipArchiveEntry::Ptr fileStream);
   void _endTransaction(std::string assetName, size_t key);
 
-  network::ServerPacketHandler& m_packetHandler;
+  network::SupervisorPacketHandler& m_packetHandler;
   ZipArchive::Ptr m_plagameFile;
   std::vector<std::string>& m_assetsEntries;
   std::vector<std::string>::iterator m_currentAssetNameIter;

@@ -1,9 +1,12 @@
 #pragma once
 
+#include <GamesServer/GamesHandler.h>
+
 /* Generic */
-#include <NetworkHandler/ServerPacketHandler.h>
-#include "GamesHandler.h"
+#include <NetworkHandler/SupervisorPacketHandler.h>
 #include <AssetsManager/AssetsTransmitter.h>
+#include <Supervisor/Supervisor.h>
+#include <Games/GameInstance.h>
 
 /* SFML */
 #include <SFML/Network.hpp>
@@ -18,29 +21,21 @@ namespace pla::games_server {
 class ServerHandler
 {
 public:
-  explicit ServerHandler(const std::string& gameName, network::ServerPacketHandler& packetHandler)
-    : m_packetHandler(packetHandler)
-    , m_run(true)
-    , m_gameName(gameName)
-    , m_gamesHandler(gameName)
+  explicit ServerHandler(games::GameInstance gameInstance)
+    : m_gameInstance(gameInstance)
+    , m_gamesHandler(gameInstance.gameKey)
   {
-  }
-
-  virtual ~ServerHandler()
-  {
-    m_packetHandler.stop();
   }
 
   virtual void run();
+  virtual void stop() { m_run = false; }
 
 protected:
   virtual bool _internalHandling();
 
-  std::string m_gameName;
+  std::atomic<bool> m_run = true;
 
-  bool m_run;
-  network::ServerPacketHandler& m_packetHandler;
-
+  games::GameInstance m_gameInstance;
   GamesHandler m_gamesHandler;
 
   std::map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;

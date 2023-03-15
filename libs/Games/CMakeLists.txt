@@ -22,6 +22,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
                         PRIVATE GamesClient
                         PUBLIC PlametaParser
+                        PUBLIC ThreadSafeQueue
                         PUBLIC Supervisor
 
                         PUBLIC lua

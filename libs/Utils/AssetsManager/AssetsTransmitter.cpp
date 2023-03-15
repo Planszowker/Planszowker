@@ -10,7 +10,7 @@ namespace pla::assets {
 using namespace games;
 
 // TODO: Remove debug printout ;)
-AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries)
+AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::SupervisorPacketHandler& packetHandler, std::vector<std::string>& assetsEntries)
   : m_plagameFile(std::move(plagameFile))
   , m_packetHandler(packetHandler)
   , m_assetsEntries(assetsEntries)

@@ -16,6 +16,8 @@ namespace pla::supervisor {
 using namespace games;
 using namespace games::json_entries;
 
+std::unordered_map<size_t, Supervisor::GameInstancesTuple> Supervisor::m_gameInstances;
+
 Supervisor::Supervisor(std::stringstream configStream)
   : m_configParser(std::move(configStream))
 {
@@ -351,11 +353,31 @@ void Supervisor::_startGameHandler(size_t clientIdKey, network::SupervisorPacket
 
   // We should check whether a lobby has enough clients connected
   auto lobby = Lobbies::getLobby(clientIdKey);
-  if (lobby->getCreatorClientId() == clientIdKey && lobby->getCurrentPlayers() >= lobby->getMinPlayers()) {
+  if (lobby->getCreatorClientId() == clientIdKey && lobby->hasEnoughClients()) {
+    _createNewGameInstance(packetHandler, *lobby);
+
     replyJson[VALID] = true;
   }
 
   lobby->sendToAllClients(packetHandler, games::PacketType::StartGame, replyJson.dump());
+}
+
+
+void Supervisor::_createNewGameInstance(network::SupervisorPacketHandler& packetHandler, const Lobby& lobby)
+{
+  GameInstanceSyncParameters gameInstanceSyncParameters;
+
+  GameInstance gameInstance {packetHandler, gameInstanceSyncParameters.queue,
+                             std::string(lobby.getGameKey()), lobby.getClients(), lobby.getCreatorClientId()};
+
+  auto serverHandlerPtr = std::make_shared<games_server::ServerHandler>(gameInstance);
+
+  gameInstanceSyncParameters.gameServerThread = std::jthread(&games_server::ServerHandler::run, serverHandlerPtr);
+
+  // If we don't have a game instance already created for given Creator ID, we create one
+  if (m_gameInstances.find(gameInstance.creatorId) == m_gameInstances.end()) {
+    m_gameInstances.emplace(gameInstance.creatorId, std::make_tuple(std::move(serverHandlerPtr), std::move(gameInstanceSyncParameters)));
+  }
 }
 
 } // namespace

@@ -1,4 +1,4 @@
-#include "GamesHandler.h"
+#include <GamesHandler.h>
 
 #include <regex>
 #include <easylogging++.h>
@@ -17,14 +17,14 @@ GamesHandler::GamesHandler(const std::string& gameName)
 
 void GamesHandler::_getAssetsList()
 {
-  std::cout << "[DEBUG] Trying to get all assets list...\n";
+  LOG(DEBUG) << "Trying to get all assets list...\n";
   // Iterate over all entries in .plagame file
   for (int idx = 0; idx < m_plagameFile->GetEntriesCount(); ++idx) {
     // Find files inside assets folder
     std::regex assetsRegex {ASSETS_DIR};
     std::string entryName = m_plagameFile->GetEntry(idx)->GetFullName();
     if (std::regex_search(entryName, assetsRegex)) {
-      LOG(DEBUG) << "[DEBUG] Found asset " << entryName << "!\n";
+      LOG(DEBUG) << "Found asset " << entryName << "!\n";
 
       m_assetsEntries.push_back(entryName);
     }

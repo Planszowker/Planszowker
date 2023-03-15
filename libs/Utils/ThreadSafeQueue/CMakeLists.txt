@@ -6,6 +6,10 @@ set(SOURCES
 
 add_library(${LIB_NAME} ${SOURCES})
 
+target_link_libraries(${LIB_NAME}
+                      PUBLIC Games
+                      )
+
 target_include_directories(${LIB_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                            PUBLIC headers

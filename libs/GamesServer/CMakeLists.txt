@@ -12,6 +12,7 @@ add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
+                        PUBLIC ThreadSafeQueue
                         PUBLIC Games
                         PUBLIC Rng
                         PUBLIC TimeMeasurement
