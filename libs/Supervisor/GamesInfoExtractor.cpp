@@ -76,14 +76,18 @@ void GamesInfoExtractor::_getDefaultAssets()
   // Iterate over all elements in `scripts/assets` directory
   for (const auto& entry : std::filesystem::directory_iterator(AssetsDir)) {
     std::string filePath = entry.path().string();
+    std::string filename = entry.path().filename().string();
 
-    LOG(DEBUG) << "Found default asset: " << filePath;
+    // Accept only specific default assets here
+    if (filename == DefaultThumbnail) {
+      LOG(DEBUG) << "Found default asset: " << filePath;
 
-    std::shared_ptr<std::ifstream> filePtr = std::make_shared<std::ifstream>(filePath);
-    std::stringstream ss;
-    ss << filePtr->rdbuf();
+      std::shared_ptr<std::ifstream> filePtr = std::make_shared<std::ifstream>(filePath);
+      std::stringstream ss;
+      ss << filePtr->rdbuf();
 
-    m_gameMetaAssets.insert(std::pair{filePath, ss.str()});
+      m_gameMetaAssets.insert(std::pair{filePath, ss.str()});
+    }
   }
 }
 

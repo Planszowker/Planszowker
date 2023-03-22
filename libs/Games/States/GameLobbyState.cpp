@@ -100,6 +100,7 @@ void GameLobbyState::display()
       m_sendLobbyHeartbeat = false;
       GameStateArguments arg;
       arg.gameName = m_gameArguments.gameName;
+      arg.creatorId = m_creatorId;
       m_graphicalView.changeState(States::Game, arg);
       break;
   }
@@ -164,11 +165,11 @@ void GameLobbyState::_guiDisplayLobby()
   ImGui::EndTable();
 
   try {
-    auto creatorID = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();
+    m_creatorId = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();
     auto minPlayers = m_lobbyDetailsJson.at(MIN_PLAYERS).get<size_t>();
     auto currentPlayers = m_lobbyDetailsJson.at(CURRENT_PLAYERS).get<size_t>();
 
-    bool shouldDisable = (creatorID != shared::getClientInfo().getId()) || (currentPlayers < minPlayers);
+    bool shouldDisable = (m_creatorId != shared::getClientInfo().getId()) || (currentPlayers < minPlayers);
     if (shouldDisable) {
       ImGui::BeginDisabled();
     }

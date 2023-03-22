@@ -73,7 +73,6 @@ void Lobby::sendUpdate(network::SupervisorPacketHandler& packetHandler) const
   sf::Packet packet;
   games::Reply reply {
     .type = games::PacketType::GetLobbyDetails,
-    .status = games::ReplyType::Success,
   };
 
   nlohmann::json replyJson;
@@ -117,7 +116,6 @@ void Lobby::sendToAllClients(network::SupervisorPacketHandler& packetHandler, ga
 {
   games::Reply reply {
     .type = type,
-    .status = games::ReplyType::Success,
     .body = body,
   };
 

@@ -44,7 +44,7 @@ end
 Function that is called when we 'roll' dice
 (More precisely, it is called after we call RollEvent)
 
-User rolls 3 dice and gets the result. Then, one can `confirm` the rolls or do a reroll, if the score was too low.
+User rolls 3 dice and gets the result. Then, one can `confirm` the rolls or do a `reroll`, if the score was too low.
 ]]--
 StateMachine['onRoll'] = function()
     print('[LUA] onRoll was invoked')

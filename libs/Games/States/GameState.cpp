@@ -92,6 +92,28 @@ void GameState::eventHandling()
       break;
     }
 
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G) {
+      sf::Packet packet;
+
+      games::Request request {
+        .type = PacketType::GameSpecificData,
+      };
+
+      packet << request;
+      m_controller.getPacketHandler()->sendPacket(packet);
+    }
+
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::J) {
+      sf::Packet packet;
+
+      games::Request request {
+              .type = PacketType::DownloadAssets,
+      };
+
+      packet << request;
+      m_controller.getPacketHandler()->sendPacket(packet);
+    }
+
     // m_desktop.HandleEvent(event);
   }
 }

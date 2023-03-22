@@ -35,7 +35,7 @@ public:
   void run();
 
 private:
-  using GameInstancesTuple = std::tuple<std::shared_ptr<games_server::ServerHandler>, games::GameInstanceSyncParameters>;
+  using GameInstancesTuple = std::tuple<std::shared_ptr<games_server::ServerHandler>, std::shared_ptr<games::GameInstanceSyncParameters>>;
 
   void _getUserInput();
   void _registerCommand(std::shared_ptr<Command>&& command);
@@ -48,6 +48,8 @@ private:
   static void _joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
   static void _lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
   static void _startGameHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
+  static void _gameSpecificDataHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const games::Request& request);
+  static void _downloadAssetsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
 
   static void _createNewGameInstance(network::SupervisorPacketHandler& packetHandler, const Lobby& lobby);
 
@@ -57,9 +59,8 @@ private:
 
   std::vector<std::shared_ptr<Command>> m_commands;
 
-  std::map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
-
   static std::unordered_map<size_t, GameInstancesTuple> m_gameInstances;
+  static std::unordered_map<size_t, size_t> m_clientCreatorMapper;
 };
 
 }

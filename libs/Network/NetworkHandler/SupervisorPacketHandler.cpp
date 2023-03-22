@@ -104,7 +104,6 @@ void SupervisorPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
       sf::Packet packet;
       games::Reply heartbeatReply {
         .type = games::PacketType::Heartbeat,
-        .status = games::ReplyType::Success
       };
       packet << heartbeatReply;
 

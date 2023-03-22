@@ -19,32 +19,35 @@ auto constexpr CURRENT_PLAYERS = "CurrentPlayers";  ///< Number of players curre
 auto constexpr VALID = "Valid";                     ///< Boolean: True if JSON is valid.
 auto constexpr LOBBIES = "Lobbies";                 ///< Array of objects: List of lobbies available for given game.
 auto constexpr LOBBY_HEARTBEAT_TYPE = "Type";       ///< String: Type of heartbeat sent by Client.
+
+// Assets transmitting
+auto constexpr ASSET_NAME = "AssetName";            ///< String: Asset's name.
+auto constexpr ASSET_TYPE = "AssetsType";           ///< String: Type of asset ("Image", "BoardDescription")
 }
 
 enum class PacketType : uint8_t
 {
-  Heartbeat,           ///< Used for pinging clients.
+  // General purpose
+  Heartbeat,                   ///< Used for pinging clients.
+  ID,                          ///< Used to get client's ID associated in server.
+
+  // Transfer specific
+  DownloadAssets,              ///< Used to indicate that Client wants to get game's assets.
+  StartTransaction,            ///< Used to start an asset transaction.
+  EndTransaction,              ///< Used to end an asset transaction.
+
+  // Lobby specific
+  ListAvailableGames,          ///< Used to list all games the server is able to handle.
+  CreateLobby,                 ///< Used to create a lobby with given name.
+  GetLobbyDetails,             ///< Used to retrieve details about a specific lobby.
+  ListOpenLobbies,             ///< Used to list all open lobbies for a specific game.
+  JoinLobby,                   ///< Used to connect a Client to a specific lobby (not self created).
+  LobbyHeartbeat,              ///< Used for keeping lobby alive. If we stop sending this packets for defined amount of time, lobby for current Client is destroyed.
+  DisconnectClient,            ///< Used to inform Client that he was disconnected from lobby, so GUI could be updated.
+  StartGame,                   ///< Used to start a specific game.
+
+  // Game specific
   GameSpecificData,    ///< Used for game specific data.
-  ID,                  ///< Used to get client's ID associated in server.
-  DownloadAssets,      ///< Used to get game's assets - only textures for now.
-  StartTransaction,    ///< Used to start asset transaction.
-  EndTransaction,      ///< Used to end asset transaction.
-  ListAvailableGames,  ///< Used to list all games the server is able to handle.
-  CreateLobby,         ///< Used to create a lobby with given name.
-  GetLobbyDetails,     ///< Used to retrieve details about a specific lobby.
-  ListOpenLobbies,     ///< Used to list all open lobbies for a specific game.
-  JoinLobby,           ///< Used to connect a Client to a specific lobby (not self created).
-  LobbyHeartbeat,      ///< Used for keeping lobby alive. If we stop sending this packets for defined amount of time, lobby for current Client is destroyed.
-  DisconnectClient,    ///< Used to inform Client that he was disconnected from lobby, so GUI could be updated.
-  StartGame,           ///< Used to start a specific game.
-  AssetTransaction,    ///< Used to transmit a supported asset to client.
-};
-
-
-enum class ReplyType : uint8_t
-{
-  Success = 0, ///< Successful reply, queried action has been done successfully.
-  Invalid ///< Invalid reply, received when some action cannot be performed.
 };
 
 
@@ -64,7 +67,6 @@ struct Request
 struct Reply
 {
   PacketType type = PacketType::GameSpecificData;
-  ReplyType status = ReplyType::Invalid;
   std::string body;
 };
 

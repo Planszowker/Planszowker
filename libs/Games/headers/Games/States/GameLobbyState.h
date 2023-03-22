@@ -79,11 +79,13 @@ private:
   nlohmann::json m_lobbyDetailsJson; ///< JSON to hold information about specific lobby's details.
   nlohmann::json m_lobbiesListJson; ///< JSON to hold information about available lobbies for given game key.
 
-  std::atomic<bool> m_sendLobbyHeartbeat = false;
-  std::atomic<bool> m_runLobbyHeartbeatThread = true;
+  std::atomic<bool> m_sendLobbyHeartbeat {false};
+  std::atomic<bool> m_runLobbyHeartbeatThread {true};
   std::atomic<LobbyHeartbeatType> m_heartbeatType {LobbyHeartbeatType::Creator};
   std::thread m_lobbyHeartbeatThread;
   std::mutex m_lobbyHeartbeatMutex;
+
+  size_t m_creatorId {0}; ///< Creator ID of lobby that client could be potentially connected to.
 
   friend class GameLobbyCallbacks; ///< Callbacks class declared as a friend to access lobby's state.
 };

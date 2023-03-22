@@ -1,18 +1,12 @@
 set(LIB_NAME ThreadSafeQueue)
 
-set(SOURCES
-        ThreadSafeQueue.cpp
-        )
-
-add_library(${LIB_NAME} ${SOURCES})
+add_library(${LIB_NAME} INTERFACE)
 
 target_link_libraries(${LIB_NAME}
-                      PUBLIC Games
+                      INTERFACE Games
                       )
 
 target_include_directories(${LIB_NAME}
-                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-                           PUBLIC headers
-
-                           PRIVATE headers/${LIB_NAME}
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+                           INTERFACE headers
                            )

@@ -19,8 +19,8 @@ public:
   static constexpr auto ThumbnailFile = "Thumbnail.png";
   static constexpr auto CombinedStringDelimiter = "::";
 
-  static constexpr auto DefaultBoard = "default-board.jpg";
-  static constexpr auto DefaultThumbnail = "default-thumbnail.png";
+  static constexpr auto DefaultBoard = "DefaultBoard.jpg";
+  static constexpr auto DefaultThumbnail = "DefaultThumbnail.png";
 
   using GameEntriesContainer = std::vector<std::string>;
   using GameMetaAssetsContainer = std::unordered_map<std::string, std::string>;

@@ -97,7 +97,6 @@ void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
           sf::Packet packet;
           games::Reply reply {
             .type = games::PacketType::DisconnectClient,
-            .status = games::ReplyType::Success
           };
           packet << reply;
 
@@ -168,7 +167,6 @@ void Lobbies::_sendDisconnect(size_t clientId, network::SupervisorPacketHandler&
   sf::Packet packet;
   games::Reply reply {
     .type = games::PacketType::DisconnectClient,
-    .status = games::ReplyType::Success
   };
   packet << reply;
 

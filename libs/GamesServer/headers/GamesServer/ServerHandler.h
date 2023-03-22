@@ -15,6 +15,7 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <unordered_map>
 
 namespace pla::games_server {
 
@@ -27,18 +28,21 @@ public:
   {
   }
 
-  virtual void run();
-  virtual void stop() { m_run = false; }
+  void run();
+  void stop() { m_run = false; }
+
+  void transmitAssetsToClient(size_t clientId);
 
 protected:
   virtual bool _internalHandling();
 
   std::atomic<bool> m_run = true;
+  std::mutex m_mutex; ///< Some methods may be accessed from Supervisor, thus we need to protect resources
 
   games::GameInstance m_gameInstance;
   GamesHandler m_gamesHandler;
 
-  std::map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
+  std::unordered_map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
 };
 
 } // namespaces

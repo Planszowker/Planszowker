@@ -24,7 +24,8 @@ void ServerHandler::run()
 
 
 bool ServerHandler::_internalHandling() {
-  time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
+  // TODO: Time logger probably not needed, since current thread is already suspended while waiting for new data in queue
+  // time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
 
 //  std::vector<size_t> keys;
 //  auto packetsMap = m_packetHandler.getPackets(keys);
@@ -96,6 +97,7 @@ bool ServerHandler::_internalHandling() {
 //  }
   LOG(DEBUG) << "[ServerHandler] Waiting for queue";
   games::Request request = m_gameInstance.queue.pop();
+  std::lock_guard<std::mutex> lock{m_mutex};
   LOG(DEBUG) << "[ServerHandler] Request: " << (int)request.type;
   /*
   LOG(DEBUG) << "ServerHandler run";
@@ -103,6 +105,31 @@ bool ServerHandler::_internalHandling() {
    */
 
   return true;
+}
+
+
+void ServerHandler::transmitAssetsToClient(size_t clientId)
+{
+  std::lock_guard<std::mutex> lock{m_mutex};
+
+  // User wants to download game's assets
+  auto assetTransmitterPtr = m_assetsTransmitterMap.find(clientId);
+  if (assetTransmitterPtr == m_assetsTransmitterMap.end()) {
+    // If we haven't found entry with AssetTransmitter, we have to add a new one
+    auto [it, inserted] = m_assetsTransmitterMap.insert({clientId, std::make_shared<assets::AssetsTransmitter>(
+            std::move(m_gamesHandler.getPlagameFile()),
+            m_gameInstance.packetHandler,
+            std::move(m_gamesHandler.getAssetsEntries()))});
+
+    if (inserted) {
+      assetTransmitterPtr = it;
+    } else {
+      LOG(ERROR) << "Cannot add new asset transmitter to map!";
+    }
+  }
+
+  // Transmit assets in chunks
+  assetTransmitterPtr->second->transmitAssets(clientId);
 }
 
 } // namespaces

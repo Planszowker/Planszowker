@@ -6,6 +6,8 @@
 #include <Rng/RandomGenerator.h>
 #include <GamesHandler.h>
 
+#include <easylogging++.h>
+
 namespace pla::games_server {
 
 using namespace games;
@@ -106,11 +108,10 @@ void Logic::_updateClients(std::string req) const
 {
   Reply reply {
     .type = PacketType::GameSpecificData,
-    .status = ReplyType::Success,
     .body = std::move(req)
   };
 
-  std::cout << "[CORE] DEBUG: Reply string is: " << reply.body << "\n";
+  LOG(DEBUG) << "[CORE] DEBUG: Reply string is: " << reply.body << "\n";
 
   sf::Packet replyPacket;
   replyPacket << reply;
@@ -153,8 +154,6 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
     m_networkHandler.sendPacketToClient(clientId, replyToClient);
     return;
   }
-
-  replyStruct.status = ReplyType::Success;
 
   // Every request handling is divided into 3 sections:
   //   - request decoding using JSON decoder and pre-processing,

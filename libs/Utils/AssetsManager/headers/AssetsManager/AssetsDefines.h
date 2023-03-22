@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 namespace pla::assets {
 
 static constexpr size_t CHUNK_SIZE {1024};

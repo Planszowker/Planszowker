@@ -13,6 +13,7 @@ namespace pla::games {
 struct GameStateArguments
 {
   std::string gameName;
+  size_t creatorId;
 };
 
 class GameState final : public IState

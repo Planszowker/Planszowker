@@ -1,44 +1,49 @@
 #include <AssetsTransmitter.h>
 
 #include <Games/Objects.h>
-#include <GamesServer/GamesHandler.h>
+
+#include <easylogging++.h>
 
 #include <utility>
+#include <nlohmann/json.hpp>
 
 namespace pla::assets {
 
 using namespace games;
+using namespace games_server;
+using namespace games::json_entries;
 
-// TODO: Remove debug printout ;)
-AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::SupervisorPacketHandler& packetHandler, std::vector<std::string>& assetsEntries)
+AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::SupervisorPacketHandler& packetHandler, GamesHandler::AssetsContainer assetsEntries)
   : m_plagameFile(std::move(plagameFile))
   , m_packetHandler(packetHandler)
-  , m_assetsEntries(assetsEntries)
-  , m_currentAssetNameIter(assetsEntries.begin())
+  , m_assetsEntries(std::move(assetsEntries))
+  , m_currentAssetNameIter(m_assetsEntries.begin())
 {
   // Set stream pointer to the first asset available.
-  m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream();
+  // Remember to close any opened streams (not sure why it is mandatory).
+  const std::string& entryName = m_currentAssetNameIter->first;
+  m_plagameFile->GetEntry(entryName)->CloseDecompressionStream();
+  m_assetStreamPtr = m_plagameFile->GetEntry(entryName)->GetDecompressionStream();
 }
 
 
-void AssetsTransmitter::transmitAssets(size_t clientKey)
+void AssetsTransmitter::transmitAssets(size_t clientIdKey)
 {
-  //std::cout << "[DEBUG] Transmitting assets...\n";
+  LOG(DEBUG) << "[AssetsTransmitter] Transmitting assets...";
   if (m_currentAssetNameIter == m_assetsEntries.end()) {
     // We have already sent all the assets.
-    std::cout << "[DEBUG] We have reached end of assets...\n";
+    LOG(DEBUG) << "[AssetsTransmitter] We have reached end of assets";
     return;
   }
 
   // Start asset transaction, if not yet started.
   if (m_transactionCounter == 0) {
-    std::cout << "[DEBUG] Starting transaction...\n";
-    _startTransaction(*m_currentAssetNameIter, clientKey);
+    LOG(DEBUG) << "[AssetsTransmitter] Starting transaction";
+    _startTransaction(m_currentAssetNameIter->first, m_currentAssetNameIter->second, clientIdKey);
   }
 
   // We send CHUNK_SIZE packets with data and then wait for response.
   for (size_t iter = 0; iter < CHUNK_QUANTITY; ++iter) {
-    //std::cout << "[DEBUG] Transferring " << m_transactionCounter << " chunk to client...\n";
     m_assetStreamPtr->read(m_buf->data(), CHUNK_SIZE);
 
     // Increase transaction counter;
@@ -50,20 +55,20 @@ void AssetsTransmitter::transmitAssets(size_t clientKey)
     // Create packet with chunk data and send it to client.
     sf::Packet packet;
     packet.append(m_buf->data(), bytesRead);
-    m_packetHandler.sendPacketToClient(clientKey, packet);
-
-    //std::cout << "[DEBUG] Bytes read: " << bytesRead << "\n";
+    m_packetHandler.sendPacketToClient(clientIdKey, packet);
 
     // If we cannot read CHUNK_SIZE bytes, it means EOF.
     if (bytesRead < CHUNK_SIZE) {
       // Move to next asset and clear transaction counter.
-      _endTransaction(*m_currentAssetNameIter, clientKey);
+      _endTransaction(m_currentAssetNameIter->first, m_currentAssetNameIter->second, clientIdKey);
 
       ++m_currentAssetNameIter; // Get to next asset
       // Check if we have any more assets...
       if (m_currentAssetNameIter != m_assetsEntries.end()) {
         // Update asset stream
-        m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream();
+        const std::string& entryName = m_currentAssetNameIter->first;
+        m_plagameFile->GetEntry(entryName)->CloseDecompressionStream();
+        m_assetStreamPtr = m_plagameFile->GetEntry(entryName)->GetDecompressionStream();
       }
       m_transactionCounter = 0; // Reset transaction counter
       break;
@@ -71,66 +76,18 @@ void AssetsTransmitter::transmitAssets(size_t clientKey)
   }
 }
 
-
-bool AssetsTransmitter::transmitAsset(size_t clientKey, const std::string& assetName)
-{
-  std::cout << "[DEBUG] Transmitting asset " << assetName << "\n";
-  m_currentAssetNameIter = std::find(m_assetsEntries.begin(), m_assetsEntries.end(), assetName);
-  if (m_currentAssetNameIter == m_assetsEntries.end()) {
-    err_handler::ErrorLogger::printError("Could not find asset with name: " + assetName);
-  }
-
-  // Start asset transaction, if not yet started.
-  if (m_transactionCounter == 0) {
-    std::cout << "[DEBUG] Starting transaction...\n";
-    // Update stream pointer to asset
-    m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream();
-    _startTransaction(*m_currentAssetNameIter, clientKey);
-  }
-
-  // We send CHUNK_SIZE packets with data and then wait for response.
-  for (size_t iter = 0; iter < CHUNK_QUANTITY; ++iter) {
-    //std::cout << "[DEBUG] Transferring " << m_transactionCounter << " chunk to client...\n";
-    m_assetStreamPtr->read(m_buf->data(), CHUNK_SIZE);
-
-    // Increase transaction counter;
-    ++m_transactionCounter;
-
-    // Read how many bytes we have successfully read.
-    size_t bytesRead = m_assetStreamPtr->gcount();
-
-    // Create packet with chunk data and send it to client.
-    sf::Packet packet;
-    packet.append(m_buf->data(), bytesRead);
-    m_packetHandler.sendPacketToClient(clientKey, packet);
-
-    std::cout << "[DEBUG] Bytes read: " << bytesRead << "\n";
-
-    // If we cannot read CHUNK_SIZE bytes, it means EOF.
-    if (bytesRead < CHUNK_SIZE) {
-      // Move to next asset and clear transaction counter.
-      _endTransaction(*m_currentAssetNameIter, clientKey);
-
-      m_currentAssetNameIter = m_assetsEntries.begin(); // Set iterator to the beginning of assets
-      m_assetStreamPtr = m_plagameFile->GetEntry(*(m_currentAssetNameIter))->GetDecompressionStream(); // Update stream pointer
-      m_transactionCounter = 0; // Reset transaction counter
-
-      return true;
-    }
-  }
-
-  return false;
-}
-
-
-void AssetsTransmitter::_startTransaction(std::string assetName, size_t key)
+void AssetsTransmitter::_startTransaction(const std::string& assetName, const std::string& assetType, size_t key)
 {
   sf::Packet packet;
   Reply reply {
     .type = PacketType::StartTransaction,
-    .status = ReplyType::Success,
-    .body = std::move(assetName)
   };
+
+  nlohmann::json replyJson;
+  replyJson[ASSET_NAME] = assetName;
+  replyJson[ASSET_TYPE] = assetType;
+
+  reply.body = replyJson.dump();
 
   packet << reply;
 
@@ -138,20 +95,18 @@ void AssetsTransmitter::_startTransaction(std::string assetName, size_t key)
 }
 
 
-void AssetsTransmitter::_transferFile(ZipArchiveEntry::Ptr fileStream)
-{
-  // TODO
-}
-
-
-void AssetsTransmitter::_endTransaction(std::string assetName, size_t key)
+void AssetsTransmitter::_endTransaction(const std::string& assetName, const std::string& assetType, size_t key)
 {
   sf::Packet packet;
   Reply reply {
-          .type = PacketType::EndTransaction,
-          .status = ReplyType::Success,
-          .body = std::move(assetName)
+    .type = PacketType::EndTransaction,
   };
+
+  nlohmann::json replyJson;
+  replyJson[ASSET_NAME] = assetName;
+  replyJson[ASSET_TYPE] = assetType;
+
+  reply.body = replyJson.dump();
 
   packet << reply;
 

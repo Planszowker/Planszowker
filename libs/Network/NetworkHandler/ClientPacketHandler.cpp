@@ -17,6 +17,8 @@ using namespace pla::time_measurement;
 
 namespace pla::network {
 
+using namespace games::json_entries;
+
 ClientPacketHandler::ClientPacketHandler(std::atomic_bool& run, sf::TcpSocket& serverSocket)
   : PacketHandler(run)
   , m_serverSocket(serverSocket)
@@ -87,12 +89,12 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         }
 
         // If it's a corrupted packet, just continue.
-        std::cerr << "[DEBUG] Corrupted packet!\n";
+        LOG(ERROR) << "[PacketHandler] Corrupted packet!\n";
         continue;
       }
 
       // If received status is not Success, we shouldn't handle it.
-      if (reply.status != games::ReplyType::Success || reply.type == games::PacketType::Heartbeat) {
+      if (reply.type == games::PacketType::Heartbeat) {
         continue;
       }
 
@@ -124,10 +126,13 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         case games::PacketType::StartTransaction:
         {
           if (m_transactionState == TransactionState::NotStarted) {
-            LOG(DEBUG) << "[DEBUG] Started transaction for " << reply.body << "!\n";
-            m_currentAssetKey = reply.body;
-            m_transactionState = TransactionState::InProgress;
-            m_receivedRawPackets.clear();
+            try {
+              nlohmann::json replyJson = nlohmann::json::parse(reply.body);
+              LOG(DEBUG) << "[DEBUG] Started transaction for " << replyJson[ASSET_NAME] << "!\n";
+              m_currentAssetKey = replyJson[ASSET_NAME];
+              m_transactionState = TransactionState::InProgress;
+              m_receivedRawPackets.clear();
+            } catch (std::exception& e) { }
           }
           break;
         }
@@ -135,18 +140,27 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
         case games::PacketType::EndTransaction:
         {
           if (m_transactionState == TransactionState::InProgress) {
-            LOG(DEBUG) << "[DEBUG] Ended transaction for " << reply.body << "!\n";
+            try {
+              nlohmann::json replyJson = nlohmann::json::parse(reply.body);
+              LOG(DEBUG) << "[DEBUG] Ended transaction for " << replyJson[ASSET_NAME] << "!\n";
 
-            if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
-              std::cerr << "Error adding " << m_currentAssetKey << "!\n";
-            }
+              if (replyJson[ASSET_TYPE] == "Image") {
+                if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
+                  LOG(ERROR) << "Error adding " << m_currentAssetKey << "!";
+                }
+              } else if (replyJson[ASSET_TYPE] == "BoardDescription"){
+                if (!assets::AssetsReceiver::addBoardDescription(m_receivedRawPackets, m_currentAssetKey)) {
+                  LOG(ERROR) << "Error adding " << m_currentAssetKey << "!";
+                }
+              }
 
-            // Reset transaction parameters
-            m_transactionState = TransactionState::NotStarted;
-            m_transactionCounter = 0;
+              // Reset transaction parameters
+              m_transactionState = TransactionState::NotStarted;
+              m_transactionCounter = 0;
 
-            // Check if more data is available - if yes, receive it as a new transaction
-            _requestAsset();
+              // Check if more data is available - if yes, receive it as a new transaction
+              _requestAsset();
+            } catch (std::exception& e) { }
           }
           break;
         }
@@ -228,7 +242,7 @@ std::deque<games::Reply> ClientPacketHandler::getReplies() {
 bool ClientPacketHandler::_requestAsset() {
   sf::Packet requestPacket;
   games::Request request {
-          .type = games::PacketType::DownloadAssets
+    .type = games::PacketType::DownloadAssets
   };
   requestPacket << request;
 

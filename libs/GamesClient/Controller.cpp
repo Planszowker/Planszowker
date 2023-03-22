@@ -44,13 +44,7 @@ void Controller::run() {
 
       LOG(DEBUG) << "Reply: " << reply.body << "\n";
       LOG(DEBUG) << "Type: " << static_cast<int>(reply.type) << "\n";
-      LOG(DEBUG) << "Status: " << static_cast<int>(reply.status) << "\n";
       LOG(DEBUG) << "== Controller Printout ==\n";
-
-      // TODO: Is it needed? Reply status should be checked on Packet Handler level
-      if (reply.status != ReplyType::Success) {
-        continue;
-      }
 
 //      nlohmann::json j = nlohmann::json::parse(reply.body);
 //

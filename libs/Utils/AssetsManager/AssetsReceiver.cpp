@@ -4,7 +4,10 @@
 
 #include <AssetsDefines.h>
 
+#include <easylogging++.h>
+
 #include <iostream>
+#include <utility>
 #include <vector>
 
 namespace pla::assets {
@@ -12,6 +15,7 @@ namespace pla::assets {
 std::mutex AssetsReceiver::m_assetsMutex;
 std::unordered_map<std::string, std::shared_ptr<sf::Texture>> AssetsReceiver::m_assets;
 std::vector<std::string> AssetsReceiver::m_assetsNames;
+std::string AssetsReceiver::m_boardDescription;
 
 bool AssetsReceiver::parseAndAddAsset(std::deque<sf::Packet>& packets, const std::string& assetName)
 {
@@ -60,6 +64,26 @@ const std::vector<std::string>& AssetsReceiver::getAssetNames()
   const std::scoped_lock assetsMutex(m_assetsMutex); // Obtain mutex
 
   return m_assetsNames;
+}
+
+
+bool AssetsReceiver::addBoardDescription(std::deque<sf::Packet>& packets, const std::string& boardDescriptionAssetName)
+{
+  const std::scoped_lock assetsMutex(m_assetsMutex); // Obtain mutex
+
+  LOG(DEBUG) << "[AssetsReceiver] Adding asset with name " << boardDescriptionAssetName;
+  std::shared_ptr<std::vector<char>> recvBuffer = std::make_shared<std::vector<char>>();
+
+  for (auto& packet : packets) {
+    // Insert packet's data into buffer
+    recvBuffer->insert(recvBuffer->end(),
+                       static_cast<const char*>(packet.getData()),
+                       static_cast<const char*>(packet.getData()) + packet.getDataSize());
+  }
+
+  m_boardDescription = std::move(std::string(recvBuffer->begin(), recvBuffer->end()));
+
+  return true;
 }
 
 } // namespace

@@ -11,33 +11,16 @@ class ThreadSafeQueue {
 public:
   ThreadSafeQueue() = default;
   ~ThreadSafeQueue() = default;
-//  ThreadSafeQueue(const ThreadSafeQueue& other) = delete; // Copy constructor
-//  ThreadSafeQueue& operator=(const ThreadSafeQueue& other) = delete; // Copy assignment
-//
-//  ThreadSafeQueue(ThreadSafeQueue&& other) noexcept; // Move constructor
-//  ThreadSafeQueue& operator=(ThreadSafeQueue&& other) noexcept; // Move assignment
 
-  ThreadSafeQueue(ThreadSafeQueue<T>&& other) noexcept
-  {
-    std::unique_lock<std::mutex> lockThis(this->m_mutex, std::defer_lock);
-    std::unique_lock<std::mutex> lockOther(other.m_mutex, std::defer_lock);
-    std::lock(lockThis, lockOther);
-    this->m_queue = std::move(other.m_queue);
-  }
+  ThreadSafeQueue(const ThreadSafeQueue<T>& other) noexcept = delete;
+  ThreadSafeQueue(ThreadSafeQueue<T>&& other) noexcept = delete;
 
-  ThreadSafeQueue<T>& operator=(ThreadSafeQueue&& other) noexcept
-  {
-    std::unique_lock<std::mutex> lockThis(this->m_mutex, std::defer_lock);
-    std::unique_lock<std::mutex> lockOther(other.m_mutex, std::defer_lock);
-    std::lock(lockThis, lockOther);
-    this->m_queue = std::move(other.m_queue);
-
-    return *this;
-  }
+  ThreadSafeQueue<T>& operator=(const ThreadSafeQueue& other) noexcept = delete;
+  ThreadSafeQueue<T>& operator=(ThreadSafeQueue&& other) noexcept = delete;
 
   void push(const T& var)
   {
-    std::lock_guard<std::mutex> lock{m_mutex};
+    std::scoped_lock lock{m_mutex};
     m_queue.push(var);
     m_cond.notify_one();
   }
@@ -55,8 +38,6 @@ public:
     return item;
   }
 
-//  void push(const T& var);
-//  T pop();
 private:
   std::queue<T> m_queue;
   std::mutex m_mutex;
