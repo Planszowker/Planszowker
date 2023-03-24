@@ -95,14 +95,11 @@ bool ServerHandler::_internalHandling() {
 //      }
 //    }
 //  }
+
   LOG(DEBUG) << "[ServerHandler] Waiting for queue";
   games::Request request = m_gameInstance.queue.pop();
   std::lock_guard<std::mutex> lock{m_mutex};
   LOG(DEBUG) << "[ServerHandler] Request: " << (int)request.type;
-  /*
-  LOG(DEBUG) << "ServerHandler run";
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-   */
 
   return true;
 }
@@ -124,12 +121,22 @@ void ServerHandler::transmitAssetsToClient(size_t clientId)
     if (inserted) {
       assetTransmitterPtr = it;
     } else {
-      LOG(ERROR) << "Cannot add new asset transmitter to map!";
+      err_handler::ErrorLogger::printError("Cannot add new asset transmitter to map!");
     }
   }
 
-  // Transmit assets in chunks
+  // Transmit assets
   assetTransmitterPtr->second->transmitAssets(clientId);
+}
+
+
+void ServerHandler::stop()
+{
+  m_run = false;
+
+  // Server handler thread is waiting for an item in queue to appear.
+  // We send an empty request to end this thread.
+  m_gameInstance.queue.push(games::Request{});
 }
 
 } // namespaces

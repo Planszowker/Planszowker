@@ -29,7 +29,7 @@ public:
   }
 
   void run();
-  void stop() { m_run = false; }
+  void stop();
 
   void transmitAssetsToClient(size_t clientId);
 

@@ -32,6 +32,8 @@ public:
   Supervisor() = delete;
   explicit Supervisor(std::stringstream configStream);
 
+  ~Supervisor();
+
   void run();
 
 private:

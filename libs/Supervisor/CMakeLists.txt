@@ -18,6 +18,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
                         PUBLIC ThreadSafeQueue
                         PUBLIC GamesServer
+                        PUBLIC TickThread
 
                         PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
                       )

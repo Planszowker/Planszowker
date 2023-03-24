@@ -1,6 +1,7 @@
 #pragma once
 
 #include <NetworkHandler/SupervisorPacketHandler.h>
+#include <TickThread/TickThread.h>
 #include <Lobby.h>
 
 #include <cstdlib>
@@ -8,6 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <chrono>
 
 namespace pla::supervisor {
 
@@ -79,6 +81,8 @@ private:
   static void _watchdogThread(network::SupervisorPacketHandler& packetHandler);
 
   static std::thread m_watchdogThread;
+
+  static utils::TickThread<std::chrono::seconds, 2> m_tickThread;
 };
 
 }

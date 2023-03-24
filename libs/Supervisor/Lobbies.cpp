@@ -13,6 +13,7 @@ std::unordered_map<size_t, Lobby> Lobbies::m_lobbies;
 std::atomic<bool> Lobbies::m_runWatchdogThread {false};
 std::mutex Lobbies::m_watchdogMutex;
 std::thread Lobbies::m_watchdogThread;
+utils::TickThread<std::chrono::seconds, 2> Lobbies::m_tickThread;
 
 Lobby* Lobbies::createNewLobby(size_t creatorClientId, std::string lobbyName, std::string gameKey)
 {
@@ -66,7 +67,7 @@ void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
 
   while (Lobbies::m_runWatchdogThread)
   {
-    std::this_thread::sleep_for(std::chrono::seconds(WatchdogSleepTime));
+    m_tickThread.waitForTick(); // Suspend current thread
 
     std::scoped_lock lock(m_watchdogMutex);
 
@@ -114,8 +115,7 @@ void Lobbies::_watchdogThread(network::SupervisorPacketHandler& packetHandler)
 void Lobbies::startWatchdogThread(network::SupervisorPacketHandler& packetHandler)
 {
   Lobbies::m_runWatchdogThread = true;
-  static auto _thread = std::thread(&Lobbies::_watchdogThread, std::ref(packetHandler));
-  Lobbies::m_watchdogThread = std::move(_thread);
+  Lobbies::m_watchdogThread = std::thread(&Lobbies::_watchdogThread, std::ref(packetHandler));
 }
 
 

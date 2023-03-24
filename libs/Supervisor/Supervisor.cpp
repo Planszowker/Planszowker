@@ -48,6 +48,15 @@ Supervisor::Supervisor(std::stringstream configStream)
 }
 
 
+Supervisor::~Supervisor()
+{
+  for (auto& [clientId, gameInstance] : m_gameInstances) {
+    auto& [serverHandler, syncParams] = gameInstance;
+    serverHandler->stop();
+  }
+}
+
+
 void Supervisor::run()
 {
   auto entryPtr = m_configParser["config:port"];
@@ -134,8 +143,8 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
           replyJson[CLIENT_ID] = clientIdKey;
 
           Reply idReply{
-                  .type = PacketType::ID,
-                  .body = replyJson.dump()
+            .type = PacketType::ID,
+            .body = replyJson.dump()
           };
 
           sf::Packet replyPacket;
