@@ -2,7 +2,7 @@
 
 #include <TimeMeasurement/TimeLogger.h>
 #include <CompilerUtils/FunctionInfoExtractor.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <Logic.h>
 #include <AssetsManager/AssetsTransmitter.h>
 

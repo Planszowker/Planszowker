@@ -1,4 +1,4 @@
-#include "Objects.h"
+#include <Games/CommObjects.h>
 
 using namespace pla::games;
 

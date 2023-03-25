@@ -2,7 +2,7 @@
 
 /* Generic */
 #include "GraphicalView.h"
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <Games/GamesMetaInfo.h>
 
 #include <NetworkHandler/ClientPacketHandler.h>

@@ -1,7 +1,7 @@
 #include <Lobby.h>
 
 #include <GamesInfoExtractor.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 
 #include <nlohmann/json.hpp>
 #include <easylogging++.h>

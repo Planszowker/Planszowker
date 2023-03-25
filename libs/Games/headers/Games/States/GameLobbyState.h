@@ -7,6 +7,7 @@
 #include <GamesClient/GraphicalView.h>
 #include <NetworkHandler/ClientPacketHandler.h>
 #include <Games/GamesMetaInfo.h>
+#include <TickThread/TickThread.h>
 
 #include <imgui.h>
 #include <imgui-SFML.h>
@@ -86,6 +87,8 @@ private:
   std::mutex m_lobbyHeartbeatMutex;
 
   size_t m_creatorId {0}; ///< Creator ID of lobby that client could be potentially connected to.
+
+  utils::TickThread<std::chrono::milliseconds , 5000> m_tickThread;
 
   friend class GameLobbyCallbacks; ///< Callbacks class declared as a friend to access lobby's state.
 };

@@ -1,6 +1,6 @@
 #include <Games/Callbacks/ICallbacks.h>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <ErrorHandler/ErrorLogger.h>
 #include <GamesClient/SharedObjects.h>
 #include <nlohmann/json.hpp>

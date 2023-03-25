@@ -2,7 +2,7 @@
 
 #include "Logger/Logger.h"
 #include "ErrorHandler/ErrorLogger.h"
-#include "Games/Objects.h"
+#include "Games/CommObjects.h"
 #include "NetworkHandler/ClientPacketHandler.h"
 #include "Games/GamesMetaInfo.h"
 

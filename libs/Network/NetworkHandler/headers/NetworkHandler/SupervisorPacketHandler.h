@@ -23,28 +23,22 @@ public:
   explicit SupervisorPacketHandler(std::atomic_bool& run, size_t port = 0);
   virtual ~SupervisorPacketHandler();
 
-  void runInBackground() override;
+  void runInBackground() final;
 
-  void stop() override;
+  void stop() final;
 
-  virtual packetMap getPackets(std::vector<size_t>& keys);
+  packetMap getPackets(std::vector<size_t>& keys);
+  std::vector<size_t> getClients();
 
-  virtual void sendPacketToEveryClients(sf::Packet& packet);
-  virtual void sendPacketToClient(size_t clientId, sf::Packet& packet);
-
-  virtual inline std::atomic_bool& hasEnoughClientsConnected()
-  {
-    return m_hasEnoughClientsConnected;
-  }
+  void sendPacketToEveryClients(sf::Packet& packet);
+  void sendPacketToClient(size_t clientId, sf::Packet& packet);
 
 protected:
   void _backgroundTask(std::mutex& tcpSocketsMutex) override;
-  virtual void _newConnectionTask(std::mutex& tcpSocketsMutex);
-  virtual void _heartbeatTask(std::mutex& tcpSocketsMutex);
+  void _newConnectionTask(std::mutex& tcpSocketsMutex);
+  void _heartbeatTask(std::mutex& tcpSocketsMutex);
 
   virtual bool _addClient(std::shared_ptr<sf::TcpSocket>& newSocket);
-
-  std::size_t m_maxPlayers {0}; ///< Maximum players that can join to specific instance
 
   sf::TcpListener m_listener; ///< TCP listener for new connections
   unsigned short m_port; ///< Current used port
@@ -55,11 +49,9 @@ protected:
   std::unordered_map<size_t, std::shared_ptr<sf::TcpSocket>> m_clients; ///< Container to hold information about clients
   std::vector<size_t> m_clientIds;
 
-  std::size_t m_lastClientId {1}; ///< Last client ID. TODO: Possible issue with overflowing
+  std::size_t m_lastClientId {1}; ///< Last client ID.
 
   packetMap m_packets;
-
-  std::atomic_bool m_hasEnoughClientsConnected {false};
 };
 
 } // namespaces

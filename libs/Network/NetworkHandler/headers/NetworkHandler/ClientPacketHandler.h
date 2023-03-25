@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <deque>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <Games/Callbacks/ICallbacks.h>
 
 #include "PacketHandler.h"

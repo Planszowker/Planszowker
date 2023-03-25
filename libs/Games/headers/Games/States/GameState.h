@@ -1,8 +1,9 @@
 #pragma once
 
-#include "IState.h"
+#include <Games/States/IState.h>
 
 #include <Games/GameWindow.h>
+#include <Games/BoardParser.h>
 #include <GamesClient/GraphicalView.h>
 
 /* SFML */
@@ -27,6 +28,13 @@ public:
   void init() final;
 
 private:
+  void _actionAreaDisplay();
+  void _logAreaDisplay();
+  void _playerAreaDisplay();
+  void _gameAreaDisplay();
+
+  friend class GameCallbacks;
+
   games_client::GraphicalView& m_graphicalView;
   games_client::Controller& m_controller;
   GameWindow& m_gameWindow;
@@ -48,6 +56,8 @@ private:
   static constexpr float ActionsAreaHeightFactor = 0.1f;
 
   sf::Clock m_deltaClock;
+
+  std::shared_ptr<BoardParser> m_boardParser;
 };
 
 } // namespace

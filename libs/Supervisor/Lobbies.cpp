@@ -1,6 +1,6 @@
 #include <Lobbies.h>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 
 #include <utility>
 #include <chrono>

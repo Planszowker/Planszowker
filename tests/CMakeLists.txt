@@ -15,3 +15,4 @@ add_subdirectory(mocks)
 
 # Add unit tests
 add_subdirectory(libs/Utils/AssetsManager)
+add_subdirectory(libs/Utils/TickThread)

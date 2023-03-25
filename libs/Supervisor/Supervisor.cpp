@@ -3,7 +3,7 @@
 #include <Supervisor/Lobbies.h>
 
 #include <PlametaParser/Entry.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 
 #include <nlohmann/json.hpp>
 
@@ -16,11 +16,9 @@ namespace pla::supervisor {
 using namespace games;
 using namespace games::json_entries;
 
-std::unordered_map<size_t, Supervisor::GameInstancesTuple> Supervisor::m_gameInstances;
-std::unordered_map<size_t, size_t> Supervisor::m_clientCreatorMapper;
-
 Supervisor::Supervisor(std::stringstream configStream)
   : m_configParser(std::move(configStream))
+  , m_gameInstancesCheckingThread(std::jthread(&Supervisor::_gameInstancesCheckingThread, this))
 {
   auto helpCmd = std::make_shared<Command>(
           "help",
@@ -64,6 +62,7 @@ void Supervisor::run()
 
   std::size_t port = static_cast<size_t>(std::get<int>(entryPtr->getVariant()));
   network::SupervisorPacketHandler supervisorPacketHandler {m_run, port};
+  m_packetHandler = &supervisorPacketHandler;
 
   supervisorPacketHandler.runInBackground();
   std::thread inputThread {&Supervisor::_getUserInput, this};
@@ -152,23 +151,23 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
 
           packetHandler.sendPacketToClient(clientIdKey, replyPacket);
         } else if (request.type == PacketType::ListAvailableGames) {
-          Supervisor::_listAvailableGamesHandler(clientIdKey, packetHandler);
+          _listAvailableGamesHandler(clientIdKey, packetHandler);
         } else if (request.type == PacketType::CreateLobby) {
-          Supervisor::_createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+          _createLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
         } else if (request.type == PacketType::GetLobbyDetails) {
-          Supervisor::_getLobbyDetailsHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+          _getLobbyDetailsHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
         } else if (request.type == PacketType::ListOpenLobbies) {
-          Supervisor::_listOpenLobbiesHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+          _listOpenLobbiesHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
         } else if (request.type == PacketType::JoinLobby) {
-          Supervisor::_joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+          _joinLobbyHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
         } else if (request.type == PacketType::LobbyHeartbeat) {
-          Supervisor::_lobbyHeartbeatHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
+          _lobbyHeartbeatHandler(clientIdKey, packetHandler, nlohmann::json::parse(request.body));
         } else if (request.type == PacketType::StartGame) {
-          Supervisor::_startGameHandler(clientIdKey, packetHandler);
+          _startGameHandler(clientIdKey, packetHandler);
         } else if (request.type == PacketType::GameSpecificData) {
-          Supervisor::_gameSpecificDataHandler(clientIdKey, packetHandler, request);
+          _gameSpecificDataHandler(clientIdKey, packetHandler, request);
         } else if (request.type == PacketType::DownloadAssets) {
-          Supervisor::_downloadAssetsHandler(clientIdKey, packetHandler);
+          _downloadAssetsHandler(clientIdKey, packetHandler);
         }
       } catch (std::exception& e) {
         LOG(DEBUG) << "[Supervisor] Exception in _processPackets";
@@ -388,7 +387,7 @@ void Supervisor::_createNewGameInstance(network::SupervisorPacketHandler& packet
     m_gameInstances.emplace(gameInstance.creatorId, std::make_tuple(std::move(serverHandlerPtr), std::move(gameInstanceSyncParametersPtr)));
 
     for (auto clientId : lobby.getClients()) {
-      // Insert of overwrite
+      // Insert or overwrite
       m_clientCreatorMapper[clientId] = lobby.getCreatorClientId();
     }
   }
@@ -400,6 +399,8 @@ void Supervisor::_gameSpecificDataHandler(size_t clientIdKey, network::Superviso
   try {
     auto requestJson = nlohmann::json::parse(request.body);
 
+    std::unique_lock lock{m_gameInstancesMutex};
+
     auto it = m_clientCreatorMapper.find(clientIdKey);
     if (it == m_clientCreatorMapper.end()) {
       return;
@@ -408,7 +409,6 @@ void Supervisor::_gameSpecificDataHandler(size_t clientIdKey, network::Superviso
     auto gameInstance = m_gameInstances.find(it->second);
     if (gameInstance != m_gameInstances.end()) {
       auto& [serverHandler, gameSyncParams] = gameInstance->second;
-      // TODO: Do some magic...
       gameSyncParams->queue.push(request);
     }
   } catch (std::exception& e) { }
@@ -418,6 +418,8 @@ void Supervisor::_gameSpecificDataHandler(size_t clientIdKey, network::Superviso
 void Supervisor::_downloadAssetsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
 {
   try {
+    std::unique_lock lock{m_gameInstancesMutex};
+
     auto it = m_clientCreatorMapper.find(clientIdKey);
     if (it == m_clientCreatorMapper.end()) {
       return;
@@ -429,6 +431,30 @@ void Supervisor::_downloadAssetsHandler(size_t clientIdKey, network::SupervisorP
       serverHandler->transmitAssetsToClient(clientIdKey);
     }
   } catch (std::exception& e) { }
+}
+
+
+void Supervisor::_gameInstancesCheckingThread()
+{
+  while (m_run) {
+    m_tickThread.waitForTick();
+
+    std::unique_lock lock{m_gameInstancesMutex};
+
+//    if (not m_packetHandler) {
+//      return;
+//    }
+//
+//    auto clientIds = m_packetHandler->getClients();
+//
+//    for (auto& [creatorId, gameInstance] : m_gameInstances) {
+//      // If creatorId has disconnected
+//      if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
+//        auto& [serverHandler, _] = gameInstance;
+//        serverHandler->stop();
+//      }
+//    }
+  }
 }
 
 } // namespace

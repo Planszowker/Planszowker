@@ -3,9 +3,10 @@ set(LIB_NAME Games)
 project(${LIB_NAME})
 
 set(SOURCES
-        Objects.cpp
+        CommObjects.cpp
         GameWindow.cpp
         GamesMetaInfo.cpp
+        BoardParser.cpp
         States/GameChoosingState.cpp
         States/GameState.cpp
         States/GameLobbyState.cpp
@@ -14,6 +15,10 @@ set(SOURCES
         Callbacks/GameChoosingCallbacks.cpp
         Callbacks/GameLobbyCallbacks.cpp
         Callbacks/GameCallbacks.cpp
+
+        Objects/ActionButton.cpp
+        Objects/DestinationPoint.cpp
+        Objects/Entity.cpp
         )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

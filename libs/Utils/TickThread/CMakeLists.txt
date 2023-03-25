@@ -5,7 +5,7 @@ add_library(${LIB_NAME} STATIC TickThread.cpp)
 target_link_libraries(
     ${LIB_NAME}
         PRIVATE Games
-        PRIVATE ErrorHandler
+        PUBLIC ErrorHandler
 )
 
 target_include_directories(${LIB_NAME}

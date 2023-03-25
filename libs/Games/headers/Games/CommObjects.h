@@ -27,6 +27,8 @@ auto constexpr ASSET_TYPE = "AssetsType";           ///< String: Type of asset (
 
 enum class PacketType : uint8_t
 {
+  Invalid,                     ///< Invalid packet.
+
   // General purpose
   Heartbeat,                   ///< Used for pinging clients.
   ID,                          ///< Used to get client's ID associated in server.
@@ -35,6 +37,7 @@ enum class PacketType : uint8_t
   DownloadAssets,              ///< Used to indicate that Client wants to get game's assets.
   StartTransaction,            ///< Used to start an asset transaction.
   EndTransaction,              ///< Used to end an asset transaction.
+  FinishedTransactions,        ///< Used to indicate that all assets have been transmitted.
 
   // Lobby specific
   ListAvailableGames,          ///< Used to list all games the server is able to handle.
@@ -47,7 +50,7 @@ enum class PacketType : uint8_t
   StartGame,                   ///< Used to start a specific game.
 
   // Game specific
-  GameSpecificData,    ///< Used for game specific data.
+  GameSpecificData,            ///< Used for game specific data.
 };
 
 
@@ -56,7 +59,7 @@ enum class PacketType : uint8_t
  */
 struct Request
 {
-  PacketType type = PacketType::Heartbeat;
+  PacketType type = PacketType::Invalid;
   std::string body;
 };
 
@@ -66,7 +69,7 @@ struct Request
  */
 struct Reply
 {
-  PacketType type = PacketType::GameSpecificData;
+  PacketType type = PacketType::Invalid;
   std::string body;
 };
 
@@ -74,9 +77,9 @@ struct Reply
 /*!
  * @brief Structure of supported assets extensions
  */
-enum class SupportedAssetExtension : uint8_t
+enum class SupportedAssetExtension
 {
-
+  // TODO
 };
 
 } // namespaces

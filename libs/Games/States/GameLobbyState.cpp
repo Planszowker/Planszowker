@@ -2,7 +2,7 @@
 
 #include <Callbacks/GameLobbyCallbacks.h>
 #include <GamesClient/SharedObjects.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <Games/States/GameState.h>
 
 #include <easylogging++.h>
@@ -275,12 +275,13 @@ void GameLobbyState::updateLobbiesList(const nlohmann::json &updateJson)
 
 void GameLobbyState::_lobbyHeartbeat()
 {
-  constexpr size_t HeartbeatSleepTime = 10;
-
   nlohmann::json requestJson;
 
   while (m_runLobbyHeartbeatThread) {
-    std::this_thread::sleep_for(std::chrono::seconds(HeartbeatSleepTime));
+    if (not m_tickThread.checkIfTick()) {
+      continue;
+    }
+
     std::scoped_lock lock{m_lobbyHeartbeatMutex};
 
     try {

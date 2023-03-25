@@ -2,7 +2,7 @@
 
 #include <NetworkHandler/SupervisorPacketHandler.h>
 #include <ThreadSafeQueue/ThreadSafeQueue.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 
 #include <atomic>
 #include <thread>

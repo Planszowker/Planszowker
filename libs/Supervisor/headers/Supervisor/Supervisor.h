@@ -7,10 +7,11 @@
 #include <NetworkHandler/SupervisorPacketHandler.h>
 #include <PlametaParser/Parser.h>
 #include <ThreadSafeQueue/ThreadSafeQueue.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <Games/GameInstance.h>
 #include <GamesServer/ServerHandler.h>
 #include <Supervisor/Lobby.h>
+#include <TickThread/TickThread.h>
 
 #include <easylogging++.h>
 #include <nlohmann/json.hpp>
@@ -43,17 +44,19 @@ private:
   void _registerCommand(std::shared_ptr<Command>&& command);
   void _processPackets(network::SupervisorPacketHandler& packetHandler);
 
-  static void _listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
-  static void _createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
-  static void _getLobbyDetailsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
-  static void _listOpenLobbiesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
-  static void _joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
-  static void _lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
-  static void _startGameHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
-  static void _gameSpecificDataHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const games::Request& request);
-  static void _downloadAssetsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
+  void _listAvailableGamesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
+  void _createLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  void _getLobbyDetailsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  void _listOpenLobbiesHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  void _joinLobbyHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  void _lobbyHeartbeatHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const nlohmann::json& requestJson);
+  void _startGameHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
+  void _gameSpecificDataHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler, const games::Request& request);
+  void _downloadAssetsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler);
 
-  static void _createNewGameInstance(network::SupervisorPacketHandler& packetHandler, const Lobby& lobby);
+  void _createNewGameInstance(network::SupervisorPacketHandler& packetHandler, const Lobby& lobby);
+
+  void _gameInstancesCheckingThread();
 
   utils::plameta::Parser m_configParser;
 
@@ -61,8 +64,15 @@ private:
 
   std::vector<std::shared_ptr<Command>> m_commands;
 
-  static std::unordered_map<size_t, GameInstancesTuple> m_gameInstances;
-  static std::unordered_map<size_t, size_t> m_clientCreatorMapper;
+  std::mutex m_gameInstancesMutex;
+  std::jthread m_gameInstancesCheckingThread;
+
+  utils::TickThread<std::chrono::milliseconds, 500> m_tickThread;
+
+  network::SupervisorPacketHandler* m_packetHandler;
+
+  std::unordered_map<size_t, GameInstancesTuple> m_gameInstances;
+  std::unordered_map<size_t, size_t> m_clientCreatorMapper;
 };
 
 }

@@ -62,6 +62,6 @@ add_subdirectory(planszowker_client)
 add_subdirectory(planszowker_server)
 
 # Testing
-# enable_testing()
+enable_testing()
 # add_subdirectory(functional_tests) # Functional tests
-# add_subdirectory(tests) # Unit tests
+add_subdirectory(tests) # Unit tests

@@ -3,7 +3,7 @@
 /* Generic */
 //#include "Games/ServerHandler.h"
 #include "NetworkHandler/SupervisorPacketHandler.h"
-#include "Games/Objects.h"
+#include "Games/CommObjects.h"
 #include "Rng/RandomGenerator.h"
 
 /* SOL/LUA */

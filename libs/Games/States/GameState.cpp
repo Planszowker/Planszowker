@@ -2,7 +2,7 @@
 
 #include <Callbacks/GameCallbacks.h>
 #include <GamesClient/SharedObjects.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 
 namespace pla::games {
 
@@ -11,7 +11,7 @@ GameState::GameState(games_client::GraphicalView& graphicalView, GameStateArgume
   , m_gameWindow(*graphicalView.getGameWindow())
   , m_controller(graphicalView.getController())
   , m_gameArguments(std::move(gameStateArguments))
-  , m_callbacks(std::make_shared<GameCallbacks>())
+  , m_callbacks(std::make_shared<GameCallbacks>(*this))
 {
   // Connect GameChoosing callbacks to packet handler
   m_controller.getPacketHandler()->connectCallbacks(m_callbacks.get());
@@ -39,6 +39,8 @@ GameState::GameState(games_client::GraphicalView& graphicalView, GameStateArgume
 
 void GameState::init()
 {
+  // Download all game's data
+  m_controller.sendRequest(PacketType::DownloadAssets);
 }
 
 
@@ -57,28 +59,6 @@ void GameState::eventHandling()
       m_graphicalView.stop();
       break;
     }
-
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::G) {
-      sf::Packet packet;
-
-      games::Request request {
-        .type = PacketType::GameSpecificData,
-      };
-
-      packet << request;
-      m_controller.getPacketHandler()->sendPacket(packet);
-    }
-
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::J) {
-      sf::Packet packet;
-
-      games::Request request {
-        .type = PacketType::DownloadAssets,
-      };
-
-      packet << request;
-      m_controller.getPacketHandler()->sendPacket(packet);
-    }
   }
 }
 
@@ -87,13 +67,53 @@ void GameState::display()
 {
   ImGui::SFML::Update(m_gameWindow, m_deltaClock.restart());
 
-  ImGui::ShowUserGuide();
+  // TODO: Remove this
   ImGui::ShowDemoWindow();
+
+  _actionAreaDisplay();
+  _gameAreaDisplay();
+  _playerAreaDisplay();
+  _logAreaDisplay();
 
   m_gameWindow.clear(sf::Color(0x54, 0x54, 0x54));
 
   ImGui::SFML::Render(m_gameWindow);
   m_gameWindow.display();
+}
+
+
+void GameState::_actionAreaDisplay()
+{
+  // Action area uses ImGui to display window with appropriate action buttons.
+  ImGui::Begin("Action window");
+
+  ImGui::Button("Action 1"); ImGui::SameLine();
+  ImGui::Button("Action 2"); ImGui::SameLine();
+  ImGui::Button("Action 3"); ImGui::SameLine();
+  ImGui::Button("Action 4");
+
+  ImGui::End();
+}
+
+
+void GameState::_gameAreaDisplay()
+{
+  // Game are uses SFML (may be using ImGui as well) to display and handle sprites.
+  // TODO
+}
+
+
+void GameState::_playerAreaDisplay()
+{
+  // Player area uses ImGui to display information about the players (points, round counter, etc.).
+  // TODO
+}
+
+
+void GameState::_logAreaDisplay()
+{
+  // Log area uses ImGui to display game logs and maybe chat messages.
+  // TODO
 }
 
 } // namespace

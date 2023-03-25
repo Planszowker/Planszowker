@@ -22,6 +22,7 @@ public:
   virtual void joinLobbyCallback(const std::any&) { };
   virtual void disconnectClientCallback(const std::any&) { };
   virtual void startGameCallback(const std::any&) { };
+  virtual void endTransactionCallback(const std::any&) { };
   // Increase callbacks if needed here...
 protected:
   ICallbacks() = default;

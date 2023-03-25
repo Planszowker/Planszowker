@@ -1,6 +1,6 @@
 #include <Callbacks/GameLobbyCallbacks.h>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <ErrorHandler/ErrorLogger.h>
 #include <easylogging++.h>
 

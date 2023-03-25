@@ -1,6 +1,6 @@
 #include "ClientPacketHandler.h"
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <TimeMeasurement/TimeLogger.h>
 #include <CompilerUtils/FunctionInfoExtractor.h>
 #include <AssetsManager/AssetsReceiver.h>
@@ -157,6 +157,10 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
               // Reset transaction parameters
               m_transactionState = TransactionState::NotStarted;
               m_transactionCounter = 0;
+
+              if (m_callbacks) {
+                m_callbacks->endTransactionCallback(arg);
+              }
 
               // Check if more data is available - if yes, receive it as a new transaction
               _requestAsset();

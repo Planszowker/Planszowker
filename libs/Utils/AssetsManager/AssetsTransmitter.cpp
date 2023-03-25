@@ -1,6 +1,6 @@
 #include <AssetsTransmitter.h>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 
 #include <easylogging++.h>
 
@@ -33,6 +33,12 @@ void AssetsTransmitter::transmitAssets(size_t clientIdKey)
   if (m_currentAssetNameIter == m_assetsEntries.end()) {
     // We have already sent all the assets.
     LOG(DEBUG) << "[AssetsTransmitter] We have reached end of assets";
+    sf::Packet packet;
+    Reply reply {
+      .type = PacketType::FinishedTransactions,
+    };
+    packet << reply;
+    m_packetHandler.sendPacketToClient(clientIdKey, packet);
     return;
   }
 
