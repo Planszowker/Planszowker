@@ -51,6 +51,7 @@ add_subdirectory(libs/Utils/Rng)
 add_subdirectory(libs/Utils/AssetsManager)
 add_subdirectory(libs/Utils/TickThread)
 add_subdirectory(libs/Utils/ThreadSafeQueue)
+add_subdirectory(libs/Utils/External/Base64)
 add_subdirectory(libs/Utils/External/EasyLogging)
 add_subdirectory(libs/Network/NetworkHandler)
 add_subdirectory(libs/Supervisor)
@@ -63,5 +64,5 @@ add_subdirectory(planszowker_server)
 
 # Testing
 enable_testing()
-# add_subdirectory(functional_tests) # Functional tests
+add_subdirectory(functional_tests) # Functional tests
 add_subdirectory(tests) # Unit tests

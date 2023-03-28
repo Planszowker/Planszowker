@@ -34,9 +34,9 @@ public:
   void sendPacketToClient(size_t clientId, sf::Packet& packet);
 
 protected:
-  void _backgroundTask(std::mutex& tcpSocketsMutex) override;
-  void _newConnectionTask(std::mutex& tcpSocketsMutex);
-  void _heartbeatTask(std::mutex& tcpSocketsMutex);
+  void _backgroundTask() override;
+  void _newConnectionTask();
+  void _heartbeatTask();
 
   virtual bool _addClient(std::shared_ptr<sf::TcpSocket>& newSocket);
 

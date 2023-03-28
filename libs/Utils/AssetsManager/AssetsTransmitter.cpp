@@ -21,9 +21,15 @@ AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::Super
 {
   // Set stream pointer to the first asset available.
   // Remember to close any opened streams (not sure why it is mandatory).
-  const std::string& entryName = m_currentAssetNameIter->first;
-  m_plagameFile->GetEntry(entryName)->CloseDecompressionStream();
-  m_assetStreamPtr = m_plagameFile->GetEntry(entryName)->GetDecompressionStream();
+  std::string entryName = m_currentAssetNameIter->first;
+  auto entry = m_plagameFile->GetEntry(entryName);
+
+  if (not entry) {
+    err_handler::ErrorLogger::printError("[AssetsTransmitter] Entry is nullptr!");
+  }
+
+  entry->CloseDecompressionStream();
+  m_assetStreamPtr = entry->GetDecompressionStream();
 }
 
 
@@ -38,6 +44,7 @@ void AssetsTransmitter::transmitAssets(size_t clientIdKey)
       .type = PacketType::FinishedTransactions,
     };
     packet << reply;
+    LOG(DEBUG) << "[AssetsTransmitter] Sending FinishedTransaction for client ID " << clientIdKey;
     m_packetHandler.sendPacketToClient(clientIdKey, packet);
     return;
   }
@@ -72,9 +79,15 @@ void AssetsTransmitter::transmitAssets(size_t clientIdKey)
       // Check if we have any more assets...
       if (m_currentAssetNameIter != m_assetsEntries.end()) {
         // Update asset stream
-        const std::string& entryName = m_currentAssetNameIter->first;
-        m_plagameFile->GetEntry(entryName)->CloseDecompressionStream();
-        m_assetStreamPtr = m_plagameFile->GetEntry(entryName)->GetDecompressionStream();
+        std::string entryName = m_currentAssetNameIter->first;
+        auto entry = m_plagameFile->GetEntry(entryName);
+
+        if(not entry) {
+          err_handler::ErrorLogger::printError("[AssetsTransmitter] Entry is nullptr!");
+        }
+
+        entry->CloseDecompressionStream();
+        m_assetStreamPtr = entry->GetDecompressionStream();
       }
       m_transactionCounter = 0; // Reset transaction counter
       break;

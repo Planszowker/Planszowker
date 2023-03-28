@@ -52,6 +52,8 @@ Supervisor::~Supervisor()
     auto& [serverHandler, syncParams] = gameInstance;
     serverHandler->stop();
   }
+
+  m_run = false;
 }
 
 
@@ -173,12 +175,13 @@ void Supervisor::_processPackets(network::SupervisorPacketHandler& packetHandler
         LOG(DEBUG) << "[Supervisor] Exception in _processPackets";
       }
 
-      std::cout << "Type: " << static_cast<int>(request.type) << "\n";
-      try {
-        std::cout << "Request JSON:\n" << nlohmann::json::parse(request.body).dump(4) << "\n";
-      } catch (std::exception& e) {
-        std::cout << "Request:" << request.body << "\n";
-      }
+      LOG(DEBUG) << "Type " << static_cast<int>(request.type) << " for clientId " << clientIdKey;
+//      std::cout << "Type: " << static_cast<int>(request.type) << "\n";
+//      try {
+//        std::cout << "Request JSON:\n" << nlohmann::json::parse(request.body).dump(4) << "\n";
+//      } catch (std::exception& e) {
+//        std::cout << "Request:" << request.body << "\n";
+//      }
     }
   }
 }
@@ -418,12 +421,14 @@ void Supervisor::_gameSpecificDataHandler(size_t clientIdKey, network::Superviso
 void Supervisor::_downloadAssetsHandler(size_t clientIdKey, network::SupervisorPacketHandler& packetHandler)
 {
   try {
-    std::unique_lock lock{m_gameInstancesMutex};
+    std::scoped_lock lock{m_gameInstancesMutex};
 
     auto it = m_clientCreatorMapper.find(clientIdKey);
     if (it == m_clientCreatorMapper.end()) {
       return;
     }
+
+    LOG(DEBUG) << "[Supervisor] Download Assets Handler for client " << clientIdKey;
 
     auto gameInstance = m_gameInstances.find(it->second);
     if (gameInstance != m_gameInstances.end()) {
@@ -439,7 +444,7 @@ void Supervisor::_gameInstancesCheckingThread()
   while (m_run) {
     m_tickThread.waitForTick();
 
-    std::unique_lock lock{m_gameInstancesMutex};
+    std::scoped_lock lock{m_gameInstancesMutex};
 
 //    if (not m_packetHandler) {
 //      return;

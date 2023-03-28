@@ -19,7 +19,7 @@ public:
   virtual void stop() = 0;
 
 protected:
-  virtual void _backgroundTask(std::mutex&) = 0;
+  virtual void _backgroundTask() = 0;
 
   // Multithreading variables
   std::thread m_backgroundThread;

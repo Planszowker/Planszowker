@@ -38,7 +38,7 @@ public:
 
 private:
 
-  void _backgroundTask(std::mutex& tcpSocketsMutex) final;
+  void _backgroundTask() final;
 
   bool _requestAsset();
 

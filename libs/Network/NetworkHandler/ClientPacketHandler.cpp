@@ -38,7 +38,7 @@ void ClientPacketHandler::runInBackground()
 {
   m_run = true;
 
-  std::thread backgroundThread{&ClientPacketHandler::_backgroundTask, this, std::ref(m_tcpSocketsMutex)};
+  std::thread backgroundThread{&ClientPacketHandler::_backgroundTask, this};
   m_backgroundThread = std::move(backgroundThread);
 }
 
@@ -48,14 +48,14 @@ void ClientPacketHandler::stop() {
 }
 
 
-void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
+void ClientPacketHandler::_backgroundTask()
 {
   // This method will receive and send packets to server
   while(m_run) {
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
 
     TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-    const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
+    std::scoped_lock tcpSocketsLock{m_tcpSocketsMutex};
 
     // Receive packets from server.
     sf::Packet receivePacket;
@@ -142,13 +142,16 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
           if (m_transactionState == TransactionState::InProgress) {
             try {
               nlohmann::json replyJson = nlohmann::json::parse(reply.body);
-              LOG(DEBUG) << "[DEBUG] Ended transaction for " << replyJson[ASSET_NAME] << "!\n";
+              auto assetName = replyJson[ASSET_NAME].get<std::string>();
+              auto assetType = replyJson[ASSET_TYPE].get<std::string>();
 
-              if (replyJson[ASSET_TYPE] == "Image") {
+              LOG(DEBUG) << "[DEBUG] Ended transaction for " << assetName << " (" << assetType << ")";
+
+              if (assetType == "Image") {
                 if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
                   LOG(ERROR) << "Error adding " << m_currentAssetKey << "!";
                 }
-              } else if (replyJson[ASSET_TYPE] == "BoardDescription"){
+              } else if (assetType == "BoardDescription"){
                 if (!assets::AssetsReceiver::addBoardDescription(m_receivedRawPackets, m_currentAssetKey)) {
                   LOG(ERROR) << "Error adding " << m_currentAssetKey << "!";
                 }
@@ -159,6 +162,7 @@ void ClientPacketHandler::_backgroundTask(std::mutex& tcpSocketsMutex)
               m_transactionCounter = 0;
 
               if (m_callbacks) {
+                LOG(DEBUG) << "Callback for EndTransaction";
                 m_callbacks->endTransactionCallback(arg);
               }
 

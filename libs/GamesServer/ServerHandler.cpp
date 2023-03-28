@@ -98,7 +98,7 @@ bool ServerHandler::_internalHandling() {
 
   LOG(DEBUG) << "[ServerHandler] Waiting for queue";
   games::Request request = m_gameInstance.queue.pop();
-  std::lock_guard<std::mutex> lock{m_mutex};
+  std::scoped_lock lock{m_mutex};
   LOG(DEBUG) << "[ServerHandler] Request: " << (int)request.type;
 
   return true;
@@ -109,12 +109,14 @@ void ServerHandler::transmitAssetsToClient(size_t clientId)
 {
   std::lock_guard<std::mutex> lock{m_mutex};
 
+  LOG(DEBUG) << "[ServerHandler] Client ID " << clientId;
+
   // User wants to download game's assets
   auto assetTransmitterPtr = m_assetsTransmitterMap.find(clientId);
   if (assetTransmitterPtr == m_assetsTransmitterMap.end()) {
     // If we haven't found entry with AssetTransmitter, we have to add a new one
     auto [it, inserted] = m_assetsTransmitterMap.insert({clientId, std::make_shared<assets::AssetsTransmitter>(
-            std::move(m_gamesHandler.getPlagameFile()),
+            m_gamesHandler.getPlagameFile(),
             m_gameInstance.packetHandler,
             std::move(m_gamesHandler.getAssetsEntries()))});
 
