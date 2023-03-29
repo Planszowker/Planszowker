@@ -22,7 +22,7 @@ void GamesHandler::_getAssetsList()
   // Iterate over all entries in .plagame file
   for (int idx = 0; idx < m_plagameFile->GetEntriesCount(); ++idx) {
     // Find files inside assets folder
-    std::regex assetsRegex {std::string(ASSETS_DIR) + "[a-zA-Z0-9]+\\.(jpg|jpeg|png|JPG|JPEG|PNG)"};
+    std::regex assetsRegex {std::string(ASSETS_DIR) + "([a-zA-Z0-9]+\\.(jpg|jpeg|png|JPG|JPEG|PNG))"};
     std::string entryName = m_plagameFile->GetEntry(idx)->GetFullName();
     if (std::regex_search(entryName, assetsRegex)) {
       LOG(DEBUG) << "\t> Found asset " << entryName << "!";

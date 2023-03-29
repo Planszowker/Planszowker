@@ -14,7 +14,7 @@ public:
   explicit GameCallbacks(GameState& state) : m_state(state) { }
   ~GameCallbacks() final = default;
 
-  void endTransactionCallback(const std::any& arg) final;
+  void downloadAssetsCallback(const std::any& arg) final;
 
 private:
   GameState& m_state;

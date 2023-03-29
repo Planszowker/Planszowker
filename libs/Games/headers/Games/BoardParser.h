@@ -19,14 +19,22 @@ auto constexpr ID = "ID";
 auto constexpr DISPLAY_NAME = "DisplayName";
 auto constexpr VISIBLE = "Visible";
 auto constexpr POSITION = "Position";
+auto constexpr SIZE = "Size";
 }
 
 class BoardParser {
 public:
-  explicit BoardParser(nlohmann::json json);
-private:
   using ObjectContainer = std::unordered_map<std::string, std::shared_ptr<Object>>;
 
+  explicit BoardParser(nlohmann::json json);
+
+  void updateObjects(nlohmann::json updateJson);
+
+  ObjectContainer& getActionButtons() { return m_actionButtons; };
+  ObjectContainer& getDestinationPoints() { return m_destinationPoints; };
+  ObjectContainer& getEntities() { return m_entities; };
+
+private:
   nlohmann::json m_json;
 
   ObjectContainer m_actionButtons;

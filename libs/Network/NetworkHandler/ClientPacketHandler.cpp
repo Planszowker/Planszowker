@@ -4,7 +4,6 @@
 #include <TimeMeasurement/TimeLogger.h>
 #include <CompilerUtils/FunctionInfoExtractor.h>
 #include <AssetsManager/AssetsReceiver.h>
-#include <AssetsManager/AssetsDefines.h>
 #include <ErrorHandler/ErrorLogger.h>
 
 #include <chrono>
@@ -22,7 +21,6 @@ using namespace games::json_entries;
 ClientPacketHandler::ClientPacketHandler(std::atomic_bool& run, sf::TcpSocket& serverSocket)
   : PacketHandler(run)
   , m_serverSocket(serverSocket)
-  , m_transactionState(TransactionState::NotStarted)
   , m_callbacks(nullptr)
 {
   m_serverSocket.setBlocking(false);
@@ -68,26 +66,6 @@ void ClientPacketHandler::_backgroundTask()
       games::Reply reply;
 
       if (!(receivePacket >> reply)) {
-        // If we fail to extract reply from packet, it means the packet is either corrupted
-        // or is a part of asset transaction.
-        if (m_transactionState == TransactionState::InProgress) {
-          // If it's a transaction part, add it to deque and stop processing.
-          m_receivedRawPackets.push_back(receivePacket);
-          ++m_transactionCounter;
-
-          //LOG(DEBUG) << "[DEBUG] Transaction counter: " << m_transactionCounter << "\n";
-
-          if (m_transactionCounter == assets::CHUNK_QUANTITY) {
-            // We have received enough chunks, we need to send a request for more data.
-            // Cannot use SendPacket(), because it would require double mutex locking...
-            //LOG(DEBUG) << "[DEBUG] Requesting asset...\n";
-            m_transactionCounter = 0;
-            _requestAsset();
-          }
-
-          continue;
-        }
-
         // If it's a corrupted packet, just continue.
         LOG(ERROR) << "[PacketHandler] Corrupted packet!\n";
         continue;
@@ -98,10 +76,12 @@ void ClientPacketHandler::_backgroundTask()
         continue;
       }
 
-      try {
-        LOG(DEBUG) << "Reply:\n" << nlohmann::json::parse(reply.body).dump(4);
-      } catch (std::exception& e) {
-        LOG(DEBUG) << "Reply:\n " << reply.body;
+      if (reply.type != games::PacketType::DownloadAssets) {
+        try {
+          LOG(DEBUG) << "Reply:\n" << nlohmann::json::parse(reply.body).dump(4);
+        } catch (std::exception &e) {
+          LOG(DEBUG) << "Reply:\n " << reply.body;
+        }
       }
 
       std::any arg = reply.body;
@@ -123,53 +103,15 @@ void ClientPacketHandler::_backgroundTask()
           break;
         }
 
-        case games::PacketType::StartTransaction:
+        case games::PacketType::DownloadAssets:
         {
-          if (m_transactionState == TransactionState::NotStarted) {
-            try {
-              nlohmann::json replyJson = nlohmann::json::parse(reply.body);
-              LOG(DEBUG) << "[DEBUG] Started transaction for " << replyJson[ASSET_NAME] << "!\n";
-              m_currentAssetKey = replyJson[ASSET_NAME];
-              m_transactionState = TransactionState::InProgress;
-              m_receivedRawPackets.clear();
-            } catch (std::exception& e) { }
-          }
-          break;
-        }
-
-        case games::PacketType::EndTransaction:
-        {
-          if (m_transactionState == TransactionState::InProgress) {
-            try {
-              nlohmann::json replyJson = nlohmann::json::parse(reply.body);
-              auto assetName = replyJson[ASSET_NAME].get<std::string>();
-              auto assetType = replyJson[ASSET_TYPE].get<std::string>();
-
-              LOG(DEBUG) << "[DEBUG] Ended transaction for " << assetName << " (" << assetType << ")";
-
-              if (assetType == "Image") {
-                if (!assets::AssetsReceiver::parseAndAddAsset(m_receivedRawPackets, m_currentAssetKey)) {
-                  LOG(ERROR) << "Error adding " << m_currentAssetKey << "!";
-                }
-              } else if (assetType == "BoardDescription"){
-                if (!assets::AssetsReceiver::addBoardDescription(m_receivedRawPackets, m_currentAssetKey)) {
-                  LOG(ERROR) << "Error adding " << m_currentAssetKey << "!";
-                }
-              }
-
-              // Reset transaction parameters
-              m_transactionState = TransactionState::NotStarted;
-              m_transactionCounter = 0;
-
-              if (m_callbacks) {
-                LOG(DEBUG) << "Callback for EndTransaction";
-                m_callbacks->endTransactionCallback(arg);
-              }
-
-              // Check if more data is available - if yes, receive it as a new transaction
-              _requestAsset();
-            } catch (std::exception& e) { }
-          }
+          try {
+            nlohmann::json replyJson = nlohmann::json::parse(reply.body);
+            assets::AssetsReceiver::parseAndAddAssets(replyJson);
+            if (m_callbacks) {
+              m_callbacks->downloadAssetsCallback(std::any{});
+            }
+          } catch (std::exception& e) { }
           break;
         }
 

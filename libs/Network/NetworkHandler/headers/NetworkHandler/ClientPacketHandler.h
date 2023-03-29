@@ -45,10 +45,6 @@ private:
   // Connection related variables
   sf::TcpSocket& m_serverSocket;
   std::deque<games::Reply> m_receivedReplies;
-  std::deque<sf::Packet> m_receivedRawPackets;
-
-  TransactionState m_transactionState;
-  std::string m_currentAssetKey;
 
   size_t m_transactionCounter {0};
 

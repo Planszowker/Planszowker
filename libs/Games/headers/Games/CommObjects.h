@@ -22,7 +22,8 @@ auto constexpr LOBBY_HEARTBEAT_TYPE = "Type";       ///< String: Type of heartbe
 
 // Assets transmitting
 auto constexpr ASSET_NAME = "AssetName";            ///< String: Asset's name.
-auto constexpr ASSET_TYPE = "AssetsType";           ///< String: Type of asset ("Image", "BoardDescription")
+auto constexpr ASSET_TYPE = "AssetType";            ///< String: Type of asset ("Image", "BoardDescription").
+auto constexpr ASSET_B64_DATA = "AssetData";        ///< String: Base64 asset string.
 }
 
 enum class PacketType : uint8_t
@@ -35,9 +36,6 @@ enum class PacketType : uint8_t
 
   // Transfer specific
   DownloadAssets,              ///< Used to indicate that Client wants to get game's assets.
-  StartTransaction,            ///< Used to start an asset transaction.
-  EndTransaction,              ///< Used to end an asset transaction.
-  FinishedTransactions,        ///< Used to indicate that all assets have been transmitted.
 
   // Lobby specific
   ListAvailableGames,          ///< Used to list all games the server is able to handle.

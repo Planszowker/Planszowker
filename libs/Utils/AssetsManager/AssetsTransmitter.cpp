@@ -6,6 +6,7 @@
 
 #include <utility>
 #include <nlohmann/json.hpp>
+#include <base64.hpp>
 
 namespace pla::assets {
 
@@ -17,119 +18,48 @@ AssetsTransmitter::AssetsTransmitter(ZipArchive::Ptr plagameFile, network::Super
   : m_plagameFile(std::move(plagameFile))
   , m_packetHandler(packetHandler)
   , m_assetsEntries(std::move(assetsEntries))
-  , m_currentAssetNameIter(m_assetsEntries.begin())
 {
-  // Set stream pointer to the first asset available.
-  // Remember to close any opened streams (not sure why it is mandatory).
-  std::string entryName = m_currentAssetNameIter->first;
-  auto entry = m_plagameFile->GetEntry(entryName);
-
-  if (not entry) {
-    err_handler::ErrorLogger::printError("[AssetsTransmitter] Entry is nullptr!");
-  }
-
-  entry->CloseDecompressionStream();
-  m_assetStreamPtr = entry->GetDecompressionStream();
 }
 
 
 void AssetsTransmitter::transmitAssets(size_t clientIdKey)
 {
   LOG(DEBUG) << "[AssetsTransmitter] Transmitting assets...";
-  if (m_currentAssetNameIter == m_assetsEntries.end()) {
-    // We have already sent all the assets.
-    LOG(DEBUG) << "[AssetsTransmitter] We have reached end of assets";
-    sf::Packet packet;
-    Reply reply {
-      .type = PacketType::FinishedTransactions,
-    };
-    packet << reply;
-    LOG(DEBUG) << "[AssetsTransmitter] Sending FinishedTransaction for client ID " << clientIdKey;
-    m_packetHandler.sendPacketToClient(clientIdKey, packet);
-    return;
-  }
+  sf::Packet packet;
+  nlohmann::json replyJson = nlohmann::json::array();
 
-  // Start asset transaction, if not yet started.
-  if (m_transactionCounter == 0) {
-    LOG(DEBUG) << "[AssetsTransmitter] Starting transaction";
-    _startTransaction(m_currentAssetNameIter->first, m_currentAssetNameIter->second, clientIdKey);
-  }
+  for (const auto& [assetName, assetType] : m_assetsEntries) {
 
-  // We send CHUNK_SIZE packets with data and then wait for response.
-  for (size_t iter = 0; iter < CHUNK_QUANTITY; ++iter) {
-    m_assetStreamPtr->read(m_buf->data(), CHUNK_SIZE);
+    auto entry = m_plagameFile->GetEntry(assetName);
 
-    // Increase transaction counter;
-    ++m_transactionCounter;
-
-    // Read how many bytes we have successfully read.
-    size_t bytesRead = m_assetStreamPtr->gcount();
-
-    // Create packet with chunk data and send it to client.
-    sf::Packet packet;
-    packet.append(m_buf->data(), bytesRead);
-    m_packetHandler.sendPacketToClient(clientIdKey, packet);
-
-    // If we cannot read CHUNK_SIZE bytes, it means EOF.
-    if (bytesRead < CHUNK_SIZE) {
-      // Move to next asset and clear transaction counter.
-      _endTransaction(m_currentAssetNameIter->first, m_currentAssetNameIter->second, clientIdKey);
-
-      ++m_currentAssetNameIter; // Get to next asset
-      // Check if we have any more assets...
-      if (m_currentAssetNameIter != m_assetsEntries.end()) {
-        // Update asset stream
-        std::string entryName = m_currentAssetNameIter->first;
-        auto entry = m_plagameFile->GetEntry(entryName);
-
-        if(not entry) {
-          err_handler::ErrorLogger::printError("[AssetsTransmitter] Entry is nullptr!");
-        }
-
-        entry->CloseDecompressionStream();
-        m_assetStreamPtr = entry->GetDecompressionStream();
-      }
-      m_transactionCounter = 0; // Reset transaction counter
-      break;
+    if (not entry) {
+      err_handler::ErrorLogger::printError("[AssetsTransmitter] Entry is nullptr!");
     }
+
+    auto assetStream = entry->GetDecompressionStream();
+    assetStream->unsetf(std::ios_base::skipws);
+
+    // Convert asset to Base64 string
+    std::string assetStr {std::istream_iterator<char>{*assetStream}, {}};
+    std::string base64Asset = base64::encode(assetStr);
+
+
+    nlohmann::json assetJson;
+    assetJson[ASSET_NAME] = assetName;
+    assetJson[ASSET_TYPE] = assetType;
+    assetJson[ASSET_B64_DATA] = base64Asset;
+
+    replyJson.push_back(assetJson);
+
+    entry->CloseDecompressionStream();
   }
-}
 
-void AssetsTransmitter::_startTransaction(const std::string& assetName, const std::string& assetType, size_t key)
-{
-  sf::Packet packet;
-  Reply reply {
-    .type = PacketType::StartTransaction,
+  games::Reply reply {
+    .type = games::PacketType::DownloadAssets,
+    .body = replyJson.dump(),
   };
-
-  nlohmann::json replyJson;
-  replyJson[ASSET_NAME] = assetName;
-  replyJson[ASSET_TYPE] = assetType;
-
-  reply.body = replyJson.dump();
-
   packet << reply;
-
-  m_packetHandler.sendPacketToClient(key, packet);
-}
-
-
-void AssetsTransmitter::_endTransaction(const std::string& assetName, const std::string& assetType, size_t key)
-{
-  sf::Packet packet;
-  Reply reply {
-    .type = PacketType::EndTransaction,
-  };
-
-  nlohmann::json replyJson;
-  replyJson[ASSET_NAME] = assetName;
-  replyJson[ASSET_TYPE] = assetType;
-
-  reply.body = replyJson.dump();
-
-  packet << reply;
-
-  m_packetHandler.sendPacketToClient(key, packet);
+  m_packetHandler.sendPacketToClient(clientIdKey, packet);
 }
 
 } // namespace

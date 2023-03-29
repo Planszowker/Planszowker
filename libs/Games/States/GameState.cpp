@@ -4,6 +4,8 @@
 #include <GamesClient/SharedObjects.h>
 #include <Games/CommObjects.h>
 
+#include <Games/Objects/ActionButton.h>
+
 namespace pla::games {
 
 GameState::GameState(games_client::GraphicalView& graphicalView, GameStateArguments gameStateArguments)
@@ -87,10 +89,15 @@ void GameState::_actionAreaDisplay()
   // Action area uses ImGui to display window with appropriate action buttons.
   ImGui::Begin("Action window");
 
-  ImGui::Button("Action 1"); ImGui::SameLine();
-  ImGui::Button("Action 2"); ImGui::SameLine();
-  ImGui::Button("Action 3"); ImGui::SameLine();
-  ImGui::Button("Action 4");
+  if (m_boardParser) {
+    for (auto& [actionButtonName, objectPtr] : m_boardParser->getActionButtons()) {
+      auto actionButtonPtr = std::dynamic_pointer_cast<ActionButton>(objectPtr);
+      auto params = actionButtonPtr->getParams();
+      if (params.visible) {
+        ImGui::Button(params.displayName.c_str());
+      }
+    }
+  }
 
   ImGui::End();
 }
@@ -98,7 +105,8 @@ void GameState::_actionAreaDisplay()
 
 void GameState::_gameAreaDisplay()
 {
-  // Game are uses SFML (may be using ImGui as well) to display and handle sprites.
+  // Game area uses SFML (may be using ImGui as well) to display and handle sprites.
+
   // TODO
 }
 

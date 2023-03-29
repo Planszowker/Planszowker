@@ -118,7 +118,7 @@ void ServerHandler::transmitAssetsToClient(size_t clientId)
     auto [it, inserted] = m_assetsTransmitterMap.insert({clientId, std::make_shared<assets::AssetsTransmitter>(
             m_gamesHandler.getPlagameFile(),
             m_gameInstance.packetHandler,
-            std::move(m_gamesHandler.getAssetsEntries()))});
+            m_gamesHandler.getAssetsEntries())});
 
     if (inserted) {
       assetTransmitterPtr = it;
