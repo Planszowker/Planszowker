@@ -21,19 +21,22 @@
       "ID": "Die1",
       "Texture": "Die1.png",
       "Size": "0.1x0.1",
-      "Position": "Die1Point"
+      "Position": "Die1Point",
+      "Visible": true
     },
     {
       "ID": "Die2",
       "Texture": "Die1.png",
       "Size": "0.1x0.1",
-      "Position": "Die2Point"
+      "Position": "Die2Point",
+      "Visible": true
     },
     {
       "ID": "Die3",
       "Texture": "Die1.png",
       "Size": "0.1x0.1",
-      "Position": "Die3Point"
+      "Position": "Die3Point",
+      "Visible": true
     }
   ],
 

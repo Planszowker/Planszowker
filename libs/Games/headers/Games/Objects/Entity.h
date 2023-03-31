@@ -11,6 +11,7 @@ struct EntityFields {
   std::string texture;
   std::string positionAsDestinationPoint;
   sf::Vector2f size;
+  bool visible;
 };
 
 class Entity : public Object {

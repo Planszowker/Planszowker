@@ -5,6 +5,9 @@
 #include <Games/GameWindow.h>
 #include <Games/BoardParser.h>
 #include <GamesClient/GraphicalView.h>
+#include <Games/Objects/ActionButton.h>
+#include <Games/Objects/Entity.h>
+#include <Games/Objects/DestinationPoint.h>
 
 /* SFML */
 #include <SFML/Graphics.hpp>
@@ -28,10 +31,13 @@ public:
   void init() final;
 
 private:
+  void _init();
   void _actionAreaDisplay();
   void _logAreaDisplay();
   void _playerAreaDisplay();
   void _gameAreaDisplay();
+
+  sf::Vector2f _convertToAbsolutePosition(const sf::Vector2f& vec);
 
   friend class GameCallbacks;
 
@@ -55,7 +61,25 @@ private:
   static constexpr float LogAreaHeightFactor = 0.4f;
   static constexpr float ActionsAreaHeightFactor = 0.1f;
 
+  // Action window defines
+  static constexpr float ActionWindowWidthPadding = 80.f;
+  static constexpr float ActionWindowHeightPadding = 50.f;
+  static constexpr float ActionWindowHeight = 60.f;
+
   sf::Clock m_deltaClock;
+
+  sf::Vector2f m_gameAreaDim;
+  sf::Vector2f m_playersAreaDim;
+  sf::Vector2f m_logAreaDim;
+
+  bool initDone {false};
+
+  struct EntitySprite {
+    std::shared_ptr<sf::Sprite> spritePtr;
+    std::shared_ptr<Entity> entityPtr;
+  };
+
+  std::vector<EntitySprite> m_entitiesSprites;
 
   std::shared_ptr<BoardParser> m_boardParser;
 };

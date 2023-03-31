@@ -2,8 +2,10 @@
 
 #include <nlohmann/json.hpp>
 #include <Games/Objects/Object.h>
+#include <NetworkHandler/ClientPacketHandler.h>
 
 #include <unordered_map>
+#include <mutex>
 
 namespace pla::games {
 
@@ -20,7 +22,14 @@ auto constexpr DISPLAY_NAME = "DisplayName";
 auto constexpr VISIBLE = "Visible";
 auto constexpr POSITION = "Position";
 auto constexpr SIZE = "Size";
+
+// Update
+auto constexpr BUTTON_PRESSED_UPDATE = "ButtonPressed";
 }
+
+enum class UpdateActions {
+  ButtonPressed,
+};
 
 class BoardParser {
 public:
@@ -30,9 +39,22 @@ public:
 
   void updateObjects(nlohmann::json updateJson);
 
-  ObjectContainer& getActionButtons() { return m_actionButtons; };
-  ObjectContainer& getDestinationPoints() { return m_destinationPoints; };
-  ObjectContainer& getEntities() { return m_entities; };
+  void performUpdateAndSendToServer(network::ClientPacketHandler& packetHandler, const std::shared_ptr<Object>& objectPtr, UpdateActions updateAction);
+
+  ObjectContainer getActionButtons() {
+    std::scoped_lock lock{m_mutex};
+    return m_actionButtons;
+  };
+
+  ObjectContainer getDestinationPoints() {
+    std::scoped_lock lock{m_mutex};
+    return m_destinationPoints;
+  };
+
+  ObjectContainer getEntities() {
+    std::scoped_lock lock{m_mutex};
+    return m_entities;
+  };
 
 private:
   nlohmann::json m_json;
@@ -40,6 +62,8 @@ private:
   ObjectContainer m_actionButtons;
   ObjectContainer m_destinationPoints;
   ObjectContainer m_entities;
+
+  std::mutex m_mutex;
 };
 
 }

@@ -18,6 +18,7 @@ Entity::Entity(nlohmann::json json)
     m_fields.id = m_json.at(ID).get<std::string>();
     m_fields.texture = m_json.at(TEXTURE).get<std::string>();
     m_fields.positionAsDestinationPoint = m_json.at(POSITION).get<std::string>();
+    m_fields.visible = m_json.at(VISIBLE).get<bool>();
 
     auto size = m_json.at(SIZE).get<std::string>();
     // Size is in format POS_X x POS_Y

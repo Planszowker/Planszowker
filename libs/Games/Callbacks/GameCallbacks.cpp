@@ -17,7 +17,7 @@ void GameCallbacks::downloadAssetsCallback(const std::any& arg)
   try {
     LOG(DEBUG) << "[GameCallbacks] downloadAssetsCallback";
     LOG(DEBUG) << "[GameCallbacks] parsing BoardDescription";
-    m_state.m_boardParser = std::make_shared<BoardParser>(assets::AssetsReceiver::getBoardDescription());
+    m_state.m_boardParser = std::move(std::make_shared<BoardParser>(assets::AssetsReceiver::getBoardDescription()));
   } catch (std::exception& e) {
     err_handler::ErrorLogger::printError("[GameCallbacks] Bad any cast!");
   }

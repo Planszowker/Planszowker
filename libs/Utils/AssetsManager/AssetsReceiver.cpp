@@ -49,6 +49,7 @@ bool AssetsReceiver::parseAndAddAssets(const nlohmann::json& json)
 
         std::shared_ptr<sf::Texture> _texture = std::make_shared<sf::Texture>();
         _texture->loadFromMemory(assetDataDecoded.c_str(), assetDataDecoded.size());
+        _texture->setSmooth(true);
 
         m_assets.emplace(shortAssetName, std::move(_texture));
         m_assetsNames.push_back(shortAssetName);

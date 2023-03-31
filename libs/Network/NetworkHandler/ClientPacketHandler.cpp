@@ -76,6 +76,7 @@ void ClientPacketHandler::_backgroundTask()
         continue;
       }
 
+      // TODO: Remove
       if (reply.type != games::PacketType::DownloadAssets) {
         try {
           LOG(DEBUG) << "Reply:\n" << nlohmann::json::parse(reply.body).dump(4);

@@ -24,6 +24,10 @@ auto constexpr LOBBY_HEARTBEAT_TYPE = "Type";       ///< String: Type of heartbe
 auto constexpr ASSET_NAME = "AssetName";            ///< String: Asset's name.
 auto constexpr ASSET_TYPE = "AssetType";            ///< String: Type of asset ("Image", "BoardDescription").
 auto constexpr ASSET_B64_DATA = "AssetData";        ///< String: Base64 asset string.
+
+// Game specific entries
+auto constexpr ACTION = "Action";                   ///< String: Action to be performed.
+auto constexpr OBJECTS = "Objects";                 ///< Array of objects: List of objects to perform an action.
 }
 
 enum class PacketType : uint8_t
