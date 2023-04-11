@@ -3,6 +3,8 @@
 #include <mutex>
 #include <queue>
 #include <condition_variable>
+#include <chrono>
+#include <optional>
 
 namespace pla::utils {
 
@@ -25,17 +27,20 @@ public:
     m_cond.notify_one();
   }
 
-  T pop()
+  std::optional<T> pop()
   {
     std::unique_lock<std::mutex> lock{m_mutex};
 
     // Wait until queue is not empty
-    m_cond.wait(lock, [this]() { return not m_queue.empty(); });
+    if (m_cond.wait_for(lock, std::chrono::milliseconds(10), [this]() { return not m_queue.empty(); })) {
+      T item = m_queue.front();
+      m_queue.pop();
 
-    T item = m_queue.front();
-    m_queue.pop();
-
-    return item;
+      return item;
+    } else {
+      // Timeout
+      return std::nullopt;
+    }
   }
 
 private:

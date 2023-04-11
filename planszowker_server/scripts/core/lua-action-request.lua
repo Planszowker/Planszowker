@@ -11,12 +11,12 @@ function ActionRequest:GetActions()
 end
 
 --[[
-Check if button with UniqueName `buttonName` was pressed by client.
+Check if button with ID `buttonID` was pressed by client.
 ]]--
-function ActionRequest:IsButtonPressed(buttonName)
+function ActionRequest:IsButtonPressed(buttonID)
   if (self:IsAction() and Helper:CheckIfArray(self:GetActions())) then
     for _, v in ipairs(self:GetActions()) do
-      if (v['Action'] == 'ButtonPress' and v['Info'] == buttonName) then
+      if (v['Action'] == 'ButtonPressed' and v['Info'] == buttonID) then
         return true
       end
     end

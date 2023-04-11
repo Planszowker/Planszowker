@@ -14,16 +14,16 @@ using namespace games;
 
 void ServerHandler::run()
 {
+  m_logic = std::make_unique<Logic>(m_gameInstance.clientsIds, m_gameInstance.gameKey, m_gameInstance.packetHandler, m_gamesHandler.getPlagameFile());
+
   while(m_run)
   {
-    if (!_internalHandling()) {
-      break;
-    }
+    _internalHandling();
   }
 }
 
 
-bool ServerHandler::_internalHandling() {
+void ServerHandler::_internalHandling() {
   // TODO: Time logger probably not needed, since current thread is already suspended while waiting for new data in queue
   // time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
 
@@ -96,12 +96,16 @@ bool ServerHandler::_internalHandling() {
 //    }
 //  }
 
-  LOG(DEBUG) << "[ServerHandler] Waiting for queue";
-  games::Request request = m_gameInstance.queue.pop();
-  std::scoped_lock lock{m_mutex};
-  LOG(DEBUG) << "[ServerHandler] Request: " << (int)request.type;
+  if (auto queueParamsOpt = m_gameInstance.queue.pop()){
+    std::scoped_lock lock{m_mutex};
+    LOG(DEBUG) << "[ServerHandler] Request: " << queueParamsOpt->request.body;
 
-  return true;
+    if (!m_logic->isGameFinished()) {
+      m_logic->handleGameLogic(queueParamsOpt->clientId, queueParamsOpt->request);
+    } else {
+      LOG(DEBUG) << "Finished";
+    }
+  }
 }
 
 
@@ -135,10 +139,6 @@ void ServerHandler::transmitAssetsToClient(size_t clientId)
 void ServerHandler::stop()
 {
   m_run = false;
-
-  // Server handler thread is waiting for an item in queue to appear.
-  // We send an empty request to end this thread.
-  m_gameInstance.queue.push(games::Request{});
 }
 
 } // namespaces

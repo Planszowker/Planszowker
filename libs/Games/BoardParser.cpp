@@ -61,15 +61,15 @@ void BoardParser::performUpdateAndSendToServer(network::ClientPacketHandler& pac
     return;
   }
 
-  nlohmann::json request_json;
+  nlohmann::json requestJson;
 
   switch (updateAction) {
     case UpdateActions::ButtonPressed:
       auto buttonPtr = dynamic_pointer_cast<ActionButton>(objectPtr);
       auto params = buttonPtr->getParams();
-      request_json[ACTION] = BUTTON_PRESSED_UPDATE;
-      request_json[OBJECTS].push_back({
-        {ID, params.id},
+      requestJson[ACTION_REQUESTS].push_back({
+        {ACTION, BUTTON_PRESSED_UPDATE},
+        {INFO, params.id}
       });
       break;
   }
@@ -77,7 +77,7 @@ void BoardParser::performUpdateAndSendToServer(network::ClientPacketHandler& pac
   sf::Packet packet;
   Request request {
     .type = PacketType::GameSpecificData,
-    .body = request_json.dump(),
+    .body = requestJson.dump(),
   };
   packet << request;
   packetHandler.sendPacket(packet);

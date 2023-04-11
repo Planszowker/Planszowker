@@ -10,6 +10,8 @@ use them at all.
 
 Callback from changing states are convenient way to describe how game should behave in such case.
 --]]
+print('[LUA] DiceRoller init script call')
+
 StateMachine = Machine.create(
     {
         initial = 'Init',

@@ -5,6 +5,7 @@
 #include <PlametaParser/Entry.h>
 #include <Games/CommObjects.h>
 
+#include <easylogging++.h>
 #include <nlohmann/json.hpp>
 
 #include <string>
@@ -412,7 +413,11 @@ void Supervisor::_gameSpecificDataHandler(size_t clientIdKey, network::Superviso
     auto gameInstance = m_gameInstances.find(it->second);
     if (gameInstance != m_gameInstances.end()) {
       auto& [serverHandler, gameSyncParams] = gameInstance->second;
-      gameSyncParams->queue.push(request);
+      GameInstanceQueueParameters queueParams {
+        .clientId = clientIdKey,
+        .request = request
+      };
+      gameSyncParams->queue.push(queueParams);
     }
   } catch (std::exception& e) { }
 }

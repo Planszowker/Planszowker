@@ -3,10 +3,11 @@
 #include <GamesServer/GamesHandler.h>
 
 /* Generic */
-#include <NetworkHandler/SupervisorPacketHandler.h>
 #include <AssetsManager/AssetsTransmitter.h>
-#include <Supervisor/Supervisor.h>
 #include <Games/GameInstance.h>
+#include <GamesServer/Logic.h>
+#include <NetworkHandler/SupervisorPacketHandler.h>
+#include <Supervisor/Supervisor.h>
 
 /* SFML */
 #include <SFML/Network.hpp>
@@ -22,7 +23,7 @@ namespace pla::games_server {
 class ServerHandler
 {
 public:
-  explicit ServerHandler(games::GameInstance gameInstance)
+  explicit ServerHandler(const games::GameInstance& gameInstance)
     : m_gameInstance(gameInstance)
     , m_gamesHandler(gameInstance.gameKey)
   {
@@ -34,7 +35,7 @@ public:
   void transmitAssetsToClient(size_t clientId);
 
 protected:
-  virtual bool _internalHandling();
+  void _internalHandling();
 
   std::atomic<bool> m_run = true;
   std::mutex m_mutex; ///< Some methods may be accessed from Supervisor, thus we need to protect resources
@@ -43,6 +44,8 @@ protected:
   GamesHandler m_gamesHandler;
 
   std::unordered_map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
+
+  std::unique_ptr<Logic> m_logic;
 };
 
 } // namespaces

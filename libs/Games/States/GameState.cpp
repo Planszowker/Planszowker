@@ -104,8 +104,8 @@ void GameState::_init()
 
       auto newSize = _convertToAbsolutePosition(entityParams.size);
       auto newFactor = newSize.x / _entity->getGlobalBounds().width;
-      _entity->setScale(newFactor, newFactor);
       _entity->setOrigin(_entity->getGlobalBounds().width / 2.0, _entity->getGlobalBounds().height / 2.0);
+      _entity->setScale(newFactor, newFactor);
 
       const auto& destinationPointMap = m_boardParser->getDestinationPoints();
       auto it = destinationPointMap.find(entityParams.positionAsDestinationPoint);
@@ -172,6 +172,16 @@ void GameState::_gameAreaDisplay()
     for (const auto& entitySprite : m_entitiesSprites) {
       if (entitySprite.entityPtr->getParams().visible) {
         m_gameWindow.draw(*entitySprite.spritePtr);
+
+        // TODO: Remove it later - used fo debugging entities
+        sf::RectangleShape ziu;
+        ziu.setSize(sf::Vector2f{40.f, 40.f});
+        ziu.setOrigin(ziu.getGlobalBounds().width/2, ziu.getGlobalBounds().height/2);
+        ziu.setOutlineThickness(5);
+        ziu.setFillColor(sf::Color(255, 255, 255, 120));
+        ziu.setOutlineColor(sf::Color(0, 100, 100, 120));
+        ziu.setPosition(entitySprite.spritePtr->getPosition());
+        m_gameWindow.draw(ziu);
       }
     }
   }

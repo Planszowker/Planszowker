@@ -39,10 +39,14 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, networ
 
     // Read content of files inside .plagame file into string streams
     m_boardScript << m_boardEntry->GetDecompressionStream()->rdbuf();
-    m_initScript << m_gameEntry->GetDecompressionStream()->rdbuf();
-    m_gameScript << m_initEntry->GetDecompressionStream()->rdbuf();
+    m_initScript << m_initEntry->GetDecompressionStream()->rdbuf();
+    m_gameScript << m_gameEntry->GetDecompressionStream()->rdbuf();
 
-    //
+    // Close streams
+    m_boardEntry->CloseDecompressionStream();
+    m_initEntry->CloseDecompressionStream();
+    m_gameEntry->CloseDecompressionStream();
+
     m_luaVM["BoardDescriptionString"] = m_boardScript.str();
 
     // Load core LUA modules
@@ -75,9 +79,8 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, networ
 
     // Invoke init script from .plagame file
     m_luaVM.script(m_initScript.str());
-
   } catch(sol::error& e) {
-    std::cerr << "Exception has been raised! " << e.what() << "\n";
+    LOG(ERROR) << "Exception has been raised! " << e.what();
   }
 }
 
@@ -88,7 +91,7 @@ bool Logic::_checkIfTurnAvailable(size_t clientId) const
 
 void Logic::_advanceRound()
 {
-  std::cout << "Advancing round...\n";
+  LOG(DEBUG) << "Advancing round...";
   m_currentClientsIDAndPointsIt = std::next(m_currentClientsIDAndPointsIt);
   if (m_currentClientsIDAndPointsIt == m_clientsIDsAndPoints.end()) {
     // Roll-over -> increase round counter by 1
@@ -99,7 +102,7 @@ void Logic::_advanceRound()
 
 void Logic::_finishGame()
 {
-  std::cout << "[CORE] Game finished.\n";
+  LOG(DEBUG) << "[CORE] Game finished.";
   m_finished = true;
 }
 
@@ -111,12 +114,12 @@ void Logic::_updateClients(std::string req) const
     .body = std::move(req)
   };
 
-  LOG(DEBUG) << "[CORE] DEBUG: Reply string is: " << reply.body << "\n";
-
   sf::Packet replyPacket;
   replyPacket << reply;
 
-  m_networkHandler.sendPacketToEveryClients(replyPacket);
+  for (auto clientId : m_clientsIDs) {
+    m_networkHandler.sendPacketToClient(clientId, replyPacket);
+  }
 }
 
 
@@ -142,14 +145,15 @@ void Logic::_addPointsToCurrentClient(int points)
 void Logic::handleGameLogic(size_t clientId, const Request& requestType)
 {
   for (const auto& client: m_clientsIDsAndPoints) {
-    std::cout << "Available clientID: " << client.first << "\n";
+    LOG(DEBUG) << "Available clientID: " << client.first;
   }
-  std::cout << "Current clientID turn: " << m_currentClientsIDAndPointsIt->first << "\n";
+  LOG(DEBUG) << "Current clientID turn: " << m_currentClientsIDAndPointsIt->first;
 
   sf::Packet replyToClient;
-  Reply replyStruct {};
+  Reply replyStruct {
+    .type = games::PacketType::GameSpecificData
+  };
 
-  // TODO: bug when previous client was deleted before game - BRD-15
   if (!_checkIfTurnAvailable(clientId)) {
     m_networkHandler.sendPacketToClient(clientId, replyToClient);
     return;
@@ -165,7 +169,7 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
     m_luaVM.set("Request", requestType.body);
     m_luaVM.script("Request = Json.decode(Request)");
   } catch (sol::error& e) {
-    std::cerr << "[LUA] Error: Exception has been raised!\n" << e.what() << "\n";
+    LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
   }
 
   // Create `Reply` table
@@ -175,7 +179,7 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
   try {
     m_luaVM.script(m_gameScript.str());
   } catch(sol::error& e) {
-    std::cerr << "[LUA] Error: Exception has been raised!\n" << e.what() << "\n";
+    LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
   }
 
   // Sending Reply to Clients
@@ -183,7 +187,7 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
     m_luaVM["Reply"]["GameFinished"] = m_finished;
     m_luaVM.script("ReplyModule:SendReply()");
   } catch (sol::error& e) {
-    std::cerr << "[LUA] Error: Exception has been raised!\n" << e.what() << "\n";
+    LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
   }
 }
 

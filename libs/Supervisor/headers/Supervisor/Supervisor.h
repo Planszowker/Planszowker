@@ -13,7 +13,6 @@
 #include <Supervisor/Lobby.h>
 #include <TickThread/TickThread.h>
 
-#include <easylogging++.h>
 #include <nlohmann/json.hpp>
 
 #include <atomic>

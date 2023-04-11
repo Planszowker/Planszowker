@@ -26,8 +26,9 @@ auto constexpr ASSET_TYPE = "AssetType";            ///< String: Type of asset (
 auto constexpr ASSET_B64_DATA = "AssetData";        ///< String: Base64 asset string.
 
 // Game specific entries
+auto constexpr ACTION_REQUESTS = "ActionRequests";  ///< Array of objects: List of actions requests.
 auto constexpr ACTION = "Action";                   ///< String: Action to be performed.
-auto constexpr OBJECTS = "Objects";                 ///< Array of objects: List of objects to perform an action.
+auto constexpr INFO = "Info";                       ///< String: Details about action.
 }
 
 enum class PacketType : uint8_t
