@@ -5,6 +5,7 @@
 #include <Games/Objects/Entity.h>
 
 #include <easylogging++.h>
+#include <memory>
 
 namespace pla::games {
 
@@ -50,8 +51,29 @@ BoardParser::BoardParser(nlohmann::json json)
 }
 
 
-void BoardParser::updateObjects(nlohmann::json updateJson) {
-  // TODO
+void BoardParser::updateObjects(const nlohmann::json& updateJson) {
+  // Check for any actions required
+  try {
+    auto actionEntries = updateJson.at(ACTIONS);
+    for (const auto& actionEntry: actionEntries) {
+      auto actionType = actionEntry.at(ACTION).get<std::string>();
+      if (actionType == ACTION_SET_TEXTURE) {
+        // Setting new texture has to have these fields defined:
+        //  > Entity - entity id to which new texture should be applied
+        //  > Texture - texture name (file name) to be applied
+        auto entity = actionEntry.at(ACTION_ENTITY_ID).get<std::string>();
+        auto texture = actionEntry.at(ACTION_TEXTURE).get<std::string>();
+
+        auto entityIt = m_entities.find(entity);
+        if (entityIt != m_entities.end()) {
+          std::dynamic_pointer_cast<Entity>(entityIt->second)->updateTexture(texture);
+          _markBoardUpdate();
+        }
+      }
+    }
+  } catch (std::exception& e) {
+    LOG(DEBUG) << "[BoardParser::updateObjects] No actions to be performed!";
+  }
 }
 
 
@@ -67,7 +89,7 @@ void BoardParser::performUpdateAndSendToServer(network::ClientPacketHandler& pac
     case UpdateActions::ButtonPressed:
       auto buttonPtr = dynamic_pointer_cast<ActionButton>(objectPtr);
       auto params = buttonPtr->getParams();
-      requestJson[ACTION_REQUESTS].push_back({
+      requestJson[ACTIONS].push_back({
         {ACTION, BUTTON_PRESSED_UPDATE},
         {INFO, params.id}
       });

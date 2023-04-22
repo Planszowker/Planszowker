@@ -23,4 +23,17 @@ void GameCallbacks::downloadAssetsCallback(const std::any& arg)
   }
 }
 
+
+void GameCallbacks::gameSpecificDataCallback(const std::any& arg)
+{
+  try {
+    if (m_state.m_boardParser) {
+      auto replyBody = std::any_cast<std::string>(arg);
+      m_state.m_boardParser->updateObjects(nlohmann::json::parse(replyBody));
+    }
+  } catch (std::exception& e) {
+    err_handler::ErrorLogger::printError("[GameCallbacks] Bad any cast!");
+  }
+}
+
 }

@@ -3,11 +3,15 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <iostream>
+
 int main()
 {
   sf::RenderWindow window(sf::VideoMode(1080, 720), "ImGui + SFML test");
   window.setFramerateLimit(60);
-  ImGui::SFML::Init(window);
+  if (not ImGui::SFML::Init(window)) {
+    std::cerr << "ImGui SFML init failed!\n";
+  }
 
   ImGui::GetIO().IniFilename = nullptr;
 

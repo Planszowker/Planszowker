@@ -19,6 +19,8 @@ public:
   explicit Entity(nlohmann::json json);
 
   EntityFields getParams() { return m_fields; }
+
+  void updateTexture(const std::string& texture) { m_fields.texture = texture; }
 private:
   EntityFields m_fields;
 };

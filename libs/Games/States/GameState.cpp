@@ -91,21 +91,21 @@ void GameState::_init()
   // Initiate game board with entities sprites
   if (m_boardParser && not initDone) {
     for (auto [objectId, entityObjectPtr] : m_boardParser->getEntities()) {
-      std::shared_ptr<Entity> entityPtr = dynamic_pointer_cast<Entity>(entityObjectPtr);
+      std::shared_ptr<Entity> _entityPtr = dynamic_pointer_cast<Entity>(entityObjectPtr);
 
-      auto entityParams = entityPtr->getParams();
+      auto entityParams = _entityPtr->getParams();
       auto _texture = assets::AssetsReceiver::getTexture(entityParams.texture);
       if (!_texture) {
         LOG(ERROR) << "Texture for entity id " << objectId << " could not be found! Check BoardDescription file!";
         throw;
       }
-      auto _entity = std::make_shared<sf::Sprite>();
-      _entity->setTexture(*_texture);
+      auto _spritePtr = std::make_shared<sf::Sprite>();
+      _spritePtr->setTexture(*_texture);
 
       auto newSize = _convertToAbsolutePosition(entityParams.size);
-      auto newFactor = newSize.x / _entity->getGlobalBounds().width;
-      _entity->setOrigin(_entity->getGlobalBounds().width / 2.0, _entity->getGlobalBounds().height / 2.0);
-      _entity->setScale(newFactor, newFactor);
+      auto newFactor = newSize.x / _spritePtr->getGlobalBounds().width;
+      _spritePtr->setOrigin(_spritePtr->getGlobalBounds().width / 2.0, _spritePtr->getGlobalBounds().height / 2.0);
+      _spritePtr->setScale(newFactor, newFactor);
 
       const auto& destinationPointMap = m_boardParser->getDestinationPoints();
       auto it = destinationPointMap.find(entityParams.positionAsDestinationPoint);
@@ -114,11 +114,11 @@ void GameState::_init()
         throw;
       }
       auto destinationPointPtr = dynamic_pointer_cast<DestinationPoint>(it->second);
-      _entity->setPosition(_convertToAbsolutePosition(destinationPointPtr->getParams().position));
+      _spritePtr->setPosition(_convertToAbsolutePosition(destinationPointPtr->getParams().position));
 
-      EntitySprite entitySprite{
-        .spritePtr = std::move(_entity),
-        .entityPtr = entityPtr,
+      EntitySpriteStruct entitySprite{
+        .spritePtr = std::move(_spritePtr),
+        .entityPtr = _entityPtr,
       };
 
       m_entitiesSprites.push_back(entitySprite);
@@ -170,6 +170,10 @@ void GameState::_gameAreaDisplay()
 
   if (m_boardParser) {
     for (const auto& entitySprite : m_entitiesSprites) {
+      if (m_boardParser->isMarkedForUpdate()) {
+        _updateSprite(entitySprite);
+      }
+
       if (entitySprite.entityPtr->getParams().visible) {
         m_gameWindow.draw(*entitySprite.spritePtr);
 
@@ -184,11 +188,14 @@ void GameState::_gameAreaDisplay()
         m_gameWindow.draw(ziu);
       }
     }
+
+    if(m_boardParser->isMarkedForUpdate()) {
+      m_boardParser->markBoardUpdated();
+    }
   }
 
   m_gameWindow.setView(m_mainWindowView);
 }
-
 
 void GameState::_playerAreaDisplay()
 {
@@ -217,6 +224,37 @@ void GameState::_logAreaDisplay()
                                          ImGuiWindowFlags_NoMove);
 
   ImGui::End();
+}
+
+
+void GameState::_updateSprite(const EntitySpriteStruct& entitySpriteStruct)
+{
+  auto _entityParams = entitySpriteStruct.entityPtr->getParams();
+  auto& _spritePtr = entitySpriteStruct.spritePtr;
+
+  auto _updatedTexture = assets::AssetsReceiver::getTexture(_entityParams.texture);
+  if (!_updatedTexture) {
+    LOG(ERROR) << "Texture for entity id " << _entityParams.id << " could not be updated!";
+    throw;
+  }
+
+  // Update texture
+  _spritePtr->setTexture(*_updatedTexture);
+
+  // Update size
+  auto newSize = _convertToAbsolutePosition(_entityParams.size);
+  auto newFactor = newSize.x / _spritePtr->getGlobalBounds().width;
+  _spritePtr->setOrigin(_spritePtr->getGlobalBounds().width / 2.0, _spritePtr->getGlobalBounds().height / 2.0);
+  _spritePtr->setScale(newFactor, newFactor);
+
+  const auto& destinationPointMap = m_boardParser->getDestinationPoints();
+  auto it = destinationPointMap.find(_entityParams.positionAsDestinationPoint);
+  if (it == m_boardParser->getDestinationPoints().end()) {
+    LOG(ERROR) << "Destination point " << _entityParams.positionAsDestinationPoint << " for entity id " << _entityParams.positionAsDestinationPoint << " could not be updated!";
+    throw;
+  }
+  auto destinationPointPtr = dynamic_pointer_cast<DestinationPoint>(it->second);
+  _spritePtr->setPosition(_convertToAbsolutePosition(destinationPointPtr->getParams().position));
 }
 
 

@@ -7,8 +7,6 @@
 
 #include <easylogging++.h>
 
-#define ELPP_THREAD_SAFE // Set multithreading for EasyLogging
-
 using namespace pla::err_handler;
 using namespace pla::games_client;
 

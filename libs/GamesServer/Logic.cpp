@@ -7,10 +7,12 @@
 #include <GamesHandler.h>
 
 #include <easylogging++.h>
+#include <nlohmann/json.hpp>
 
 namespace pla::games_server {
 
 using namespace games;
+using namespace games::json_entries;
 
 Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::SupervisorPacketHandler& packetHandler, ZipArchive::Ptr zipFile)
   : m_gameName(gameName)
@@ -149,13 +151,19 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
   }
   LOG(DEBUG) << "Current clientID turn: " << m_currentClientsIDAndPointsIt->first;
 
-  sf::Packet replyToClient;
-  Reply replyStruct {
-    .type = games::PacketType::GameSpecificData
-  };
-
+  // Check if turn is available for given client
   if (!_checkIfTurnAvailable(clientId)) {
-    m_networkHandler.sendPacketToClient(clientId, replyToClient);
+    sf::Packet packet;
+    nlohmann::json replyJson;
+    replyJson[VALID] = false;
+
+    Reply reply {
+      .type = games::PacketType::GameSpecificData,
+      .body = replyJson.dump(),
+    };
+    packet << reply;
+
+    m_networkHandler.sendPacketToClient(clientId, packet);
     return;
   }
 

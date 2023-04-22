@@ -37,6 +37,12 @@ private:
   void _playerAreaDisplay();
   void _gameAreaDisplay();
 
+  struct EntitySpriteStruct {
+    std::shared_ptr<sf::Sprite> spritePtr;
+    std::shared_ptr<Entity> entityPtr;
+  };
+  void _updateSprite(const EntitySpriteStruct& entitySpriteStruct);
+
   sf::Vector2f _convertToAbsolutePosition(const sf::Vector2f& vec);
 
   friend class GameCallbacks;
@@ -74,12 +80,7 @@ private:
 
   bool initDone {false};
 
-  struct EntitySprite {
-    std::shared_ptr<sf::Sprite> spritePtr;
-    std::shared_ptr<Entity> entityPtr;
-  };
-
-  std::vector<EntitySprite> m_entitiesSprites;
+  std::vector<EntitySpriteStruct> m_entitiesSprites;
 
   std::shared_ptr<BoardParser> m_boardParser;
 };

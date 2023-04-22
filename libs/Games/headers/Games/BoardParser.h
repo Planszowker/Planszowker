@@ -25,6 +25,11 @@ auto constexpr SIZE = "Size";
 
 // Update
 auto constexpr BUTTON_PRESSED_UPDATE = "ButtonPressed";
+
+// Set texture update request
+auto constexpr ACTION_SET_TEXTURE = "SetTexture";
+auto constexpr ACTION_ENTITY_ID = "Entity";
+auto constexpr ACTION_TEXTURE = "Texture";
 }
 
 enum class UpdateActions {
@@ -37,8 +42,20 @@ public:
 
   explicit BoardParser(nlohmann::json json);
 
-  void updateObjects(nlohmann::json updateJson);
+  /**
+   * Update internal objects based on received reply.
+   *
+   * @param updateJson JSON with update entries
+   */
+  void updateObjects(const nlohmann::json& updateJson);
 
+  /**
+   * Update internal object based on user actions and send them to server.
+   *
+   * @param packetHandler Packet handler to be used to send request to server.
+   * @param objectPtr Object pointer.
+   * @param updateAction Action that was performed by user.
+   */
   void performUpdateAndSendToServer(network::ClientPacketHandler& packetHandler, const std::shared_ptr<Object>& objectPtr, UpdateActions updateAction);
 
   ObjectContainer getActionButtons() {
@@ -56,7 +73,12 @@ public:
     return m_entities;
   };
 
+  void markBoardUpdated() { m_boardUpdate = false; }
+  bool isMarkedForUpdate() { return m_boardUpdate; }
+
 private:
+  void _markBoardUpdate() { m_boardUpdate = true; }
+
   nlohmann::json m_json;
 
   ObjectContainer m_actionButtons;
@@ -64,6 +86,8 @@ private:
   ObjectContainer m_entities;
 
   std::mutex m_mutex;
+
+  bool m_boardUpdate { false };
 };
 
 }

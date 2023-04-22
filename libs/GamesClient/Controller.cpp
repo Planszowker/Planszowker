@@ -42,9 +42,9 @@ void Controller::run() {
     const auto replies = m_clientPacketHandler.getReplies();
     for (const auto& reply: replies) {
 
-      LOG(DEBUG) << "Reply: " << reply.body << "\n";
-      LOG(DEBUG) << "Type: " << static_cast<int>(reply.type) << "\n";
-      LOG(DEBUG) << "== Controller Printout ==\n";
+      LOG(DEBUG) << "Reply: " << nlohmann::json::parse(reply.body).dump(4);
+      LOG(DEBUG) << "Type: " << static_cast<int>(reply.type);
+      LOG(DEBUG) << "== Controller Printout ==";
 
 //      nlohmann::json j = nlohmann::json::parse(reply.body);
 //

@@ -16,6 +16,8 @@ public:
 
   void downloadAssetsCallback(const std::any& arg) final;
 
+  void gameSpecificDataCallback(const std::any& arg) final;
+
 private:
   GameState& m_state;
 };

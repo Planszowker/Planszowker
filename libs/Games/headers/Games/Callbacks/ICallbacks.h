@@ -23,6 +23,7 @@ public:
   virtual void disconnectClientCallback(const std::any&) { };
   virtual void startGameCallback(const std::any&) { };
   virtual void downloadAssetsCallback(const std::any&) { };
+  virtual void gameSpecificDataCallback(const std::any&) { };
   // Increase callbacks if needed here...
 protected:
   ICallbacks() = default;

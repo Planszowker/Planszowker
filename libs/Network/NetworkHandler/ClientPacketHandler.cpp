@@ -67,7 +67,7 @@ void ClientPacketHandler::_backgroundTask()
 
       if (!(receivePacket >> reply)) {
         // If it's a corrupted packet, just continue.
-        LOG(ERROR) << "[PacketHandler] Corrupted packet!\n";
+        LOG(ERROR) << "[PacketHandler] Corrupted packet!";
         continue;
       }
 
@@ -91,7 +91,10 @@ void ClientPacketHandler::_backgroundTask()
       switch (reply.type) {
         case games::PacketType::GameSpecificData:
         {
-          m_receivedReplies.push_back(reply);
+          if (m_callbacks) {
+            m_callbacks->gameSpecificDataCallback(arg);
+          }
+          //m_receivedReplies.push_back(reply);
           break;
         }
 

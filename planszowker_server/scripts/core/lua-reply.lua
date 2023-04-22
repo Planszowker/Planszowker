@@ -26,6 +26,8 @@ end
 
 -- Function that sends resulting JSON string to players, so they can update their view.
 function ReplyModule:SendReply()
+  print('[LUA-DEBUG] SendReply method invoked')
+
   self:GenerateGenericReply(Reply)
 
   -- Encode reply as a JSON string

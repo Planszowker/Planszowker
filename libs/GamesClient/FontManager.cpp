@@ -4,6 +4,8 @@
 #include <imgui-SFML.h>
 #include <vector>
 
+#include <easylogging++.h>
+
 namespace pla::games_client {
 
 void FontManager::loadFonts()
@@ -21,7 +23,9 @@ void FontManager::loadFonts()
     m_fontAtlas.insert({std::get<2>(fontEntry), font});
   }
 
-  ImGui::SFML::UpdateFontTexture();
+  if (not ImGui::SFML::UpdateFontTexture()) {
+    LOG(ERROR) << "[FontManager] Updating font textures failed!";
+  }
 
   //io.Fonts->Build();
 }

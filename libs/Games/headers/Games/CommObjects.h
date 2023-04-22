@@ -26,7 +26,7 @@ auto constexpr ASSET_TYPE = "AssetType";            ///< String: Type of asset (
 auto constexpr ASSET_B64_DATA = "AssetData";        ///< String: Base64 asset string.
 
 // Game specific entries
-auto constexpr ACTION_REQUESTS = "ActionRequests";  ///< Array of objects: List of actions requests.
+auto constexpr ACTIONS = "Actions";                 ///< Array of objects: List of actions requests.
 auto constexpr ACTION = "Action";                   ///< String: Action to be performed.
 auto constexpr INFO = "Info";                       ///< String: Details about action.
 }
