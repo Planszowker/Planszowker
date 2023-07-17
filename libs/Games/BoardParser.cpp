@@ -52,21 +52,53 @@ BoardParser::BoardParser(nlohmann::json json)
 
 
 void BoardParser::updateObjects(const nlohmann::json& updateJson) {
+  // Check if game has finished
+  try {
+    m_gameFinished = updateJson.at(GAME_FINISHED);
+    if (m_gameFinished) {
+      LOG(DEBUG) << "[BoardParser::updateObjects] Game has finished!";
+    }
+  } catch (std::exception& e) {
+    LOG(DEBUG) << "[BoardParser::updateObjects] No information whether game has finished!";
+  }
+
+  // Check if we have informations about turn
+  try {
+    m_currentTurnClientId = updateJson.at(TURN_CLIENT_ID);
+    LOG(DEBUG) << "[BoardParser::updateObjects] Current turn client ID: " << m_currentTurnClientId;
+  } catch (std::exception& e) {
+    LOG(DEBUG) << "[BoardParser::updateObjects] There were no information about turn client ID!";
+  }
+
   // Check for any actions required
   try {
     auto actionEntries = updateJson.at(ACTIONS);
     for (const auto& actionEntry: actionEntries) {
       auto actionType = actionEntry.at(ACTION).get<std::string>();
+      // LOG(DEBUG) << "[BoardParser::updateObjects] Handling " << actionType;
       if (actionType == ACTION_SET_TEXTURE) {
         // Setting new texture has to have these fields defined:
-        //  > Entity - entity id to which new texture should be applied
-        //  > Texture - texture name (file name) to be applied
+        //  > Entity - entity id to which new texture should be applied,
+        //  > Texture - texture name (file name) to be applied.
         auto entity = actionEntry.at(ACTION_ENTITY_ID).get<std::string>();
         auto texture = actionEntry.at(ACTION_TEXTURE).get<std::string>();
 
         auto entityIt = m_entities.find(entity);
         if (entityIt != m_entities.end()) {
           std::dynamic_pointer_cast<Entity>(entityIt->second)->updateTexture(texture);
+          _markBoardUpdate();
+        }
+      }
+      else if (actionType == ACTION_SET_VISIBILITY) {
+        // Setting object's visibility has to have these fields defined:
+        //  > ObjectID - object's unique ID,
+        //  > Visibility - boolean value whether the object should be visible.
+        auto button = actionEntry.at(ACTION_OBJECT_ID).get<std::string>();
+        auto visible = actionEntry.at(ACTION_VISIBILITY).get<bool>();
+
+        auto buttonIt = m_actionButtons.find(button);
+        if (buttonIt != m_actionButtons.end()) {
+          std::dynamic_pointer_cast<ActionButton>(buttonIt->second)->setVisibility(visible);
           _markBoardUpdate();
         }
       }

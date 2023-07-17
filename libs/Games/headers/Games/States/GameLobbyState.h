@@ -52,8 +52,8 @@ public:
 private:
   enum class LobbyHeartbeatType
   {
-    Creator, ///< Lobby creator heartbeat.
-    Client ///< Lobby client heartbeat.
+    Creator,        ///< Lobby creator heartbeat.
+    Client          ///< Lobby client heartbeat.
   };
 
   void _guiDisplayMainGui();

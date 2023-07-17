@@ -1,5 +1,6 @@
 #pragma once
 
+/* Planszowker specific */
 #include <Games/States/IState.h>
 
 #include <Games/GameWindow.h>
@@ -11,6 +12,8 @@
 
 /* SFML */
 #include <SFML/Graphics.hpp>
+
+/* STD */
 
 namespace pla::games {
 

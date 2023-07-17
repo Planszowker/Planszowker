@@ -30,6 +30,11 @@ auto constexpr BUTTON_PRESSED_UPDATE = "ButtonPressed";
 auto constexpr ACTION_SET_TEXTURE = "SetTexture";
 auto constexpr ACTION_ENTITY_ID = "Entity";
 auto constexpr ACTION_TEXTURE = "Texture";
+
+// Set object's visibility
+auto constexpr ACTION_SET_VISIBILITY = "SetVisibility";
+auto constexpr ACTION_OBJECT_ID = "ObjectID";
+auto constexpr ACTION_VISIBILITY = "Visibility";
 }
 
 enum class UpdateActions {
@@ -76,6 +81,9 @@ public:
   void markBoardUpdated() { m_boardUpdate = false; }
   bool isMarkedForUpdate() { return m_boardUpdate; }
 
+  size_t getCurrentTurnClientId() { return m_currentTurnClientId; }
+  bool isGameFinished() { return m_gameFinished; }
+
 private:
   void _markBoardUpdate() { m_boardUpdate = true; }
 
@@ -84,6 +92,9 @@ private:
   ObjectContainer m_actionButtons;
   ObjectContainer m_destinationPoints;
   ObjectContainer m_entities;
+
+  bool m_gameFinished {false};
+  size_t m_currentTurnClientId {0};
 
   std::mutex m_mutex;
 

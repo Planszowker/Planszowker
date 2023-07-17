@@ -13,14 +13,14 @@ Callback from changing states are convenient way to describe how game should beh
 print('[LUA] DiceRoller init script call')
 
 StateMachine = Machine.create(
-    {
-        initial = 'Init',
-        events = {
-            { name = 'RollEvent', from = {'Init', 'Confirm'}, to = 'Roll' },
-            { name = 'RerollEvent', from = 'Roll', to = 'Reroll' },
-            { name = 'ConfirmEvent', from = {'Roll', 'Reroll'}, to = 'Confirm' },
-        }
+  {
+    initial = 'Init',
+    events = {
+      { name = 'RollEvent', from = {'Init', 'Confirm'}, to = 'Roll' },
+      { name = 'RerollEvent', from = 'Roll', to = 'Reroll' },
+      { name = 'ConfirmEvent', from = {'Roll', 'Reroll'}, to = 'Confirm' },
     }
+  }
 )
 
 -- Map entities into separate table, it will be easier to use them
@@ -37,9 +37,25 @@ RolledDice = {}
 
 -- Function to update Dice according to results
 function _updateTextures()
-    for i, die in ipairs(RolledDice) do
-        Entities['Die'..tostring(i)]:SetTexture('Die'..die..'.png')
-    end
+  for i, die in ipairs(RolledDice) do
+    Entities['Die'..tostring(i)]:SetTexture('Die'..die..'.png')
+  end
+end
+
+--[[
+  Function to update Action Bar buttons' visibility depending
+  on possible state change.
+]]
+local inspect = require('scripts.core.debug.inspect')
+function _updateButtonVisibility()
+  print(inspect(StateMachine))
+  for eventName, _ in pairs(StateMachine.events) do
+    print(eventName)
+    print(StateMachine:can(eventName))
+    local buttonID = eventName:gsub("Event", "", 1)
+    ReplyModule:SetVisibility(buttonID, StateMachine:can(eventName))
+    print('=-=-=-=-=')
+  end
 end
 
 --[[
@@ -65,43 +81,49 @@ StateMachine['onRoll'] = function()
 
     -- Update textures
     _updateTextures()
+
+    -- Update Action Bar buttons' visibility
+    _updateButtonVisibility()
 end
 
 --[[
-Function that is called when we 'reroll' dice
+  Function that is called when we 'reroll' dice
 ]]--
 StateMachine['onReroll'] = function()
-    print('[LUA] onReroll was invoked')
-    RolledDice = {}
-    for i = 1, 3 do
-        RolledDice[i] = DiceRng:GenerateRandomNumber()
-    end
+  print('[LUA] onReroll was invoked')
+  RolledDice = {}
+  for i = 1, 3 do
+    RolledDice[i] = DiceRng:GenerateRandomNumber()
+  end
 
-    local eventString = '[LUA] Client ' .. GetCurrentPlayer() .. ' rerolled '
-                        .. RolledDice[1] .. ' '
-                        .. RolledDice[2] .. ' '
-                        .. RolledDice[3]
+  local eventString = '[LUA] Client ' .. GetCurrentPlayer() .. ' rerolled '
+                      .. RolledDice[1] .. ' '
+                      .. RolledDice[2] .. ' '
+                      .. RolledDice[3]
 
-    print(eventString)
-    ReplyModule:ReportEvent(eventString)
+  print(eventString)
+  ReplyModule:ReportEvent(eventString)
 
-    _updateTextures()
+  _updateTextures()
+  _updateButtonVisibility()
 
-    -- Force `confirm`, because user cannot do anything else here
-    StateMachine:ConfirmEvent()
+  -- Force `confirm`, because user cannot do anything else here
+  StateMachine:ConfirmEvent()
 end
 
 --[[
-Function that is called when we 'confirm' rolls
+  Function that is called when we 'confirm' rolls
 ]]--
 StateMachine['onConfirm'] = function()
-    print('[LUA] onConfirm was invoked')
+  print('[LUA] onConfirm was invoked')
 
-    for i = 1, 3 do
-        AddPointsToCurrentPlayer(RolledDice[i])
-    end
+  for i = 1, 3 do
+    AddPointsToCurrentPlayer(RolledDice[i])
+  end
 
-    print('[LUA] Player ID ' .. GetCurrentPlayer() .. ' has ' .. GetCurrentPlayerPoints() .. ' points')
+  print('[LUA] Player ID ' .. GetCurrentPlayer() .. ' has ' .. GetCurrentPlayerPoints() .. ' points')
 
-    AdvanceRound()
+  _updateButtonVisibility()
+
+  AdvanceRound()
 end

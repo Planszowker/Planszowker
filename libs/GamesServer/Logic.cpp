@@ -61,6 +61,7 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, networ
     // Load Game Objects
     m_luaVM.script("Entity = require('scripts.core.objects.entity')");
     m_luaVM.script("DestinationPoint = require('scripts.core.objects.destination-point')");
+    m_luaVM.script("ActionButton = require('scripts.core.objects.action-button')");
     m_luaVM.script("GameObjects = require('scripts.core.lua-game-objects')"); // Game Objects
 
     // Make necessary utils visible in LUA
@@ -111,6 +112,16 @@ void Logic::_finishGame()
 
 void Logic::_updateClients(std::string req) const
 {
+  // We need to add additional info - request was valid, turn client ID
+  try {
+    auto requestJson = nlohmann::json::parse(req);
+    requestJson[TURN_CLIENT_ID] = m_currentClientsIDAndPointsIt->first;
+    requestJson[VALID] = true;
+    req = requestJson.dump();
+  } catch (std::exception) {
+    LOG(DEBUG) << "[Logic::_updateClients] Bad cast into JSON!";
+  }
+
   Reply reply {
     .type = PacketType::GameSpecificData,
     .body = std::move(req)
@@ -172,22 +183,25 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
   //   - invoking <GameName>.lua script,
   //   - sending reply to clients and post-processing.
 
-  // Request is in JSON format. It is decoded and passed as a `request` table into LUA VM.
-  try {
-    m_luaVM.set("Request", requestType.body);
-    m_luaVM.script("Request = Json.decode(Request)");
-  } catch (sol::error& e) {
-    LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
-  }
+  // Check if game has finished
+  if (m_finished) {
+    // Request is in JSON format. It is decoded and passed as a `request` table into LUA VM.
+    try {
+      m_luaVM.set("Request", requestType.body);
+      m_luaVM.script("Request = Json.decode(Request)");
+    } catch (sol::error& e) {
+      LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
+    }
 
-  // Create `Reply` table
-  m_luaVM["Reply"] = m_luaVM.create_table();
+    // Create `Reply` table
+    m_luaVM["Reply"] = m_luaVM.create_table();
 
-  // Invoking <GameName>.lua script
-  try {
-    m_luaVM.script(m_gameScript.str());
-  } catch(sol::error& e) {
-    LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
+    // Invoking <GameName>.lua script
+    try {
+      m_luaVM.script(m_gameScript.str());
+    } catch(sol::error& e) {
+      LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
+    }
   }
 
   // Sending Reply to Clients

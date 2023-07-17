@@ -16,6 +16,8 @@ public:
   explicit ActionButton(nlohmann::json json);
 
   ActionButtonFields getParams() { return m_fields; }
+
+  void setVisibility(bool visibility) { m_fields.visible = visibility; }
 private:
   ActionButtonFields m_fields;
 };

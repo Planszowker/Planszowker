@@ -28,10 +28,13 @@ void GameCallbacks::gameSpecificDataCallback(const std::any& arg)
 {
   try {
     if (m_state.m_boardParser) {
-      auto replyBody = std::any_cast<std::string>(arg);
-      m_state.m_boardParser->updateObjects(nlohmann::json::parse(replyBody));
+      auto replyJson = nlohmann::json::parse(std::any_cast<std::string>(arg));
+      if (replyJson.value(VALID, false)) {
+        m_state.m_boardParser->updateObjects(replyJson);
+      }
     }
   } catch (std::exception& e) {
+    LOG(ERROR) << e.what();
     err_handler::ErrorLogger::printError("[GameCallbacks] Bad any cast!");
   }
 }

@@ -1,6 +1,9 @@
 local ReplyModule = {}
 
--- Function to add generic reply to existing table
+--[[
+  Function to add generic reply to existing table:
+  > Adds information about players' points.
+]]
 function ReplyModule:GenerateGenericReply()
   Reply['PlayersInfo'] = {}
   local i = 1
@@ -14,7 +17,11 @@ function ReplyModule:GenerateGenericReply()
   end
 end
 
--- Function to send event
+--[[
+  Function to send event.
+
+  @param[in] eventString Event string.
+]]--
 function ReplyModule:ReportEvent(eventString)
   Reply['Events'] = Reply['Events'] or {}
 
@@ -24,24 +31,14 @@ function ReplyModule:ReportEvent(eventString)
   Reply['Events'][eventCount + 1]['EventString'] = eventString
 end
 
--- Function that sends resulting JSON string to players, so they can update their view.
-function ReplyModule:SendReply()
-  print('[LUA-DEBUG] SendReply method invoked')
+--[[
+  Function to set entity's texture.
 
-  self:GenerateGenericReply(Reply)
-
-  -- Encode reply as a JSON string
-  replyString = Json.encode(Reply)
-
-  -- Send reply to players
-  SendReply(replyString)
-end
-
--- Function to set entity's texture
+  @param[in] id Entity's ID.
+  @param[in] texture New entity's texture ID.
+]]--
 function ReplyModule:SetTexture(id, texture)
-  if Reply['Actions'] == nil then
-    Reply['Actions'] = {}
-  end
+  Reply['Actions'] = Reply['Actions'] or {}
 
   local newIndex = #Reply['Actions'] + 1
   Reply['Actions'][newIndex] = {}
@@ -53,6 +50,46 @@ function ReplyModule:SetTexture(id, texture)
   assert(Reply['Actions'][newIndex]['Action'] ~= nil)
   assert(Reply['Actions'][newIndex]['Entity'] ~= nil)
   assert(Reply['Actions'][newIndex]['Texture'] ~= nil)
+end
+
+--[[
+  Function to set object's visibility.
+
+  @param[in] id Object's ID.
+  @param[in] visibility True if object should be visible, false otherwise.
+]]--
+function ReplyModule:SetVisibility(id, visibility)
+  Reply['Actions'] = Reply['Actions'] or {}
+
+  local newIndex = #Reply['Actions'] + 1
+  Reply['Actions'][newIndex] = {}
+  Reply['Actions'][newIndex]['Action'] = 'SetVisibility'
+  Reply['Actions'][newIndex]['ObjectID'] = id
+  Reply['Actions'][newIndex]['Visibility'] = visibility
+
+  assert(Reply['Actions'][newIndex] ~= nil)
+  assert(Reply['Actions'][newIndex]['Action'] ~= nil)
+  assert(Reply['Actions'][newIndex]['ObjectID'] ~= nil)
+  assert(Reply['Actions'][newIndex]['Visibility'] ~= nil)
+end
+
+--[[
+  Function that sends resulting JSON string to players, so they can update their view.
+
+  This method is invoked automatically in internal logic, thus it shouldn't be necessary
+  to invoke it manually. But, if your game's adaptation requires multiple updates in
+  single round, go ahead and use it.
+]]--
+function ReplyModule:SendReply()
+  print('[LUA-DEBUG] SendReply method invoked')
+
+  self:GenerateGenericReply(Reply)
+
+  -- Encode reply as a JSON string
+  replyString = Json.encode(Reply)
+
+  -- Send reply to players
+  SendReply(replyString)
 end
 
 return ReplyModule

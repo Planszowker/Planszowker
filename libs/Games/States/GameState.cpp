@@ -10,6 +10,7 @@
 namespace pla::games {
 
 using namespace assets;
+using namespace games_client;
 
 GameState::GameState(games_client::GraphicalView& graphicalView, GameStateArguments gameStateArguments)
   : m_graphicalView(graphicalView)
@@ -46,6 +47,9 @@ void GameState::init()
 {
   // Download all game's data
   m_controller.sendRequest(PacketType::DownloadAssets);
+
+  // Send empty request to receive information about current turn client ID
+  m_controller.sendRequest(PacketType::GameSpecificData, "{}");
 }
 
 
@@ -80,6 +84,17 @@ void GameState::display()
   _gameAreaDisplay();
   _playerAreaDisplay();
   _logAreaDisplay();
+
+  if (m_boardParser && m_boardParser->isGameFinished()) {
+    ImGui::OpenPopup("Game has finished");
+    if (ImGui::BeginPopupModal("Game has finished")) {
+      if (ImGui::Button("<-- Go back to games selection")) {
+        m_graphicalView.changeState(States::GameChoosing);
+        ImGui::CloseCurrentPopup();
+      }
+      ImGui::EndPopup();
+    }
+  }
 
   ImGui::SFML::Render(m_gameWindow);
   m_gameWindow.display();
@@ -151,8 +166,20 @@ void GameState::_actionAreaDisplay()
     for (auto& [actionButtonName, objectPtr] : actionButtonsMap) {
       auto actionButtonPtr = std::dynamic_pointer_cast<ActionButton>(objectPtr);
       auto params = actionButtonPtr->getParams();
+
+      bool disabledButtons = (m_boardParser->getCurrentTurnClientId() != shared::getClientInfo().getId());
+
+      if (disabledButtons) {
+        ImGui::BeginDisabled();
+      }
+
+      ImGui::SameLine();
       if (params.visible && ImGui::Button(params.displayName.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth() / actionButtonsSize, -FLT_MIN))) {
         m_boardParser->performUpdateAndSendToServer(*m_controller.getPacketHandler(), actionButtonPtr, UpdateActions::ButtonPressed);
+      }
+
+      if (disabledButtons) {
+        ImGui::EndDisabled();
       }
     }
   }
@@ -177,7 +204,7 @@ void GameState::_gameAreaDisplay()
       if (entitySprite.entityPtr->getParams().visible) {
         m_gameWindow.draw(*entitySprite.spritePtr);
 
-        // TODO: Remove it later - used fo debugging entities
+        // @TODO: Remove it later - used fo debugging entities
         sf::RectangleShape ziu;
         ziu.setSize(sf::Vector2f{40.f, 40.f});
         ziu.setOrigin(ziu.getGlobalBounds().width/2, ziu.getGlobalBounds().height/2);
