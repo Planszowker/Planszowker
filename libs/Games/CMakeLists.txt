@@ -3,16 +3,34 @@ set(LIB_NAME Games)
 project(${LIB_NAME})
 
 set(SOURCES
-        GraphicalView.cpp
-        Objects.cpp
+        CommObjects.cpp
+        GameWindow.cpp
+        GamesMetaInfo.cpp
+        BoardParser.cpp
+        States/GameChoosingState.cpp
+        States/GameState.cpp
+        States/GameLobbyState.cpp
+
+        Callbacks/ICallbacks.cpp
+        Callbacks/GameChoosingCallbacks.cpp
+        Callbacks/GameLobbyCallbacks.cpp
+        Callbacks/GameCallbacks.cpp
+
+        Objects/ActionButton.cpp
+        Objects/DestinationPoint.cpp
+        Objects/Entity.cpp
         )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
+                        PRIVATE GamesClient
+                        PUBLIC PlametaParser
+                        PUBLIC ThreadSafeQueue
+                        PUBLIC Supervisor
 
-                        PUBLIC lua5.3
+                        PUBLIC lua
 
                         PUBLIC sfml-network
                       )

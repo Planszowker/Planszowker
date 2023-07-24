@@ -1,9 +1,13 @@
 #pragma once
 
+#include <GamesServer/GamesHandler.h>
+
 /* Generic */
-#include <NetworkHandler/ServerPacketHandler.h>
-#include "GamesHandler.h"
 #include <AssetsManager/AssetsTransmitter.h>
+#include <Games/GameInstance.h>
+#include <GamesServer/Logic.h>
+#include <NetworkHandler/SupervisorPacketHandler.h>
+#include <Supervisor/Supervisor.h>
 
 /* SFML */
 #include <SFML/Network.hpp>
@@ -12,38 +16,40 @@
 #include <vector>
 #include <memory>
 #include <atomic>
+#include <unordered_map>
 
 namespace pla::games_server {
 
 class ServerHandler
 {
 public:
-  explicit ServerHandler(const std::string& gameName, network::ServerPacketHandler& packetHandler)
-    : m_packetHandler(packetHandler)
-    , m_run(true)
-    , m_gameName(gameName)
-    , m_gamesHandler(gameName)
+  explicit ServerHandler(const games::GameInstance& gameInstance)
+    : m_gameInstance(gameInstance)
+    , m_gamesHandler(gameInstance.gameKey)
   {
   }
 
-  virtual ~ServerHandler()
-  {
-    m_packetHandler.stop();
-  }
+  void run();
+  void stop();
 
-  virtual void run();
+  void transmitAssetsToClient(size_t clientId);
+
+  const Logic* getLogic() const {
+    return m_logic.get();
+  }
 
 protected:
-  virtual bool _internalHandling();
+  void _internalHandling();
 
-  std::string m_gameName;
+  std::atomic<bool> m_run = true;
+  std::mutex m_mutex; ///< Some methods may be accessed from Supervisor, thus we need to protect resources
 
-  bool m_run;
-  network::ServerPacketHandler& m_packetHandler;
-
+  games::GameInstance m_gameInstance;
   GamesHandler m_gamesHandler;
 
-  std::map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
+  std::unordered_map<size_t, std::shared_ptr<assets::AssetsTransmitter>> m_assetsTransmitterMap;
+
+  std::unique_ptr<Logic> m_logic;
 };
 
 } // namespaces

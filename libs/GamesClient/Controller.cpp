@@ -2,8 +2,9 @@
 
 #include "Logger/Logger.h"
 #include "ErrorHandler/ErrorLogger.h"
-#include "Games/Objects.h"
+#include "Games/CommObjects.h"
 #include "NetworkHandler/ClientPacketHandler.h"
+#include "Games/GamesMetaInfo.h"
 
 #include <thread>
 #include <chrono>
@@ -12,39 +13,27 @@
 
 #include <nlohmann/json.hpp>
 
+#include <easylogging++.h>
+
+using namespace pla;
 using namespace pla::err_handler;
 using namespace pla::logger;
 using namespace pla::games;
 
-namespace pla::common::games::dice_roller {
+namespace pla::games_client {
 
-DiceRollerController::DiceRollerController(sf::TcpSocket& serverSocket)
-  : Controller()
-  , m_clientPacketHandler(m_run, serverSocket)
+Controller::Controller(sf::TcpSocket& serverSocket)
+  : m_clientPacketHandler(m_run, serverSocket)
+  , m_view(std::make_shared<GraphicalView>(*this, m_run, sf::Vector2i(1600U, 900U), "Planszowker Client"))
 {
-  m_view.init();
-
-  sf::Packet idPacket;
-
-  Request request{
-    .type = PacketType::ID
-  };
-
-  idPacket << request;
-
-  m_clientPacketHandler.sendPacket(idPacket);
+  m_view->init();
 }
 
 
-void DiceRollerController::run() {
-  std::thread viewInput(&DiceRollerConsoleView::runLoop, m_view, this, std::ref(m_run));
-  //std::thread assetView(&DiceRollerConsoleView::showAssets, m_view);
+void Controller::run() {
+  std::thread viewInput(&GraphicalView::run, m_view);
 
   m_clientPacketHandler.runInBackground();
-
-  //std::cout << "Return " << m_clientPacketHandler.getClientID(m_clientID) << "\n";
-
-  m_clientPacketHandler.getClientID(m_clientID);
 
   while (m_run) {
     // TODO
@@ -53,36 +42,35 @@ void DiceRollerController::run() {
     const auto replies = m_clientPacketHandler.getReplies();
     for (const auto& reply: replies) {
 
+      LOG(DEBUG) << "Reply: " << nlohmann::json::parse(reply.body).dump(4);
+      LOG(DEBUG) << "Type: " << static_cast<int>(reply.type);
+      LOG(DEBUG) << "== Controller Printout ==";
 
-      std::cout << "Reply: " << reply.body << "\n";
-      std::cout << "Type: " << static_cast<int>(reply.type) << "\n";
-      std::cout << "Status: " << static_cast<int>(reply.status) << "\n";
-      std::cout << "== Controller Printout ==\n";
+//      nlohmann::json j = nlohmann::json::parse(reply.body);
+//
+//      for (auto pointsReply : j["PlayersInfo"]) {
+//        //std::cout << "I am client " << m_clientID << " and received ID is " << pointsReply["ID"] << "\n";
+//        std::stringstream ss;
+//        ss.str(pointsReply["ID"]);
+//
+//        size_t replyClientID {0};
+//        ss >> replyClientID;
+//
+//        if (replyClientID == m_clientID) {
+//          std::cout << "\nI have " << pointsReply["Points"] << " points.\n";
+//        }
+//      }
+//
+//      for (auto event : j["Events"]) {
+//        std::string eventString = event["EventString"];
+//        eventString.erase(std::remove(eventString.begin(), eventString.end(), '\"'), eventString.end());
+//        std::cout << "\n" << eventString << "\n";
+//      }
 
-      if (reply.status != ReplyType::Success) {
-        continue;
-      }
 
-      nlohmann::json j = nlohmann::json::parse(reply.body);
 
-      for (auto pointsReply : j["PlayersInfo"]) {
-        //std::cout << "I am client " << m_clientID << " and received ID is " << pointsReply["ID"] << "\n";
-        std::stringstream ss;
-        ss.str(pointsReply["ID"]);
 
-        size_t replyClientID {0};
-        ss >> replyClientID;
 
-        if (replyClientID == m_clientID) {
-          std::cout << "\nI have " << pointsReply["Points"] << " points.\n";
-        }
-      }
-
-      for (auto event : j["Events"]) {
-        std::string eventString = event["EventString"];
-        eventString.erase(std::remove(eventString.begin(), eventString.end(), '\"'), eventString.end());
-        std::cout << "\n" << eventString << "\n";
-      }
 
 //      DiceRollerReply reply = *reinterpret_cast<DiceRollerReply*>(const_cast<void*>(data));
 //
@@ -161,32 +149,44 @@ void DiceRollerController::run() {
   }
 
   viewInput.join();
-  //assetView.join();
 }
 
 
-void DiceRollerController::update()
+void Controller::update()
 {
-  m_view.update(std::make_any<std::string>("Something..."));
+
 }
 
 
-void DiceRollerController::viewCallback(std::any& object) {
-  try {
-    auto viewRequest = std::any_cast<Request>(object);
+void Controller::sendRequest(games::PacketType type, const std::string& body)
+{
+  sf::Packet requestPacket;
+  games::Request request {
+    .type = type,
+    .body = body
+  };
 
-    //Logger::printDebug("Callback from ConsoleView has occurred!");
-    //Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
+  requestPacket << request;
 
-    sf::Packet requestPacket;
-    requestPacket << viewRequest;
-    m_clientPacketHandler.sendPacket(requestPacket);
-
-  } catch (const std::bad_any_cast &e) {
-    //Logger::printDebug("Bad any cast in view's callback!");
-    std::cout << e.what() << std::endl;
-  }
+  m_clientPacketHandler.sendPacket(requestPacket);
 }
 
+
+void Controller::viewCallback(std::any& object) {
+//  try {
+//    auto viewRequest = std::any_cast<Request>(object);
+//
+//    //Logger::printDebug("Callback from ConsoleView has occurred!");
+//    //Logger::printDebug("Received data: " + std::to_string(static_cast<int>(viewRequest.type)));
+//
+//    sf::Packet requestPacket;
+//    requestPacket << viewRequest;
+//    m_clientPacketHandler.sendPacket(requestPacket);
+//
+//  } catch (const std::bad_any_cast &e) {
+//    //Logger::printDebug("Bad any cast in view's callback!");
+//    std::cout << e.what() << std::endl;
+//  }
+}
 
 } // namespace

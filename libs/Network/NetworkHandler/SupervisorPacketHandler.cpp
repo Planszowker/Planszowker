@@ -1,9 +1,11 @@
 #include "SupervisorPacketHandler.h"
 
 #include "Logger/Logger.h"
-#include "Games/Objects.h"
+#include "Games/CommObjects.h"
 #include "TimeMeasurement/TimeLogger.h"
 #include "CompilerUtils/FunctionInfoExtractor.h"
+
+#include <easylogging++.h>
 
 using namespace pla::logger;
 using namespace pla::err_handler;
@@ -18,12 +20,12 @@ SupervisorPacketHandler::SupervisorPacketHandler(std::atomic_bool& run, size_t p
 {
   if (m_port == 0) {
     if(m_listener.listen(sf::Socket::AnyPort) != sf::Socket::Done) {
-      ErrorLogger::printError("Error binding for TCP Listener in ServerPacketHandler!");
+      ErrorLogger::printError("Error binding for TCP Listener in SupervisorPacketHandler!");
     }
 
     m_port = m_listener.getLocalPort();
   } else if(m_listener.listen(m_port) != sf::Socket::Done) {
-    ErrorLogger::printError("Error binding for TCP Listener in ServerPacketHandler!");
+    ErrorLogger::printError("Error binding for TCP Listener in SupervisorPacketHandler!");
   }
 
   m_listener.setBlocking(false);
@@ -43,15 +45,15 @@ SupervisorPacketHandler::~SupervisorPacketHandler()
 void SupervisorPacketHandler::runInBackground()
 {
   // Create task for handling game-data exchange
-  std::thread backgroundThread{&SupervisorPacketHandler::_backgroundTask, this, std::ref(m_tcpSocketsMutex)};
+  std::thread backgroundThread{&SupervisorPacketHandler::_backgroundTask, this};
   m_backgroundThread = std::move(backgroundThread);
 
   // Create task for handling heartbeat packets
-  std::thread heartbeatThread(&SupervisorPacketHandler::_heartbeatTask, this, std::ref(m_tcpSocketsMutex));
+  std::thread heartbeatThread(&SupervisorPacketHandler::_heartbeatTask, this);
   m_heartbeatThread = std::move(heartbeatThread);
 
   // Create task for adding new clients
-  std::thread newConnectionThread(&SupervisorPacketHandler::_newConnectionTask, this, std::ref(m_tcpSocketsMutex));
+  std::thread newConnectionThread(&SupervisorPacketHandler::_newConnectionTask, this);
   m_newConnectionThread = std::move(newConnectionThread);
 }
 
@@ -71,7 +73,7 @@ bool SupervisorPacketHandler::_addClient(std::shared_ptr<sf::TcpSocket>& newSock
   }
 
   // If client doesn't exist, add him to container.
-  auto[it, inserted] = m_clients.emplace(std::make_pair(m_lastClientId, newSocket));
+  auto[it, inserted] = m_clients.emplace(m_lastClientId, newSocket);
   if (!inserted) {
     return false;
   }
@@ -82,19 +84,19 @@ bool SupervisorPacketHandler::_addClient(std::shared_ptr<sf::TcpSocket>& newSock
   it->second->setBlocking(false);
 
   Logger::printInfo("Adding new client with IP: " + info.getIpAddress().toString() + ":" + std::to_string(info.getPort()) + " with uniqueID: " + std::to_string(m_lastClientId)
-                    + " (" + std::to_string(m_clients.size()) + " / " + std::to_string(m_maxPlayers) + ")");
+                    + " (" + std::to_string(m_clients.size()) + ")");
   ++m_lastClientId;
 
   return true;
 }
 
 
-void SupervisorPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
+void SupervisorPacketHandler::_heartbeatTask() {
   while(m_run) {
     std::this_thread::sleep_for(std::chrono::milliseconds (1000));
 
     TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-    const std::lock_guard<std::mutex> lock(tcpMutex);
+    std::scoped_lock lock{m_tcpSocketsMutex};
 
     // TODO: Maybe refactor for normal for-loop to delete multiple clients in one run
     for (auto& client: m_clients) {
@@ -102,16 +104,14 @@ void SupervisorPacketHandler::_heartbeatTask(std::mutex& tcpMutex) {
       sf::Packet packet;
       games::Reply heartbeatReply {
         .type = games::PacketType::Heartbeat,
-        .status = games::ReplyType::Success
       };
       packet << heartbeatReply;
 
-      //Logger::printInfo("Sending data to " + std::to_string(client.first));
       sf::Socket::Status clientStatus = client.second->send(packet);
 
       if (clientStatus != sf::Socket::Done) {
-        Logger::printInfo("Deleting client with ID: " + std::to_string(client.first) + " for failed querying ("
-                          + std::to_string(m_clients.size() - 1) + " / " + std::to_string(m_maxPlayers) + ")");
+        Logger::printInfo("Deleting client with ID: " + std::to_string(client.first) + " for failed querying (connected clients: "
+                          + std::to_string(m_clients.size() - 1) + ")");
 
         size_t keyToRemove = client.first;
 
@@ -132,13 +132,13 @@ void SupervisorPacketHandler::stop() {
 }
 
 
-void SupervisorPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
+void SupervisorPacketHandler::_backgroundTask() {
   while (m_run)
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds (10));
+    std::this_thread::sleep_for(std::chrono::milliseconds (1));
 
     TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-    const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
+    std::scoped_lock tcpSocketsLock{m_tcpSocketsMutex};
     for (auto& client : m_clients)
     {
       sf::Packet clientPacket;
@@ -166,13 +166,13 @@ void SupervisorPacketHandler::_backgroundTask(std::mutex &tcpSocketsMutex) {
         packetsIt->second.push_back(clientPacket);
       }
 
-      Logger::printDebug("Received packet from " + client.second->getRemoteAddress().toString() + ":"
-                         + std::to_string(client.second->getRemotePort()) + " with size of " + std::to_string(clientPacket.getDataSize()));
+      // Logger::printDebug("Received packet from " + client.second->getRemoteAddress().toString() + ":"
+      //                    + std::to_string(client.second->getRemotePort()) + " with size of " + std::to_string(clientPacket.getDataSize()));
     }
   }
 }
 
-void SupervisorPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
+void SupervisorPacketHandler::_newConnectionTask() {
   while(m_run) {
     std::shared_ptr<sf::TcpSocket> newTcpSocket = std::make_shared<sf::TcpSocket>();
 
@@ -186,21 +186,12 @@ void SupervisorPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
       continue;
     }
 
-    const std::scoped_lock tcpSocketsLock(tcpSocketsMutex);
-    if (!m_hasEnoughClientsConnected) {
+    {
+      std::scoped_lock tcpSocketsLock{m_tcpSocketsMutex};
       if (!_addClient(newTcpSocket)) {
         ErrorLogger::printWarning("Error adding new client from " + newTcpSocket->getRemoteAddress().toString() + ":" +
                                   std::to_string(newTcpSocket->getRemotePort()));
       }
-    } else {
-      Logger::printInfo("Maximum number of players reached!");
-    }
-
-    // Check if we have enough players
-    if (m_maxPlayers && m_clients.size() >= m_maxPlayers) {
-      m_hasEnoughClientsConnected = true;
-    } else {
-      m_hasEnoughClientsConnected = false;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds (10));
@@ -208,7 +199,7 @@ void SupervisorPacketHandler::_newConnectionTask(std::mutex &tcpSocketsMutex) {
 }
 
 SupervisorPacketHandler::packetMap SupervisorPacketHandler::getPackets(std::vector<size_t> &keys) {
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+  std::scoped_lock tcpSocketsLock{m_tcpSocketsMutex};
 
   // Retrieve keys
   keys = m_clientIds;
@@ -221,9 +212,11 @@ SupervisorPacketHandler::packetMap SupervisorPacketHandler::getPackets(std::vect
   return returnMap;
 }
 
-void SupervisorPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
+void SupervisorPacketHandler::sendPacketToEveryClients(sf::Packet& packet) {
   TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+  std::scoped_lock tcpSocketsLock{m_tcpSocketsMutex};
+
+  LOG(DEBUG) << "Sending packet to every client...";
 
   for (const auto& client: m_clients) {
     sf::Socket::Status status = client.second->send(packet);
@@ -236,7 +229,9 @@ void SupervisorPacketHandler::sendPacketToEveryClients(sf::Packet &packet) {
 void SupervisorPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &packet)
 {
   TimeLogger logger(GET_CURRENT_FUNCTION_NAME());
-  const std::scoped_lock tcpSocketsLock(m_tcpSocketsMutex);
+  std::scoped_lock tcpSocketsLock{m_tcpSocketsMutex};
+
+  LOG(DEBUG) << "Sending packet to client " << clientId;
 
   auto clientIt = m_clients.find(clientId);
   if (clientIt != m_clients.end()) {
@@ -245,6 +240,13 @@ void SupervisorPacketHandler::sendPacketToClient(size_t clientId, sf::Packet &pa
       status = clientIt->second->send(packet);
     }
   }
+}
+
+std::vector<size_t> SupervisorPacketHandler::getClients()
+{
+  std::scoped_lock lock{m_tcpSocketsMutex};
+
+  return m_clientIds;
 }
 
 

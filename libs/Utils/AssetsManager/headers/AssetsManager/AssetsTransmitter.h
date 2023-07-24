@@ -1,38 +1,25 @@
 #pragma once
 
-#include <zipios/zipfile.hpp>
-#include <NetworkHandler/ServerPacketHandler.h>
-
-#include "AssetsDefines.h"
+#include <ZipLib/ZipFile.h>
+#include <NetworkHandler/SupervisorPacketHandler.h>
+#include <GamesServer/GamesHandler.h>
 
 #include <vector>
+#include <istream>
 
 namespace pla::assets {
 
 class AssetsTransmitter
 {
 public:
-  AssetsTransmitter(zipios::ZipFile& plagameFile, network::ServerPacketHandler& packetHandler, std::vector<std::string>& assetsEntries);
+  AssetsTransmitter(ZipArchive::Ptr plagameFile, network::SupervisorPacketHandler& packetHandler, games_server::GamesHandler::AssetsContainer assetsEntries);
 
-  // Transmit assets in chunks - to not overflow eth fifo on client's side
-  void transmitAssets(size_t key);
+  void transmitAssets(size_t clientIdKey); // Transmit all available assets in chunks
 
 private:
-  void _startTransaction(std::string assetName, size_t key);
-  void _transferFile(zipios::ZipFile::stream_pointer_t& fileStream);
-  void _endTransaction(std::string assetName, size_t key);
-
-  network::ServerPacketHandler& m_packetHandler;
-  zipios::ZipFile& m_plagameFile;
-  std::vector<std::string>& m_assetsEntries;
-  std::vector<std::string>::iterator m_currentAssetNamePtr;
-
-  // Chunk buffer
-  std::shared_ptr<std::vector<char>> m_buf = std::make_shared<std::vector<char>>(1024);
-
-  // Client specific containers
-  size_t m_transactionCounter {0};
-  zipios::ZipFile::stream_pointer_t m_assetStreamPtr;
+  network::SupervisorPacketHandler& m_packetHandler;
+  ZipArchive::Ptr m_plagameFile;
+  games_server::GamesHandler::AssetsContainer m_assetsEntries;
 };
 
 } // namespace

@@ -1,42 +1,63 @@
 #pragma once
 
 /* Generic */
-#include "Games/Controller.h"
-#include "NetworkHandler/ClientPacketHandler.h"
+#include "GraphicalView.h"
+#include <Games/CommObjects.h>
+#include <Games/GamesMetaInfo.h>
 
-/* DiceRoller specific */
-#include "ConsoleView.h"
-#include "ViewLogic.h"
+#include <NetworkHandler/ClientPacketHandler.h>
 
 /* SFML */
-#include "SFML/Network.hpp"
+#include <SFML/Network.hpp>
 
 /* STD */
 #include <memory>
 #include <any>
 #include <atomic>
 
-namespace pla::common::games::dice_roller {
+namespace pla::games_client {
 
-class DiceRollerController : public pla::games::Controller
+class GraphicalView;
+
+/*!
+ * @brief Controller is used to create threads for Graphical View and Network Packet Handler.
+ * Packet Handler is used to gather all requests/responses from the Server. Controller is responsible for parsing them and
+ * create appropriate response to the Server.
+ */
+class Controller
 {
 public:
-  explicit DiceRollerController(sf::TcpSocket& serverSocket);
+  explicit Controller(sf::TcpSocket& serverSocket);
 
-  void run() final;
-  void viewCallback(std::any& object) final;
+  void run();
+  void viewCallback(std::any& object);
+
+  GraphicalView* getView()
+  {
+    return m_view.get();
+  }
+
+  network::ClientPacketHandler* getPacketHandler()
+  {
+    return &m_clientPacketHandler;
+  }
+
+  void sendRequest(games::PacketType type, const std::string& body = "");
 
 private:
   void update();
 
+  std::atomic_bool m_run {true}; ///< Flag used to sync threads.
+
+  std::mutex m_mutex; ///< Mutex for shared resources.
+
+  size_t m_clientID {0};
+
   network::ClientPacketHandler m_clientPacketHandler;
 
-  DiceRollerConsoleView m_view;
-  DiceRollerViewLogic m_logic;
+  std::shared_ptr<GraphicalView> m_view;
 
-  size_t m_clientID{0};
-
-  std::atomic_bool m_run;
+  games::GamesMetaInfo m_gamesMetaInfo;
 };
 
 } // namespaces

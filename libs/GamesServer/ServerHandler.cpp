@@ -1,11 +1,12 @@
-#include "ServerHandler.h"
+#include <ServerHandler.h>
 
 #include <TimeMeasurement/TimeLogger.h>
 #include <CompilerUtils/FunctionInfoExtractor.h>
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
 #include <Logic.h>
 #include <AssetsManager/AssetsTransmitter.h>
 
+#include <easylogging++.h>
 
 namespace pla::games_server {
 
@@ -13,92 +14,60 @@ using namespace games;
 
 void ServerHandler::run()
 {
-  m_packetHandler.runInBackground();
+  m_logic = std::make_unique<Logic>(m_gameInstance.clientsIds, m_gameInstance.gameKey, m_gameInstance.packetHandler, m_gamesHandler.getPlagameFile());
 
   while(m_run)
   {
-    if (!_internalHandling()) {
-      break;
-    }
+    _internalHandling();
   }
-
-  m_packetHandler.stop();
 }
 
 
-bool ServerHandler::_internalHandling() {
-  time_measurement::TimeLogger timeLogger(GET_CURRENT_FUNCTION_NAME());
+void ServerHandler::_internalHandling()
+{
+  if (auto queueParamsOpt = m_gameInstance.queue.pop()){
+    std::scoped_lock lock{m_mutex};
+    LOG(DEBUG) << "[ServerHandler] Request: " << queueParamsOpt->request.body;
 
-  std::vector<size_t> keys;
-  auto packetsMap = m_packetHandler.getPackets(keys);
-
-  // TODO: Not elegant, maybe better solution?
-  for (const auto& key: keys) {
-    // Find map entry with client ID -> (size_t, deque) is received
-    const auto mapIt = packetsMap.find(key);
-    if (mapIt == packetsMap.end()) {
-      continue;
+    if (!m_logic->isGameFinished()) {
+      m_logic->handleGameLogic(queueParamsOpt->clientId, queueParamsOpt->request);
+    } else {
+      LOG(DEBUG) << "Finished";
     }
+  }
+}
 
-    // Iterate over all packets in deque
-    for (auto& packet: mapIt->second) {
-      Request request{};
-      packet >> request;
 
-      if (request.type == PacketType::Heartbeat) {
-        // We don't care about Heartbeat packets
-        continue;
-      } else if (request.type == PacketType::ID) {
-        // If we get ID request, we need to send client's ID
-        Reply idReply{
-          .type = PacketType::ID,
-          .status = ReplyType::Success,
-          .body = std::to_string(key)
-        };
-        sf::Packet replyPacket;
-        replyPacket << idReply;
+void ServerHandler::transmitAssetsToClient(size_t clientId)
+{
+  std::lock_guard<std::mutex> lock{m_mutex};
 
-        m_packetHandler.sendPacketToClient(key, replyPacket);
-        continue;
-      } else if (request.type == PacketType::DownloadAssets) {
-        // User wants to download game's assets
-        auto assetTransmitterPtr = m_assetsTransmitterMap.find(key);
-        if (assetTransmitterPtr == m_assetsTransmitterMap.end()) {
-          // If we haven't found entry with AssetTransmitter, we have to add a new one
-          auto [it, inserted] = m_assetsTransmitterMap.insert({key, std::make_shared<assets::AssetsTransmitter>(
-                  m_gamesHandler.getPlagameFile(),
-                  m_packetHandler,
-                  m_gamesHandler.getAssetsEntries())});
+  LOG(DEBUG) << "[ServerHandler] Client ID " << clientId;
 
-          if (inserted) {
-            assetTransmitterPtr = it;
-          } else {
-            std::cerr << "Cannot add new asset transmitter to map!\n";
-          }
-        }
+  // User wants to download game's assets
+  auto assetTransmitterPtr = m_assetsTransmitterMap.find(clientId);
+  if (assetTransmitterPtr == m_assetsTransmitterMap.end()) {
+    // If we haven't found entry with AssetTransmitter, we have to add a new one
+    auto [it, inserted] = m_assetsTransmitterMap.insert({clientId, std::make_shared<assets::AssetsTransmitter>(
+            m_gamesHandler.getPlagameFile(),
+            m_gameInstance.packetHandler,
+            m_gamesHandler.getAssetsEntries())});
 
-        // Transmit assets in chunks
-        assetTransmitterPtr->second->transmitAssets(key);
-
-        continue;
-      }
-
-      std::cout << "Type: " << static_cast<int>(request.type) << "\n";
-      std::cout << "Body: " << request.body << "\n";
-
-      if (m_packetHandler.hasEnoughClientsConnected()) {
-        static Logic logic {keys, m_gameName, m_packetHandler, m_gamesHandler.getPlagameFile()};
-        if (!logic.isGameFinished()) {
-          logic.handleGameLogic(key, request);
-        } else {
-          std::cout << "Finished\n";
-          return false;
-        }
-      }
+    if (inserted) {
+      assetTransmitterPtr = it;
+    } else {
+      err_handler::ErrorLogger::printError("Cannot add new asset transmitter to map!");
     }
   }
 
-  return true;
+  // Transmit assets
+  assetTransmitterPtr->second->transmitAssets(clientId);
+}
+
+
+void ServerHandler::stop()
+{
+  m_run = false;
 }
 
 } // namespaces

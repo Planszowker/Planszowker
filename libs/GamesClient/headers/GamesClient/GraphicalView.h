@@ -1,30 +1,76 @@
 #pragma once
 
 /* Generic */
-#include "Games/GraphicalView.h"
+#include "Controller.h"
+#include "FontManager.h"
+
+#include <Games/GameWindow.h>
+#include <Games/States/IState.h>
+
+#include <imgui.h>
+#include <imgui-SFML.h>
 
 /* STD */
+#include <functional>
 #include <any>
-#include <mutex>
 #include <atomic>
+#include <deque>
+#include <memory>
 
-namespace pla::common::games::dice_roller {
+namespace pla::games_client {
 
-class DiceRollerConsoleView : public pla::games::GenericView
+class Controller;
+
+/*!
+ * @brief Graphical view class. It is responsible to create a window and render all provided data.
+ */
+class GraphicalView
 {
 public:
-  DiceRollerConsoleView() = default;
-  virtual ~DiceRollerConsoleView() = default;
+  GraphicalView() = delete;
+  explicit GraphicalView(Controller& controller, std::atomic_bool& run, const sf::Vector2i& windowDim, const std::string& windowName);
 
-  void init() final;
-  void update(const std::any& object) final;
+  ~GraphicalView();
 
-  void runLoop(pla::games::Controller* controller, std::atomic_bool& runLoop) final;
+  void init();
+
+  /*!
+   * @brief Run view in loop (get user input, handle events, send callbacks).
+   */
+  void run();
+
+  void stop()
+  {
+    m_run = false;
+  }
+
+  const std::unique_ptr<games::GameWindow>& getGameWindow()
+  {
+    return m_gameWindow;
+  }
+
+  Controller& getController()
+  {
+    return m_controller;
+  }
+
+  const FontManager& getFontManager() const
+  {
+    return m_fontManager;
+  }
+
+  void changeState(games::States newState, const std::any& arg = 0);
 
 private:
-  void notifyController(std::function<void(std::any&)> callback) final;
+  Controller& m_controller;
+  FontManager m_fontManager;
 
-  int m_inputType{0};
+  std::deque<std::shared_ptr<games::IState>> m_states;
+
+  std::atomic_bool& m_run;
+
+  // Game window
+  std::unique_ptr<games::GameWindow> m_gameWindow;
 };
 
 } // namespaces

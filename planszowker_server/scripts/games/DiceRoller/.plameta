@@ -1,0 +1,12 @@
+[overview]
+name: DiceRoller
+description: Simple dice game
+distributor: None
+
+[adaptation]
+author: Ishiguro
+version: 0.1
+
+[settings]
+min_players: 2
+max_players: 8

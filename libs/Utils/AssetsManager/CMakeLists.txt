@@ -10,12 +10,14 @@ set(SOURCES
 add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
+                        PUBLIC nlohmann_json::nlohmann_json
                         PUBLIC NetworkHandler
                         PUBLIC Games
                         PRIVATE GamesServer
                         PRIVATE EasyLogging
+                        PRIVATE Base64
 
-                        PRIVATE zipios
+                        PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
                       )
 
 target_include_directories(${LIB_NAME}

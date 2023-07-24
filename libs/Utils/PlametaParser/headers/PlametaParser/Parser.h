@@ -18,7 +18,9 @@ public:
   Parser() = delete;
   explicit Parser(std::stringstream plametaContent);
 
-  std::shared_ptr<Entry> operator[] (const std::string& key);
+  Parser(const Parser& other);
+
+  std::shared_ptr<Entry> operator[] (const std::string& key) const;
 
 private:
   void _setValidEntries();

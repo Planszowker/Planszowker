@@ -2,8 +2,8 @@
 
 /* Generic */
 //#include "Games/ServerHandler.h"
-#include "NetworkHandler/ServerPacketHandler.h"
-#include "Games/Objects.h"
+#include "NetworkHandler/SupervisorPacketHandler.h"
+#include "Games/CommObjects.h"
 #include "Rng/RandomGenerator.h"
 
 /* SOL/LUA */
@@ -14,8 +14,8 @@
 #include <vector>
 #include <string>
 
-/* ZIPIOS */
-#include <zipios/zipfile.hpp>
+/* ZipLib */
+#include <ZipLib/ZipFile.h>
 
 namespace pla::games_server {
 
@@ -24,9 +24,9 @@ class Logic
 public:
   using ClientIDsAndPointsMap = std::unordered_map<size_t, int>;
 
-  Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::ServerPacketHandler& packetHandler, zipios::ZipFile& zipFile);
+  Logic(std::vector<size_t>& clientIds, const std::string& gameName, network::SupervisorPacketHandler& packetHandler, ZipArchive::Ptr zipFile);
 
-  void handleGameLogic(size_t clientId, games::Request requestType);
+  void handleGameLogic(size_t clientId, const games::Request& requestType);
 
   [[nodiscard]] inline bool isGameFinished() const { return m_finished; }
 
@@ -46,9 +46,9 @@ private:
   int _getClientPoints(size_t clientID) const;
 
   const std::string& m_gameName;
-  network::ServerPacketHandler& m_networkHandler;
+  network::SupervisorPacketHandler& m_networkHandler;
 
-  zipios::ZipFile& m_plaGameFile;
+  ZipArchive::Ptr m_plaGameFile;
 
   std::vector<size_t>& m_clientsIDs;
 
@@ -60,9 +60,9 @@ private:
 
   sol::state m_luaVM;
 
-  zipios::FileEntry::pointer_t m_boardEntry;
-  zipios::FileEntry::pointer_t m_gameEntry;
-  zipios::FileEntry::pointer_t m_initEntry;
+  ZipArchiveEntry::Ptr m_boardEntry;
+  ZipArchiveEntry::Ptr m_gameEntry;
+  ZipArchiveEntry::Ptr m_initEntry;
 
   std::ostringstream m_boardScript;
   std::ostringstream m_initScript;

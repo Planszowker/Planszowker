@@ -1,0 +1,13 @@
+{
+  "name": "planszowker",
+  "version-string": "pre-alpha",
+  "dependencies": [
+    "sfml",
+    "imgui",
+    "imgui-sfml",
+    "nlohmann-json",
+    "lua",
+    "sol2",
+    "gtest"
+  ]
+}

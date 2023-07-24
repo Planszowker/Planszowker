@@ -9,7 +9,8 @@
 #include <unordered_map>
 #include <deque>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
+#include <Games/Callbacks/ICallbacks.h>
 
 #include "PacketHandler.h"
 
@@ -25,7 +26,7 @@ class ClientPacketHandler : public PacketHandler
 public:
 
   explicit ClientPacketHandler(std::atomic_bool& run, sf::TcpSocket& serverSocket);
-  ~ClientPacketHandler();
+  virtual ~ClientPacketHandler();
 
   void runInBackground() final;
   void stop() final;
@@ -33,27 +34,21 @@ public:
   bool sendPacket(sf::Packet& packet);
   std::deque<games::Reply> getReplies();
 
-  bool getClientID(size_t& id);
+  void connectCallbacks(games::ICallbacks* callbacks);
 
 private:
 
-  void _backgroundTask(std::mutex& tcpSocketsMutex) final;
+  void _backgroundTask() final;
 
   bool _requestAsset();
-  void _listAllAvailableGames();
 
   // Connection related variables
   sf::TcpSocket& m_serverSocket;
   std::deque<games::Reply> m_receivedReplies;
-  std::deque<sf::Packet> m_receivedRawPackets;
-
-  bool m_validID{false};
-  size_t m_clientID{0};
-
-  TransactionState m_transactionState;
-  std::string m_currentAssetKey;
 
   size_t m_transactionCounter {0};
+
+  games::ICallbacks* m_callbacks;
 };
 
 } // namespaces

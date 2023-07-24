@@ -1,42 +1,69 @@
 #include <AssetsReceiver.h>
 
-#include <Games/Objects.h>
+#include <Games/CommObjects.h>
+#include <GamesServer/GamesHandler.h>
 
-#include <AssetsDefines.h>
+#include <easylogging++.h>
+#include <base64.hpp>
 
 #include <iostream>
+#include <utility>
 #include <vector>
+#include <regex>
 
 namespace pla::assets {
+
+using namespace games::json_entries;
 
 std::mutex AssetsReceiver::m_assetsMutex;
 std::unordered_map<std::string, std::shared_ptr<sf::Texture>> AssetsReceiver::m_assets;
 std::vector<std::string> AssetsReceiver::m_assetsNames;
+nlohmann::json AssetsReceiver::m_boardDescription;
 
-bool AssetsReceiver::parseAndAddAsset(std::deque<sf::Packet>& packets, const std::string& assetName)
+bool AssetsReceiver::parseAndAddAssets(const nlohmann::json& json)
 {
   const std::scoped_lock assetsMutex(m_assetsMutex); // Obtain mutex
 
-  if (m_assets.find(assetName) != m_assets.end()) {
-    std::cerr << "Asset with name " << assetName << " already exists!\n";
-    return false;
-  }
+  try {
+    for (const auto& asset : json) {
+      auto assetName = asset.at(ASSET_NAME).get<std::string>();
+      auto assetType = asset.at(ASSET_TYPE).get<std::string>();
+      auto assetDataB64 = asset.at(ASSET_B64_DATA).get<std::string>();
+      std::string assetDataDecoded = base64::decode(assetDataB64);
 
-  std::cout << "Adding asset with name " << assetName << "\n";
-  std::shared_ptr<std::vector<char>> recvBuffer = std::make_shared<std::vector<char>>();
+      if(assetType == "Image") {
+        std::regex assetNameRegex {".+/Assets/(.+)"};
+        std::smatch matches;
+        if (!std::regex_search(assetName, matches, assetNameRegex)) {
+          LOG(ERROR) << "Received assets are not in a proper directory!";
+          return false;
+        }
 
-  for (auto& packet : packets) {
-    // Insert packet's data into buffer
-    recvBuffer->insert(recvBuffer->end(),
-                       static_cast<const char*>(packet.getData()),
-                       static_cast<const char*>(packet.getData()) + packet.getDataSize());
-  }
+        auto shortAssetName = matches[1].str();
 
-  std::shared_ptr<sf::Texture> _texture = std::make_shared<sf::Texture>();
-  _texture->loadFromMemory(recvBuffer->data(), recvBuffer->size());
+        LOG(DEBUG) << "[AssetsReceiver] Adding image assets with name " << shortAssetName;
+        if (m_assets.find(shortAssetName) != m_assets.end()) {
+          LOG(ERROR) << "Asset with name " << shortAssetName << " already exists!";
+          return false;
+        }
 
-  m_assets[assetName] = std::move(_texture);
-  m_assetsNames.push_back(assetName);
+        std::shared_ptr<sf::Texture> _texture = std::make_shared<sf::Texture>();
+        _texture->loadFromMemory(assetDataDecoded.c_str(), assetDataDecoded.size());
+        _texture->setSmooth(true);
+
+        m_assets.emplace(shortAssetName, std::move(_texture));
+        m_assetsNames.push_back(shortAssetName);
+
+      } else if (assetType == "BoardDescription") {
+        LOG(DEBUG) << "[AssetsReceiver] Adding board description";
+
+        m_boardDescription = std::move(nlohmann::json::parse(std::move(assetDataDecoded)));
+      } else {
+        LOG(ERROR) << "[AssetsReceiver] Unknown asset type!";
+      }
+    }
+  } catch(std::exception& e) { }
+
   return true;
 }
 

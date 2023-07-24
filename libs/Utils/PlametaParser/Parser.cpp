@@ -22,7 +22,7 @@ Parser::Parser(std::stringstream plametaContent)
     std::regex sectionRegex {"^\\[(.+)\\]$"}; // Match for [section]
     std::smatch results;
     if (std::regex_match(readLine, results, sectionRegex)) {
-      LOG(DEBUG) << "Current section: " << currentSection;
+      //LOG(DEBUG) << "Current section: " << currentSection;
       currentSection = results.str(1); // Change current key if new section has been encountered
       continue;
     }
@@ -34,7 +34,7 @@ Parser::Parser(std::stringstream plametaContent)
       auto key = results.str(1);
       auto value = results.str(2);
 
-      LOG(DEBUG) << "Key " << key << " with value " << value;
+      //LOG(DEBUG) << "Key " << key << " with value " << value;
 
       // We should check if read entry is valid
       bool valid = false;
@@ -48,17 +48,17 @@ Parser::Parser(std::stringstream plametaContent)
       }
 
       if (valid) {
-        LOG(DEBUG) << "Found valid key " << key << " with value " << value << ". Adding new entry...";
+        //LOG(DEBUG) << "Found valid key " << key << " with value " << value << ". Adding new entry...";
 
         auto sectionIt = m_entries.find(currentSection);
         if (sectionIt == m_entries.end()) {
-          LOG(DEBUG) << "We don't have that section...";
+          //LOG(DEBUG) << "We don't have that section...";
           // We don't have any entries with global key yet...
           auto [it, inserted] = m_entries.insert({currentSection, {}});
           if (inserted) {
             sectionIt = it;
           } else {
-            LOG(ERROR) << "Parser: Cannot insert entry!";
+            //LOG(ERROR) << "Parser: Cannot insert entry!";
             err_handler::ErrorLogger::throwError();
           }
         }
@@ -73,7 +73,7 @@ Parser::Parser(std::stringstream plametaContent)
 
   // Debug printout
   // TODO: Delete this section
-  for (const auto& globalKey : m_entries) {
+  /*for (const auto& globalKey : m_entries) {
     LOG(DEBUG) << "Global key " << globalKey.first;
     for (const auto& keyEntry : globalKey.second) {
       std::cout << "[" << keyEntry->getKey() << "]: ";
@@ -92,9 +92,15 @@ Parser::Parser(std::stringstream plametaContent)
           break;
       }
     }
-  }
+  }*/
 }
 
+Parser::Parser(const Parser& other)
+{
+  this->m_validEntries = other.m_validEntries;
+  this->m_entries = other.m_entries;
+  this->m_plametaContent << other.m_plametaContent.str();
+}
 
 void Parser::_setValidEntries()
 {
@@ -109,7 +115,7 @@ void Parser::_setValidEntries()
 }
 
 
-std::shared_ptr<Entry> Parser::operator[] (const std::string& key)
+std::shared_ptr<Entry> Parser::operator[] (const std::string& key) const
 {
   // Key is in given format:
   // section:entry
@@ -117,8 +123,8 @@ std::shared_ptr<Entry> Parser::operator[] (const std::string& key)
   std::string section = key.substr(0, pos);
   std::string entryKey = key.substr(pos + 1, std::string::npos);
 
-  LOG(DEBUG) << "Section: " << section;
-  LOG(DEBUG) << "Entry key: " << entryKey;
+  //LOG(DEBUG) << "Section: " << section;
+  //LOG(DEBUG) << "Entry key: " << entryKey;
 
   auto it = m_entries.find(section);
   if (it != m_entries.end()) {

@@ -1,22 +1,16 @@
 #pragma once
 
-#include <vector>
+#include <unordered_map>
 #include <string>
 #include <filesystem>
 
-#include <zipios/zipfile.hpp>
-
-#include <NetworkHandler/ServerPacketHandler.h>
+#include <ZipLib/ZipFile.h>
 
 namespace pla::games_server {
 
 class GamesHandler {
 public:
-  explicit GamesHandler(const std::string& gameName);
-
-  zipios::ZipFile& getPlagameFile() { return m_plagameFile; }
-
-  std::vector<std::string>& getAssetsEntries() { return m_assetsEntries; }
+  using AssetsContainer = std::unordered_map<std::string, std::string>; // Assets name, asset type
 
   static constexpr auto GAME_EXTENSION = ".plagame";
   static constexpr auto BOARD_DESCRIPTION_FILE = "BoardDescription.json";
@@ -25,14 +19,18 @@ public:
   static constexpr auto ASSETS_DIR = "Assets/";
   static constexpr auto LUA_SCRIPT_EXTENSION = ".lua";
   static constexpr auto LUA_SCRIPT_INIT_SUFFIX = "-init.lua";
+
+  explicit GamesHandler(std::string gameName);
+
+  ZipArchive::Ptr getPlagameFile() { return m_plagameFile; }
+
+  AssetsContainer getAssetsEntries() { return m_assetsEntries; }
 private:
   void _getAssetsList();
 
-  const std::string& m_gameName;
-
-  zipios::ZipFile m_plagameFile;
-
-  std::vector<std::string> m_assetsEntries;
+  std::string m_gameName;
+  ZipArchive::Ptr m_plagameFile;
+  AssetsContainer m_assetsEntries;
 };
 
 } // namespace

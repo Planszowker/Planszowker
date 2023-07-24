@@ -12,15 +12,16 @@ add_library(${LIB_NAME} STATIC ${SOURCES})
 
 target_link_libraries(${LIB_NAME}
                         PUBLIC NetworkHandler
+                        PUBLIC ThreadSafeQueue
                         PUBLIC Games
                         PUBLIC Rng
                         PUBLIC TimeMeasurement
                         PUBLIC CompilerUtils
                         PUBLIC AssetsManager
 
-                        PUBLIC lua5.3
+                        PUBLIC lua
 
-                        PRIVATE zipios
+                        PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
                       )
 
 target_include_directories(${LIB_NAME}
