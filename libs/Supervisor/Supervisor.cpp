@@ -451,19 +451,29 @@ void Supervisor::_gameInstancesCheckingThread()
 
     std::scoped_lock lock{m_gameInstancesMutex};
 
-//    if (not m_packetHandler) {
-//      return;
-//    }
-//
-//    auto clientIds = m_packetHandler->getClients();
-//
-//    for (auto& [creatorId, gameInstance] : m_gameInstances) {
-//      // If creatorId has disconnected
-//      if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
-//        auto& [serverHandler, _] = gameInstance;
-//        serverHandler->stop();
-//      }
-//    }
+    if (not m_packetHandler) {
+      return;
+    }
+
+    auto clientIds = m_packetHandler->getClients();
+
+    for (auto& [creatorId, gameInstance] : m_gameInstances) {
+      auto& [serverHandler, _] = gameInstance;
+
+      if (not serverHandler) {
+        continue;
+      }
+
+      // If creatorId has disconnected
+      if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
+        serverHandler->stop();
+      }
+
+      // If game has finished
+      if (serverHandler->getLogic() && serverHandler->getLogic()->isGameFinished()) {
+        serverHandler->stop();
+      }
+    }
   }
 }
 

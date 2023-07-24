@@ -34,6 +34,10 @@ public:
 
   void transmitAssetsToClient(size_t clientId);
 
+  const Logic* getLogic() const {
+    return m_logic.get();
+  }
+
 protected:
   void _internalHandling();
 
