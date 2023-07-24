@@ -163,7 +163,7 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
   LOG(DEBUG) << "Current clientID turn: " << m_currentClientsIDAndPointsIt->first;
 
   // Check if turn is available for given client
-  if (!_checkIfTurnAvailable(clientId)) {
+  if (not _checkIfTurnAvailable(clientId)) {
     sf::Packet packet;
     nlohmann::json replyJson;
     replyJson[VALID] = false;
@@ -183,20 +183,19 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
   //   - invoking <GameName>.lua script,
   //   - sending reply to clients and post-processing.
 
-  // Check if game has finished
-  if (m_finished) {
-    // Request is in JSON format. It is decoded and passed as a `request` table into LUA VM.
-    try {
-      m_luaVM.set("Request", requestType.body);
-      m_luaVM.script("Request = Json.decode(Request)");
-    } catch (sol::error& e) {
-      LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
-    }
+  // Request is in JSON format. It is decoded and passed as a `request` table into LUA VM.
+  try {
+    m_luaVM.set("Request", requestType.body);
+    m_luaVM.script("Request = Json.decode(Request)");
+  } catch (sol::error& e) {
+    LOG(ERROR) << "[LUA] Error: Exception has been raised!\n" << e.what();
+  }
 
-    // Create `Reply` table
-    m_luaVM["Reply"] = m_luaVM.create_table();
+  // Create `Reply` table
+  m_luaVM["Reply"] = m_luaVM.create_table();
 
-    // Invoking <GameName>.lua script
+  // Invoke <GameName>.lua script in case game is not yet finished.
+  if (not m_finished) {
     try {
       m_luaVM.script(m_gameScript.str());
     } catch(sol::error& e) {
@@ -204,7 +203,7 @@ void Logic::handleGameLogic(size_t clientId, const Request& requestType)
     }
   }
 
-  // Sending Reply to Clients
+  // Sending Reply to Clients.
   try {
     m_luaVM["Reply"]["GameFinished"] = m_finished;
     m_luaVM.script("ReplyModule:SendReply()");
