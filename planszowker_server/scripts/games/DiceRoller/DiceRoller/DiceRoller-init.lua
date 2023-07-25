@@ -48,13 +48,15 @@ end
 ]]
 local inspect = require('scripts.core.debug.inspect')
 function _updateButtonVisibility()
-  print(inspect(StateMachine))
   for eventName, _ in pairs(StateMachine.events) do
-    print(eventName)
-    print(StateMachine:can(eventName))
+    -- We remove `Event` from event's name - this gives us the button's name
+    -- e.g. we have a button called `Roll` and event `RollEvent`.
     local buttonID = eventName:gsub("Event", "", 1)
+
+    -- We update button's visibility based of possible translations.
+    -- E.g. if user can fire event from `RollEvent` to both `RerollEvent` and
+    -- `ConfirmEvent`, we update `Roll` and `Confirm` buttons' visibility.
     ReplyModule:SetVisibility(buttonID, StateMachine:can(eventName))
-    print('=-=-=-=-=')
   end
 end
 

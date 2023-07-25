@@ -377,7 +377,7 @@ void Supervisor::_startGameHandler(size_t clientIdKey, network::SupervisorPacket
 
 void Supervisor::_createNewGameInstance(network::SupervisorPacketHandler& packetHandler, const Lobby& lobby)
 {
-  auto gameInstanceSyncParametersPtr = std::make_shared<GameInstanceSyncParameters>();
+  auto gameInstanceSyncParametersPtr = std::make_unique<GameInstanceSyncParameters>();
 
   GameInstance gameInstance {packetHandler, gameInstanceSyncParametersPtr->queue,
                              std::string(lobby.getGameKey()), lobby.getClients(), lobby.getCreatorClientId()};
@@ -457,21 +457,32 @@ void Supervisor::_gameInstancesCheckingThread()
 
     auto clientIds = m_packetHandler->getClients();
 
-    for (auto& [creatorId, gameInstance] : m_gameInstances) {
+    for (auto it = m_gameInstances.begin(); it != m_gameInstances.end();) {
+      auto& [creatorId, gameInstance] = *it;
       auto& [serverHandler, _] = gameInstance;
 
       if (not serverHandler) {
         continue;
       }
 
+      bool terminate = false;
+
       // If creatorId has disconnected
       if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
         serverHandler->stop();
+        terminate = true;
       }
 
       // If game has finished
       if (serverHandler->getLogic() && serverHandler->getLogic()->isGameFinished()) {
         serverHandler->stop();
+        terminate = true;
+      }
+
+      if (terminate) {
+        it = m_gameInstances.erase(it);
+      } else {
+        ++it;
       }
     }
   }

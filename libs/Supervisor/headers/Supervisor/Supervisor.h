@@ -37,7 +37,7 @@ public:
   void run();
 
 private:
-  using GameInstancesTuple = std::tuple<std::shared_ptr<games_server::ServerHandler>, std::shared_ptr<games::GameInstanceSyncParameters>>;
+  using GameInstancesTuple = std::tuple<std::shared_ptr<games_server::ServerHandler>, std::unique_ptr<games::GameInstanceSyncParameters>>;
 
   void _getUserInput();
   void _registerCommand(std::shared_ptr<Command>&& command);
