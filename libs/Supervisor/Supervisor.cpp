@@ -388,6 +388,7 @@ void Supervisor::_createNewGameInstance(network::SupervisorPacketHandler& packet
 
   // If we don't have a game instance already created for given Creator ID, we create one
   if (m_gameInstances.find(gameInstance.creatorId) == m_gameInstances.end()) {
+    LOG(DEBUG) << "[Supervisor::_createNewGameInstance] Creating new game instance...";
     m_gameInstances.emplace(gameInstance.creatorId, std::make_tuple(std::move(serverHandlerPtr), std::move(gameInstanceSyncParametersPtr)));
 
     for (auto clientId : lobby.getClients()) {
@@ -469,17 +470,20 @@ void Supervisor::_gameInstancesCheckingThread()
 
       // If creatorId has disconnected
       if (std::find(clientIds.begin(), clientIds.end(), creatorId) == clientIds.end()) {
+        LOG(DEBUG) << "[Supervisor::_gameInstancesCheckingThread] Stopping game instance. Creator has disconnected";
         serverHandler->stop();
         terminate = true;
       }
 
       // If game has finished
       if (serverHandler->getLogic() && serverHandler->getLogic()->isGameFinished()) {
+        LOG(DEBUG) << "[Supervisor::_gameInstancesCheckingThread] Stopping game instance. Game has finished";
         serverHandler->stop();
         terminate = true;
       }
 
       if (terminate) {
+        LOG(DEBUG) << "[Supervisor::_gameInstancesCheckingThread] Terminating game instance...";
         it = m_gameInstances.erase(it);
       } else {
         ++it;
