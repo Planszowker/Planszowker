@@ -31,6 +31,11 @@ auto constexpr ACTION = "Action";                   ///< String: Action to be pe
 auto constexpr INFO = "Info";                       ///< String: Details about action.
 auto constexpr TURN_CLIENT_ID = "TurnClientID";     ///< String: Client ID with current turn.
 auto constexpr GAME_FINISHED = "GameFinished";      ///< Boolean: True if game has finished.
+auto constexpr PLAYERS_INFO = "PlayersInfo";        ///< Array of objects: List of players' info.
+auto constexpr PLAYER_INFO_ID = "ID";               ///< String: Player's ID.
+auto constexpr PLAYER_INFO_POINTS = "Points";       ///< Number: Player's points.
+auto constexpr EVENTS = "Events";                   ///< Array of objects: Events that should be displayed in EventLog.
+auto constexpr EVENTS_EVENT_STRING = "EventString"; ///< String: Event string.
 }
 
 enum class PacketType : uint8_t

@@ -139,30 +139,31 @@ void GameLobbyState::_guiDisplayMainGui()
 
 void GameLobbyState::_guiDisplayLobby()
 {
-  ImGui::BeginTable("Players", 1);
-  ImGui::TableSetupColumn("Player");
-  ImGui::TableHeadersRow();
-  ImGui::TableNextRow();
-  ImGui::TableNextColumn();
+  if (ImGui::BeginTable("Players", 1)) {
+    ImGui::TableSetupColumn("Player");
+    ImGui::TableHeadersRow();
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
 
-  try {
-    std::scoped_lock lock{m_lobbyHeartbeatMutex};
+    try {
+      std::scoped_lock lock{m_lobbyHeartbeatMutex};
 
-    auto clientsIDs = m_lobbyDetailsJson.at(CLIENT_IDS).get<std::vector<size_t>>();
-    auto creatorID = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();
+      auto clientsIDs = m_lobbyDetailsJson.at(CLIENT_IDS).get<std::vector<size_t>>();
+      auto creatorID = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();
 
-    for (const auto clientID: clientsIDs) {
-      if (clientID == creatorID) {
-        ImGui::Text("[Creator] %lu", clientID);
-      } else {
-        ImGui::Text("%lu", clientID);
+      for (const auto clientID: clientsIDs) {
+        if (clientID == creatorID) {
+          ImGui::Text("[Creator] %lu", clientID);
+        } else {
+          ImGui::Text("%lu", clientID);
+        }
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
       }
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
+    } catch (std::exception& e) {
     }
-  } catch (std::exception& e) {
+    ImGui::EndTable();
   }
-  ImGui::EndTable();
 
   try {
     m_creatorId = m_lobbyDetailsJson.at(CREATOR_ID).get<size_t>();

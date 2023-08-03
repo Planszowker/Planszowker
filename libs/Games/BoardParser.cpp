@@ -13,12 +13,12 @@ using namespace board_entries;
 using namespace json_entries;
 
 BoardParser::BoardParser(nlohmann::json json)
-  : m_json(std::move(json))
+  : m_boardJson(std::move(json))
 {
   std::scoped_lock lock{m_mutex};
   // Parse ActionBar
   try {
-    for (const auto& actionBarEntry : m_json[ACTION_BAR]) {
+    for (const auto& actionBarEntry : m_boardJson[ACTION_BAR]) {
       auto actionButton = std::make_shared<ActionButton>(actionBarEntry);
       std::string id = actionButton->getParams().id;
       m_actionButtons.emplace(id, std::move(actionButton));
@@ -29,7 +29,7 @@ BoardParser::BoardParser(nlohmann::json json)
 
   // Parse DestinationPoints
   try {
-    for (const auto& destinationPointEntry : m_json[DESTINATION_POINTS]) {
+    for (const auto& destinationPointEntry : m_boardJson[DESTINATION_POINTS]) {
       auto destinationPoint = std::make_shared<DestinationPoint>(destinationPointEntry);
       std::string id = destinationPoint->getParams().id;
       m_destinationPoints.emplace(id, std::move(destinationPoint));
@@ -40,7 +40,7 @@ BoardParser::BoardParser(nlohmann::json json)
 
   // Parse Entities
   try {
-    for (const auto& entityEntry : m_json[ENTITIES]) {
+    for (const auto& entityEntry : m_boardJson[ENTITIES]) {
       auto entity = std::make_shared<Entity>(entityEntry);
       std::string id = entity->getParams().id;
       m_entities.emplace(id, std::move(entity));
@@ -52,6 +52,8 @@ BoardParser::BoardParser(nlohmann::json json)
 
 
 void BoardParser::updateObjects(const nlohmann::json& updateJson) {
+  m_replyJson = updateJson;
+
   // Check if game has finished
   try {
     m_gameFinished = updateJson.at(GAME_FINISHED);

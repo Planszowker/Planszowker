@@ -1,14 +1,12 @@
 --[[
-This script is run each round.
+  his script is run each round.
 ]]--
 
-print('[LUA] Current state: ' .. StateMachine.current)
-
 --[[
-Handle state changes depending on received requests.
-DiceRoller does not require any additional checking.
+  Handle state changes depending on received requests.
+  DiceRoller does not require any additional checking.
 
-Note: See ActionRequest
+  Note: See ActionRequest
 ]]--
 if ActionRequest:IsButtonPressed('Roll') then
     StateMachine:RollEvent()

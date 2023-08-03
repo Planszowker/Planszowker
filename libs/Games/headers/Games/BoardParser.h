@@ -63,31 +63,74 @@ public:
    */
   void performUpdateAndSendToServer(network::ClientPacketHandler& packetHandler, const std::shared_ptr<Object>& objectPtr, UpdateActions updateAction);
 
+  /**
+   * Get Action Buttons.
+   *
+   * @return Map with object's ID and shared pointer to object.
+   */
   ObjectContainer getActionButtons() {
     std::scoped_lock lock{m_mutex};
     return m_actionButtons;
   };
 
+  /**
+   * Get Destination Points.
+   *
+   * @return Map with object's ID and shared pointer to object.
+   */
   ObjectContainer getDestinationPoints() {
     std::scoped_lock lock{m_mutex};
     return m_destinationPoints;
   };
 
+  /**
+   * Get Entities.
+   *
+   * @return Map with object's ID and shared pointer to object.
+   */
   ObjectContainer getEntities() {
     std::scoped_lock lock{m_mutex};
     return m_entities;
   };
 
+  /**
+   * Mark that board's update has been consumed.
+   */
   void markBoardUpdated() { m_boardUpdate = false; }
-  bool isMarkedForUpdate() { return m_boardUpdate; }
 
-  size_t getCurrentTurnClientId() { return m_currentTurnClientId; }
-  bool isGameFinished() { return m_gameFinished; }
+  /**
+   * Check whether board has been updated.
+   *
+   * @return [bool] True if board has been updated, false otherwise.
+   */
+  bool isMarkedForUpdate() const { return m_boardUpdate; }
+
+  /**
+   * Get current ClientID that has the turn.
+   *
+   * @return ClientID with current turn.
+   */
+  size_t getCurrentTurnClientId() const { return m_currentTurnClientId; }
+
+  /**
+   * Check if game is finished.
+   *
+   * @return True if game is finished, false otherwise.
+   */
+  bool isGameFinished() const { return m_gameFinished; }
+
+  /**
+   * Get raw Reply JSON.
+   *
+   * @return Const reference to raw Reply JSON.
+   */
+  nlohmann::json& getReplyJson() { return m_replyJson; }
 
 private:
   void _markBoardUpdate() { m_boardUpdate = true; }
 
-  nlohmann::json m_json;
+  nlohmann::json m_boardJson;
+  nlohmann::json m_replyJson;
 
   ObjectContainer m_actionButtons;
   ObjectContainer m_destinationPoints;
@@ -98,7 +141,7 @@ private:
 
   std::mutex m_mutex;
 
-  bool m_boardUpdate { false };
+  bool m_boardUpdate { false }; ///< Indicates whether board has been updated (client might need to update his view).
 };
 
 }

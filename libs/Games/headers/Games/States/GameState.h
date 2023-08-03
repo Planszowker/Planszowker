@@ -14,6 +14,8 @@
 #include <SFML/Graphics.hpp>
 
 /* STD */
+#include <map>
+#include <vector>
 
 namespace pla::games {
 
@@ -45,6 +47,9 @@ private:
     std::shared_ptr<Entity> entityPtr;
   };
   void _updateSprite(const EntitySpriteStruct& entitySpriteStruct);
+
+  void _updatePlayersPoints();
+  void _updateEventLog();
 
   sf::Vector2f _convertToAbsolutePosition(const sf::Vector2f& vec);
 
@@ -86,6 +91,9 @@ private:
   std::vector<EntitySpriteStruct> m_entitiesSprites;
 
   std::shared_ptr<BoardParser> m_boardParser;
+
+  std::map<std::string, size_t> m_playersPoints; ///< Container to hold players' points.
+  std::vector<std::string> m_events; ///< Container to hold events with initial size (100).
 };
 
 } // namespace

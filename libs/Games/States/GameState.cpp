@@ -7,10 +7,15 @@
 
 #include <easylogging++.h>
 
+#include <imgui.h>
+
+#include <string> // stoi
+
 namespace pla::games {
 
 using namespace assets;
 using namespace games_client;
+using namespace json_entries;
 
 GameState::GameState(games_client::GraphicalView& graphicalView, GameStateArguments gameStateArguments)
   : m_graphicalView(graphicalView)
@@ -95,6 +100,8 @@ void GameState::display()
       ImGui::EndPopup();
     }
   }
+
+  ImGui::ShowDemoWindow();
 
   ImGui::SFML::Render(m_gameWindow);
   m_gameWindow.display();
@@ -194,7 +201,6 @@ void GameState::_gameAreaDisplay()
   m_gameWindow.setView(m_gameAreaView);
 
   // We should iterate over all entities and determine whether they should be displayed.
-
   if (m_boardParser) {
     for (const auto& entitySprite : m_entitiesSprites) {
       if (m_boardParser->isMarkedForUpdate()) {
@@ -216,6 +222,12 @@ void GameState::_gameAreaDisplay()
       }
     }
 
+    // Update other things like players' points
+    if (m_boardParser->isMarkedForUpdate()) {
+      _updatePlayersPoints();
+      _updateEventLog();
+    }
+
     if(m_boardParser->isMarkedForUpdate()) {
       m_boardParser->markBoardUpdated();
     }
@@ -230,10 +242,39 @@ void GameState::_playerAreaDisplay()
   ImGui::SetNextWindowSize(ImVec2(m_playersAreaDim.x, m_playersAreaDim.y),
                            ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(m_gameAreaDim.x, 0.f), ImGuiCond_FirstUseEver);
-  ImGui::Begin("Player window", nullptr, // ImGuiWindowFlags_NoTitleBar |
-                                                           ImGuiWindowFlags_NoCollapse |
-                                                           ImGuiWindowFlags_NoResize |
-                                                           ImGuiWindowFlags_NoMove);
+  ImGui::Begin("Player window", nullptr, ImGuiWindowFlags_NoTitleBar |
+                                         ImGuiWindowFlags_NoCollapse |
+                                         ImGuiWindowFlags_NoResize |
+                                         ImGuiWindowFlags_NoMove);
+
+  if (ImGui::BeginTable("Player info", 2, ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders)) {
+    ImGui::PushTextWrapPos();
+
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+    ImGui::TableNextColumn();
+    ImGui::Text("Here will be player's avatar");
+    ImGui::TableNextColumn();
+    ImGui::Text("ID: %ld", games_client::shared::getClientInfo().getId());
+    ImGui::Text("Beside PlayerID, PlayerName will be used in the future :)");
+    ImGui::EndTable();
+
+    ImGui::PopTextWrapPos();
+  }
+
+  if (ImGui::BeginTable("Players points", 2)) {
+    ImGui::TableSetupColumn("Player ID");
+    ImGui::TableSetupColumn("Points");
+    ImGui::TableHeadersRow();
+
+    for (auto [playerID, playerPoints] : m_playersPoints) {
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", playerID.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%lu", playerPoints);
+    }
+
+    ImGui::EndTable();
+  }
 
   ImGui::End();
 }
@@ -245,10 +286,14 @@ void GameState::_logAreaDisplay()
   ImGui::SetNextWindowSize(ImVec2(m_logAreaDim.x, m_logAreaDim.y),
                            ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(m_gameAreaDim.x, m_playersAreaDim.y), ImGuiCond_FirstUseEver);
-  ImGui::Begin("Log window", nullptr, // ImGuiWindowFlags_NoTitleBar |
-                                         ImGuiWindowFlags_NoCollapse |
-                                         ImGuiWindowFlags_NoResize |
-                                         ImGuiWindowFlags_NoMove);
+  ImGui::Begin("Log window", nullptr, ImGuiWindowFlags_NoTitleBar |
+                                      ImGuiWindowFlags_NoCollapse |
+                                      ImGuiWindowFlags_NoResize |
+                                      ImGuiWindowFlags_NoMove);
+
+  for (auto event : m_events) {
+    ImGui::Text("%s", event.c_str());
+  }
 
   ImGui::End();
 }
@@ -282,6 +327,44 @@ void GameState::_updateSprite(const EntitySpriteStruct& entitySpriteStruct)
   }
   auto destinationPointPtr = dynamic_pointer_cast<DestinationPoint>(it->second);
   _spritePtr->setPosition(_convertToAbsolutePosition(destinationPointPtr->getParams().position));
+}
+
+
+void GameState::_updatePlayersPoints()
+{
+  if (m_boardParser) {
+    const auto& json = m_boardParser->getReplyJson();
+    try {
+      for (auto playerInfo : json.at(PLAYERS_INFO)) {
+        auto playerID = playerInfo[PLAYER_INFO_ID].get<std::string>();
+        auto playerPoints = playerInfo[PLAYER_INFO_POINTS].get<size_t>();
+        m_playersPoints[playerID] = playerPoints;
+      }
+    } catch (std::exception& e) {
+      LOG(DEBUG) << "[GameState::_updatePlayersPoints] Cannot retrieve players' points!";
+    }
+  }
+}
+
+
+void GameState::_updateEventLog()
+{
+  if (m_boardParser) {
+    const auto& json = m_boardParser->getReplyJson();
+    try {
+      for (auto event : json.at(EVENTS)) {
+        auto eventString = event[EVENTS_EVENT_STRING].get<std::string>();
+        m_events.push_back(eventString);
+      }
+    } catch (std::exception& e) {
+      LOG(DEBUG) << "[GameState::_updateEventLog] There were no new events!";
+    }
+
+    LOG(DEBUG) << "Current event log content";
+    for (const auto& event : m_events) {
+      LOG(DEBUG) << event;
+    }
+  }
 }
 
 

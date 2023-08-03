@@ -10,7 +10,6 @@ use them at all.
 
 Callback from changing states are convenient way to describe how game should behave in such case.
 --]]
-print('[LUA] DiceRoller init script call')
 
 StateMachine = Machine.create(
   {
@@ -30,8 +29,8 @@ Entities = GameObjects.Entities
 DiceRng = Rng.new(1,6)
 
 --[[
-Rolled dice are stored in global variable to be accessible between callbacks. This table's value is then read in the
-`confirm` state.
+  Rolled dice are stored in global variable to be accessible between callbacks. This table's value is then read in the
+  `confirm` state.
 ]]--
 RolledDice = {}
 
@@ -45,7 +44,7 @@ end
 --[[
   Function to update Action Bar buttons' visibility depending
   on possible state change.
-]]
+]]--
 local inspect = require('scripts.core.debug.inspect')
 function _updateButtonVisibility()
   for eventName, _ in pairs(StateMachine.events) do
@@ -61,13 +60,12 @@ function _updateButtonVisibility()
 end
 
 --[[
-Function that is called when we 'roll' dice
-(More precisely, it is called after we call RollEvent)
+  Function that is called when we 'roll' dice
+  (More precisely, it is called after we call RollEvent)
 
-User rolls 3 dice and gets the result. Then, one can `confirm` the rolls or do a `reroll`, if the score was too low.
+  User rolls 3 dice and gets the result. Then, one can `confirm` the rolls or do a `reroll`, if the score was too low.
 ]]--
 StateMachine['onRoll'] = function()
-    print('[LUA] onRoll was invoked')
     RolledDice = {}
     for i = 1, 3 do
         RolledDice[i] = DiceRng:GenerateRandomNumber()
@@ -78,7 +76,6 @@ StateMachine['onRoll'] = function()
                         .. RolledDice[2] .. ' '
                         .. RolledDice[3]
 
-    print(eventString)
     ReplyModule:ReportEvent(eventString)
 
     -- Update textures
@@ -92,7 +89,6 @@ end
   Function that is called when we 'reroll' dice
 ]]--
 StateMachine['onReroll'] = function()
-  print('[LUA] onReroll was invoked')
   RolledDice = {}
   for i = 1, 3 do
     RolledDice[i] = DiceRng:GenerateRandomNumber()
@@ -103,7 +99,6 @@ StateMachine['onReroll'] = function()
                       .. RolledDice[2] .. ' '
                       .. RolledDice[3]
 
-  print(eventString)
   ReplyModule:ReportEvent(eventString)
 
   _updateTextures()
@@ -117,8 +112,6 @@ end
   Function that is called when we 'confirm' rolls
 ]]--
 StateMachine['onConfirm'] = function()
-  print('[LUA] onConfirm was invoked')
-
   for i = 1, 3 do
     AddPointsToCurrentPlayer(RolledDice[i])
   end
