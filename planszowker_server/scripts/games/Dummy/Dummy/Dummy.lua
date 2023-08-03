@@ -1,1 +1,0 @@
-print('[LUA] Dummy exec...')

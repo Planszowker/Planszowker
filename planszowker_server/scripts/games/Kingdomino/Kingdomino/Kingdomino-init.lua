@@ -1,0 +1,1 @@
+print('[LUA] Kingdomino init...')

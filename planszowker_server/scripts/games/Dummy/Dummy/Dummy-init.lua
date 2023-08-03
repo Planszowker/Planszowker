@@ -1,1 +1,0 @@
-print('[LUA] Dummy init...')

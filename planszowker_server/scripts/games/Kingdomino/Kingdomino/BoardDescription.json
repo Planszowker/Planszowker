@@ -1,0 +1,514 @@
+{
+  "Board": "default",
+
+  "PlayersViews": {
+    "Side": "Bottom",
+    "Size": "1.0x0.4"
+  },
+
+  "DestinationPoints": [
+    {
+      "ID": "Castle",
+      "Position": "0.4x0.3"
+    },
+    {
+      "ID": "DominoChoose1",
+      "Position": "0.8x0.1"
+    },
+    {
+      "ID": "DominoChoose2",
+      "Position": "0.8x0.2"
+    },
+    {
+      "ID": "DominoChoose3",
+      "Position": "0.8x0.3"
+    },
+    {
+      "ID": "DominoChoose4",
+      "Position": "0.8x0.4"
+    }
+  ],
+
+  "Entities": [
+    {
+      "ID": "Tile01",
+      "Texture": "Tile01.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w w",
+        "Comment": "[Wheat field; Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile02",
+      "Texture": "Tile02.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w w",
+        "Comment": "[Wheat field; Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile03",
+      "Texture": "Tile03.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f f",
+        "Comment": "[Forest; Forest]"
+      }
+    },
+    {
+      "ID": "Tile04",
+      "Texture": "Tile04.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f f",
+        "Comment": "[Forest; Forest]"
+      }
+    },
+    {
+      "ID": "Tile05",
+      "Texture": "Tile05.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f f",
+        "Comment": "[Forest; Forest]"
+      }
+    },
+    {
+      "ID": "Tile06",
+      "Texture": "Tile06.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f f",
+        "Comment": "[Forest; Forest]"
+      }
+    },
+    {
+      "ID": "Tile07",
+      "Texture": "Tile07.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s s",
+        "Comment": "[Sea; Sea]"
+      }
+    },
+    {
+      "ID": "Tile08",
+      "Texture": "Tile08.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s s",
+        "Comment": "[Sea; Sea]"
+      }
+    },
+    {
+      "ID": "Tile09",
+      "Texture": "Tile09.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s s",
+        "Comment": "[Sea; Sea]"
+      }
+    },
+    {
+      "ID": "Tile10",
+      "Texture": "Tile10.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "p p",
+        "Comment": "[Plains; Plains]"
+      }
+    },
+    {
+      "ID": "Tile11",
+      "Texture": "Tile11.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "p p",
+        "Comment": "[Plains; Plains]"
+      }
+    },
+    {
+      "ID": "Tile12",
+      "Texture": "Tile12.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "b b",
+        "Comment": "[Bog; Bog]"
+      }
+    },
+    {
+      "ID": "Tile13",
+      "Texture": "Tile13.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w f",
+        "Comment": "[Wheat field; Forest]"
+      }
+    },
+    {
+      "ID": "Tile14",
+      "Texture": "Tile14.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w s",
+        "Comment": "[Wheat field; Sea]"
+      }
+    },
+    {
+      "ID": "Tile15",
+      "Texture": "Tile15.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w p",
+        "Comment": "[Wheat field; Plains]"
+      }
+    },
+    {
+      "ID": "Tile16",
+      "Texture": "Tile16.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w b",
+        "Comment": "[Wheat field; Bog]"
+      }
+    },
+    {
+      "ID": "Tile17",
+      "Texture": "Tile17.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f s",
+        "Comment": "[Forest; Sea]"
+      }
+    },
+    {
+      "ID": "Tile18",
+      "Texture": "Tile18.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f p",
+        "Comment": "[Forest; Plains]"
+      }
+    },
+    {
+      "ID": "Tile19",
+      "Texture": "Tile19.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w1 f",
+        "Comment": "[Wheat field (1 crown); Forest]"
+      }
+    },
+    {
+      "ID": "Tile20",
+      "Texture": "Tile20.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w1 s",
+        "Comment": "[Wheat field (1 crown); Sea]"
+      }
+    },
+    {
+      "ID": "Tile21",
+      "Texture": "Tile21.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w1 p",
+        "Comment": "[Wheat field (1 crown); Plains]"
+      }
+    },
+    {
+      "ID": "Tile22",
+      "Texture": "Tile22.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w1 b",
+        "Comment": "[Wheat field (1 crown); Bog]"
+      }
+    },
+    {
+      "ID": "Tile23",
+      "Texture": "Tile23.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w1 m",
+        "Comment": "[Wheat field (1 crown); Mine]"
+      }
+    },
+    {
+      "ID": "Tile24",
+      "Texture": "Tile24.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f1 w",
+        "Comment": "[Forest (1 crown); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile25",
+      "Texture": "Tile25.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f1 w",
+        "Comment": "[Forest (1 crown); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile26",
+      "Texture": "Tile26.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f1 w",
+        "Comment": "[Forest (1 crown); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile27",
+      "Texture": "Tile27.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f1 w",
+        "Comment": "[Forest (1 crown); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile28",
+      "Texture": "Tile28.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f1 s",
+        "Comment": "[Forest (1 crown); Sea]"
+      }
+    },
+    {
+      "ID": "Tile29",
+      "Texture": "Tile29.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "f1 p",
+        "Comment": "[Forest (1 crown); Plains]"
+      }
+    },
+    {
+      "ID": "Tile30",
+      "Texture": "Tile30.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s1 w",
+        "Comment": "[Sea (1 crown); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile31",
+      "Texture": "Tile31.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s1 w",
+        "Comment": "[Sea (1 crown); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile32",
+      "Texture": "Tile32.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s1 f",
+        "Comment": "[Sea (1 crown); Forest]"
+      }
+    },
+    {
+      "ID": "Tile33",
+      "Texture": "Tile33.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s1 f",
+        "Comment": "[Sea (1 crown); Forest]"
+      }
+    },
+    {
+      "ID": "Tile34",
+      "Texture": "Tile34.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s1 f",
+        "Comment": "[Sea (1 crown); Forest]"
+      }
+    },
+    {
+      "ID": "Tile35",
+      "Texture": "Tile35.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s1 f",
+        "Comment": "[Sea (1 crown); Forest]"
+      }
+    },
+    {
+      "ID": "Tile36",
+      "Texture": "Tile36.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w p1",
+        "Comment": "[Wheat field; Plains (1 crown)]"
+      }
+    },
+    {
+      "ID": "Tile37",
+      "Texture": "Tile37.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s p1",
+        "Comment": "[Sea; Plains (1 crown)]"
+      }
+    },
+    {
+      "ID": "Tile38",
+      "Texture": "Tile38.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w b1",
+        "Comment": "[Wheat field; Bog (1 crown)]"
+      }
+    },
+    {
+      "ID": "Tile39",
+      "Texture": "Tile39.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "p b1",
+        "Comment": "[Plains; Bog (1 crown)]"
+      }
+    },
+    {
+      "ID": "Tile40",
+      "Texture": "Tile40.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "m1 w",
+        "Comment": "[Mine (1 crown); Wheat fields]"
+      }
+    },
+    {
+      "ID": "Tile41",
+      "Texture": "Tile41.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w p2",
+        "Comment": "[Wheat field; Plains (2 crowns)]"
+      }
+    },
+    {
+      "ID": "Tile42",
+      "Texture": "Tile42.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "s p2",
+        "Comment": "[Sea; Plains (2 crowns)]"
+      }
+    },
+    {
+      "ID": "Tile43",
+      "Texture": "Tile43.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w b2",
+        "Comment": "[Wheat field; Bog (2 crowns)]"
+      }
+    },
+    {
+      "ID": "Tile44",
+      "Texture": "Tile44.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "p b2",
+        "Comment": "[Plains; Bog (2 crowns)]"
+      }
+    },
+    {
+      "ID": "Tile45",
+      "Texture": "Tile45.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "m2 w",
+        "Comment": "[Mine (2 crowns); Wheat field]"
+      }
+    },
+    {
+      "ID": "Tile46",
+      "Texture": "Tile46.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "b m2",
+        "Comment": "[Bog; Mine (2 crowns)]"
+      }
+    },
+    {
+      "ID": "Tile47",
+      "Texture": "Tile47.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "b m2",
+        "Comment": "[Bog; Mine (2 crowns)]"
+      }
+    },
+    {
+      "ID": "Tile48",
+      "Texture": "Tile48.png",
+      "Size": "0.1x0.05",
+      "Visible": false,
+      "UserData": {
+        "Type": "w m3",
+        "Comment": "[Wheat field; Mine (3 crowns)]"
+      }
+    }
+  ]
+}
