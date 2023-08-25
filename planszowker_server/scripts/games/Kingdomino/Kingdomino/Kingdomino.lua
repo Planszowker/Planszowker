@@ -1,3 +1,3 @@
 print('[LUA] Kingdomino exec...')
 
-FinishGame()
+-- FinishGame()

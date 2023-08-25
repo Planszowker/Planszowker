@@ -19,6 +19,7 @@ set(SOURCES
         Objects/ActionButton.cpp
         Objects/DestinationPoint.cpp
         Objects/Entity.cpp
+        Objects/Tile.cpp
         )
 
 add_library(${LIB_NAME} STATIC ${SOURCES})

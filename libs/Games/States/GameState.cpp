@@ -115,8 +115,8 @@ void GameState::_init()
     for (auto [objectId, entityObjectPtr] : m_boardParser->getEntities()) {
       std::shared_ptr<Entity> _entityPtr = dynamic_pointer_cast<Entity>(entityObjectPtr);
 
-      auto entityParams = _entityPtr->getParams();
-      auto _texture = assets::AssetsReceiver::getTexture(entityParams.texture);
+      auto entityParams = static_cast<EntityFields*>(_entityPtr->getParams());
+      auto _texture = assets::AssetsReceiver::getTexture(entityParams->texture);
       if (!_texture) {
         LOG(ERROR) << "Texture for entity id " << objectId << " could not be found! Check BoardDescription file!";
         throw;
@@ -124,19 +124,20 @@ void GameState::_init()
       auto _spritePtr = std::make_shared<sf::Sprite>();
       _spritePtr->setTexture(*_texture);
 
-      auto newSize = _convertToAbsolutePosition(entityParams.size);
-      auto newFactor = newSize.x / _spritePtr->getGlobalBounds().width;
+      // Calculate new size
+      auto newSize = _convertToAbsolutePosition(entityParams->size);
+      sf::Vector2f newFactor(newSize.x / _spritePtr->getLocalBounds().width, newSize.y / _spritePtr->getLocalBounds().height);
       _spritePtr->setOrigin(_spritePtr->getGlobalBounds().width / 2.0, _spritePtr->getGlobalBounds().height / 2.0);
-      _spritePtr->setScale(newFactor, newFactor);
+      _spritePtr->setScale(newFactor);
 
       const auto& destinationPointMap = m_boardParser->getDestinationPoints();
-      auto it = destinationPointMap.find(entityParams.positionAsDestinationPoint);
+      auto it = destinationPointMap.find(entityParams->positionAsDestinationPoint);
       if (it == m_boardParser->getDestinationPoints().end()) {
-        LOG(ERROR) << "Destination point " << entityParams.positionAsDestinationPoint << " for entity id " << objectId << " could not be found! Check BoardDescription file!";
+        LOG(ERROR) << "Destination point " << entityParams->positionAsDestinationPoint << " for entity id " << objectId << " could not be found! Check BoardDescription file!";
         throw;
       }
       auto destinationPointPtr = dynamic_pointer_cast<DestinationPoint>(it->second);
-      _spritePtr->setPosition(_convertToAbsolutePosition(destinationPointPtr->getParams().position));
+      _spritePtr->setPosition(_convertToAbsolutePosition(static_cast<DestinationPointFields*>(destinationPointPtr->getParams())->position));
 
       EntitySpriteStruct entitySprite{
         .spritePtr = std::move(_spritePtr),
@@ -167,12 +168,12 @@ void GameState::_actionAreaDisplay()
 
     auto actionButtonsSize = static_cast<float>(std::count_if(actionButtonsMap.begin(), actionButtonsMap.end(), [](auto param){
       auto ptr = dynamic_pointer_cast<ActionButton>(param.second);
-      return ptr->getParams().visible;
+      return static_cast<ActionButtonFields*>(ptr->getParams())->visible;
     }));
 
     for (auto& [actionButtonName, objectPtr] : actionButtonsMap) {
-      auto actionButtonPtr = std::dynamic_pointer_cast<ActionButton>(objectPtr);
-      auto params = actionButtonPtr->getParams();
+      auto actionButtonPtr = dynamic_pointer_cast<ActionButton>(objectPtr);
+      auto params = static_cast<ActionButtonFields*>(actionButtonPtr->getParams());
 
       bool disabledButtons = (m_boardParser->getCurrentTurnClientId() != shared::getClientInfo().getId());
 
@@ -181,8 +182,8 @@ void GameState::_actionAreaDisplay()
       }
 
       ImGui::SameLine();
-      if (params.visible && ImGui::Button(params.displayName.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth() / actionButtonsSize, -FLT_MIN))) {
-        m_boardParser->performUpdateAndSendToServer(*m_controller.getPacketHandler(), actionButtonPtr, UpdateActions::ButtonPressed);
+      if (params->visible && ImGui::Button(params->displayName.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth() / actionButtonsSize, -FLT_MIN))) {
+        m_boardParser->performUpdateAndSendToServer(*m_controller.getPacketHandler(), actionButtonPtr, UpdateActions::ObjectPressed);
       }
 
       if (disabledButtons) {
@@ -207,7 +208,7 @@ void GameState::_gameAreaDisplay()
         _updateSprite(entitySprite);
       }
 
-      if (entitySprite.entityPtr->getParams().visible) {
+      if (static_cast<EntityFields*>(entitySprite.entityPtr->getParams())->visible) {
         m_gameWindow.draw(*entitySprite.spritePtr);
 
         // @TODO: Remove it later - used fo debugging entities
@@ -301,32 +302,37 @@ void GameState::_logAreaDisplay()
 
 void GameState::_updateSprite(const EntitySpriteStruct& entitySpriteStruct)
 {
-  auto _entityParams = entitySpriteStruct.entityPtr->getParams();
+  auto _entityParams = static_cast<EntityFields*>(entitySpriteStruct.entityPtr->getParams());
   auto& _spritePtr = entitySpriteStruct.spritePtr;
 
-  auto _updatedTexture = assets::AssetsReceiver::getTexture(_entityParams.texture);
+  auto _updatedTexture = assets::AssetsReceiver::getTexture(_entityParams->texture);
   if (!_updatedTexture) {
-    LOG(ERROR) << "Texture for entity id " << _entityParams.id << " could not be updated!";
+    LOG(ERROR) << "Texture for entity id " << _entityParams->id << " could not be updated!";
     throw;
   }
 
-  // Update texture
+  // Update texture and set scale back to 1.0
+  _spritePtr->setScale(1.f, 1.f);
   _spritePtr->setTexture(*_updatedTexture);
 
-  // Update size
-  auto newSize = _convertToAbsolutePosition(_entityParams.size);
-  auto newFactor = newSize.x / _spritePtr->getGlobalBounds().width;
+  // Calculate new size
+  auto newSize = _convertToAbsolutePosition(_entityParams->size);
+  sf::Vector2f newFactor(newSize.x / _spritePtr->getLocalBounds().width, newSize.y / _spritePtr->getLocalBounds().height);
   _spritePtr->setOrigin(_spritePtr->getGlobalBounds().width / 2.0, _spritePtr->getGlobalBounds().height / 2.0);
-  _spritePtr->setScale(newFactor, newFactor);
+  _spritePtr->setScale(newFactor);
+
+  // LOG(DEBUG) << "[GameState::_updateSprite] _spriteGlobalBounds: " << _spritePtr->getGlobalBounds().width << " " << _spritePtr->getGlobalBounds().height;
+  // LOG(DEBUG) << "[GameState::_updateSprite] newSize: " << newSize.x << " " << newSize.y;
+  // LOG(DEBUG) << "[GameState::_updateSprite] newFactor: " << newFactor;
 
   const auto& destinationPointMap = m_boardParser->getDestinationPoints();
-  auto it = destinationPointMap.find(_entityParams.positionAsDestinationPoint);
+  auto it = destinationPointMap.find(_entityParams->positionAsDestinationPoint);
   if (it == m_boardParser->getDestinationPoints().end()) {
-    LOG(ERROR) << "Destination point " << _entityParams.positionAsDestinationPoint << " for entity id " << _entityParams.positionAsDestinationPoint << " could not be updated!";
+    LOG(ERROR) << "Destination point " << _entityParams->positionAsDestinationPoint << " for entity id " << _entityParams->positionAsDestinationPoint << " could not be updated!";
     throw;
   }
   auto destinationPointPtr = dynamic_pointer_cast<DestinationPoint>(it->second);
-  _spritePtr->setPosition(_convertToAbsolutePosition(destinationPointPtr->getParams().position));
+  _spritePtr->setPosition(_convertToAbsolutePosition(static_cast<DestinationPointFields*>(destinationPointPtr->getParams())->position));
 }
 
 

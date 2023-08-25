@@ -2,7 +2,7 @@ local ActionRequest = {}
 
 local ACTIONS_REQUEST <const> = 'Actions'
 local ACTION_ENTRY <const> = 'Action'
-local INFO_ENTRY <const> = 'Info'
+local OBJECT_ID <const> = 'ID'
 
 --[[
   Check if request has actions in it.
@@ -25,15 +25,18 @@ function ActionRequest:GetActions()
 end
 
 --[[
-  Check if button with ID `buttonID` was pressed by client.
+  Check if object with ID `objectID` was pressed by client.
 
-  @param[in] buttonID Button's unique ID.
-  @return True if button with given ID was pressed, false otherwise.
+  @param[in] objectID Object's unique ID.
+  @return True if object with given ID was pressed, false otherwise.
 ]]--
-function ActionRequest:IsButtonPressed(buttonID)
+function ActionRequest:IsObjectPressed(objectID)
   if (self:IsAction() and Helper:CheckIfArray(self:GetActions())) then
+    print("[LUA-DEBUG] Action Requests received")
     for _, v in ipairs(self:GetActions()) do
-      if (v[ACTION_ENTRY] == 'ButtonPressed' and v[INFO_ENTRY] == buttonID) then
+      print("[LUA-DEBUG] Action Request: " .. v[ACTION_ENTRY] .. ", ID: " .. v[OBJECT_ID])
+      if (v[ACTION_ENTRY] == 'ObjectPressed' and v[OBJECT_ID] == objectID) then
+        print("[LUA-DEBUG] Returning true")
         return true
       end
     end

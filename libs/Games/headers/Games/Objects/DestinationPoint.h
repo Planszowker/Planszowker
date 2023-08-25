@@ -6,8 +6,7 @@
 
 namespace pla::games {
 
-struct DestinationPointFields {
-  std::string id;
+struct DestinationPointFields : public ObjectFields {
   sf::Vector2f position;
 };
 
@@ -15,7 +14,9 @@ class DestinationPoint : public Object {
 public:
   explicit DestinationPoint(nlohmann::json json);
 
-  DestinationPointFields getParams() { return m_fields; }
+  ObjectFields* getParams() final { return &m_fields; }
+
+  void setVisibility(bool) final { } // This method is not implemented in DestinationPoint object.
 private:
   DestinationPointFields m_fields;
 };

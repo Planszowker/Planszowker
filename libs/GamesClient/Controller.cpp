@@ -24,7 +24,7 @@ namespace pla::games_client {
 
 Controller::Controller(sf::TcpSocket& serverSocket)
   : m_clientPacketHandler(m_run, serverSocket)
-  , m_view(std::make_shared<GraphicalView>(*this, m_run, sf::Vector2i(1600U, 900U), "Planszowker Client"))
+  , m_view(std::make_shared<GraphicalView>(*this, m_run, sf::Vector2i(1200U, 960), "Planszowker Client"))
 {
   m_view->init();
 }

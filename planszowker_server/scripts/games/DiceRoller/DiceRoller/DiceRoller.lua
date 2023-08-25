@@ -8,11 +8,11 @@
 
   Note: See ActionRequest
 ]]--
-if ActionRequest:IsButtonPressed('Roll') then
+if ActionRequest:IsObjectPressed('Roll') then
     StateMachine:RollEvent()
-elseif ActionRequest:IsButtonPressed('Reroll') then
+elseif ActionRequest:IsObjectPressed('Reroll') then
     StateMachine:RerollEvent()
-elseif ActionRequest:IsButtonPressed('Confirm') then
+elseif ActionRequest:IsObjectPressed('Confirm') then
     StateMachine:ConfirmEvent()
 end
 

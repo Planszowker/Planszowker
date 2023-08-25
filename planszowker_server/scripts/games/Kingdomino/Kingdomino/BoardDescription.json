@@ -1,7 +1,7 @@
 {
   "Board": "default",
 
-  "PlayersViews": {
+  "PlayersView": {
     "Side": "Bottom",
     "Size": "1.0x0.4"
   },
@@ -9,7 +9,7 @@
   "DestinationPoints": [
     {
       "ID": "Castle",
-      "Position": "0.4x0.3"
+      "Position": "0.4x0.4"
     },
     {
       "ID": "DominoChoose1",
@@ -30,6 +30,46 @@
   ],
 
   "Entities": [
+    {
+      "ID": "Castle",
+      "Texture": "CastleTemp.png",
+      "Size": "0.1x0.1",
+      "Visible": true,
+      "Position": "Castle",
+      "UserData": {
+        "Comment": "[Castle]"
+      }
+    },
+
+    {
+      "ID": "DEBUG1",
+      "Texture": "CastleTemp.png",
+      "Size": "0.1x0.1",
+      "Visible": true,
+      "Position": "DominoChoose1"
+    },
+    {
+      "ID": "DEBUG2",
+      "Texture": "CastleTemp.png",
+      "Size": "0.1x0.1",
+      "Visible": true,
+      "Position": "DominoChoose2"
+    },
+    {
+      "ID": "DEBUG3",
+      "Texture": "CastleTemp.png",
+      "Size": "0.1x0.1",
+      "Visible": true,
+      "Position": "DominoChoose3"
+    },
+    {
+      "ID": "DEBUG4",
+      "Texture": "CastleTemp.png",
+      "Size": "0.1x0.1",
+      "Visible": true,
+      "Position": "DominoChoose4"
+    },
+
     {
       "ID": "Tile01",
       "Texture": "Tile01.png",
@@ -509,6 +549,117 @@
         "Type": "w m3",
         "Comment": "[Wheat field; Mine (3 crowns)]"
       }
+    }
+  ],
+
+  "Tiles": [
+    {
+      "ID": "CastleTile",
+      "Attachable": true,
+      "Size": "1x1",
+      "Rotable": false,
+      "InitialRotate": 0,
+      "AttachableSideAreas": [
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.0",
+            "x_end": "1.0",
+            "y_start": "0.0",
+            "y_end": "0.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.0",
+            "x_end": "1.0",
+            "y_start": "1.0",
+            "y_end": "1.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.0",
+            "x_end": "0.0",
+            "y_start": "0.0",
+            "y_end": "1.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "1.0",
+            "x_end": "1.0",
+            "y_start": "0.0",
+            "y_end": "1.0"
+          }
+        }    
+      ]
+    },
+    {
+      "ID": "StandardTile",
+      "Attachable": true,
+      "Size": "1x2",
+      "Rotable": true,
+      "InitialRotate": 0,
+      "AttachableSideAreas": [
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.0",
+            "x_end": "0.5",
+            "y_start": "0.0",
+            "y_end": "0.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.5",
+            "x_end": "1.0",
+            "y_start": "0.0",
+            "y_end": "0.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "1.0",
+            "x_end": "1.0",
+            "y_start": "0.0",
+            "y_end": "1.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.5",
+            "x_end": "1.0",
+            "y_start": "1.0",
+            "y_end": "1.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.0",
+            "x_end": "0.5",
+            "y_start": "1.0",
+            "y_end": "1.0"
+          }
+        },
+        {
+          "Type": "Line",
+          "Boundary": {
+            "x_start": "0.0",
+            "x_end": "0.0",
+            "y_start": "0.0",
+            "y_end": "1.0"
+          }
+        }
+      ]
     }
   ]
 }

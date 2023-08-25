@@ -9,36 +9,38 @@
 
 namespace pla::games {
 
+// Relate to and only to BoardDescription.json
 namespace board_entries {
 auto constexpr BOARD = "Board";
 auto constexpr DESTINATION_POINTS = "DestinationPoints";
 auto constexpr ENTITIES = "Entities";
 auto constexpr ACTION_BAR = "ActionBar";
+auto constexpr TILES = "Tiles";
 
 auto constexpr TEXTURE = "Texture";
 auto constexpr TYPE = "Type";
 auto constexpr ID = "ID";
 auto constexpr DISPLAY_NAME = "DisplayName";
 auto constexpr VISIBLE = "Visible";
+auto constexpr CLICKABLE = "Clickable";
 auto constexpr POSITION = "Position";
 auto constexpr SIZE = "Size";
+auto constexpr ATTACHABLE = "Attachable";
+auto constexpr ROTABLE = "Rotable";
+auto constexpr INITIAL_ROTATE = "InitialRotate";
+auto constexpr ATTACHABLE_SIDE_AREAS = "AttachableSideAreas";
+auto constexpr BOUNDARY = "Boundary";
 
-// Update
-auto constexpr BUTTON_PRESSED_UPDATE = "ButtonPressed";
-
-// Set texture update request
-auto constexpr ACTION_SET_TEXTURE = "SetTexture";
-auto constexpr ACTION_ENTITY_ID = "Entity";
-auto constexpr ACTION_TEXTURE = "Texture";
-
-// Set object's visibility
-auto constexpr ACTION_SET_VISIBILITY = "SetVisibility";
-auto constexpr ACTION_OBJECT_ID = "ObjectID";
-auto constexpr ACTION_VISIBILITY = "Visibility";
+// Boundary
+auto constexpr BOUNDARY_X_START = "x_start";
+auto constexpr BOUNDARY_Y_START = "y_start";
+auto constexpr BOUNDARY_X_END = "x_end";
+auto constexpr BOUNDARY_Y_END = "y_end";
 }
 
 enum class UpdateActions {
-  ButtonPressed,
+  ObjectPressed,
+  GetPossibleAttachmentPoints
 };
 
 class BoardParser {
@@ -135,6 +137,7 @@ private:
   ObjectContainer m_actionButtons;
   ObjectContainer m_destinationPoints;
   ObjectContainer m_entities;
+  ObjectContainer m_tiles;
 
   bool m_gameFinished {false};
   size_t m_currentTurnClientId {0};

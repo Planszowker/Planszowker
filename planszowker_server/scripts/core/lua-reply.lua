@@ -43,12 +43,12 @@ function ReplyModule:SetTexture(id, texture)
   local newIndex = #Reply['Actions'] + 1
   Reply['Actions'][newIndex] = {}
   Reply['Actions'][newIndex]['Action'] = 'SetTexture'
-  Reply['Actions'][newIndex]['Entity'] = id
+  Reply['Actions'][newIndex]['ID'] = id
   Reply['Actions'][newIndex]['Texture'] = texture
 
   assert(Reply['Actions'][newIndex] ~= nil)
   assert(Reply['Actions'][newIndex]['Action'] ~= nil)
-  assert(Reply['Actions'][newIndex]['Entity'] ~= nil)
+  assert(Reply['Actions'][newIndex]['ID'] ~= nil)
   assert(Reply['Actions'][newIndex]['Texture'] ~= nil)
 end
 
@@ -64,12 +64,12 @@ function ReplyModule:SetVisibility(id, visibility)
   local newIndex = #Reply['Actions'] + 1
   Reply['Actions'][newIndex] = {}
   Reply['Actions'][newIndex]['Action'] = 'SetVisibility'
-  Reply['Actions'][newIndex]['ObjectID'] = id
+  Reply['Actions'][newIndex]['ID'] = id
   Reply['Actions'][newIndex]['Visibility'] = visibility
 
   assert(Reply['Actions'][newIndex] ~= nil)
   assert(Reply['Actions'][newIndex]['Action'] ~= nil)
-  assert(Reply['Actions'][newIndex]['ObjectID'] ~= nil)
+  assert(Reply['Actions'][newIndex]['ID'] ~= nil)
   assert(Reply['Actions'][newIndex]['Visibility'] ~= nil)
 end
 

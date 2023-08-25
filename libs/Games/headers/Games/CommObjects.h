@@ -8,6 +8,9 @@
 namespace pla::games {
 
 namespace json_entries {
+///////////////////////////////
+// [SECTION] Generic entries //
+///////////////////////////////
 auto constexpr CREATOR_ID = "CreatorID";            ///< Number: Creator's ID of specific lobby.
 auto constexpr CLIENT_ID = "ClientID";              ///< Number: Specific Client's ID.
 auto constexpr CLIENT_IDS = "ClientIDs";            ///< Array of numbers: List of all Clients connected to the specific lobby.
@@ -25,10 +28,11 @@ auto constexpr ASSET_NAME = "AssetName";            ///< String: Asset's name.
 auto constexpr ASSET_TYPE = "AssetType";            ///< String: Type of asset ("Image", "BoardDescription").
 auto constexpr ASSET_B64_DATA = "AssetData";        ///< String: Base64 asset string.
 
-// Game specific entries
+/////////////////////////////////////
+// [SECTION] Game Specific Entries //
+/////////////////////////////////////
 auto constexpr ACTIONS = "Actions";                 ///< Array of objects: List of actions requests.
 auto constexpr ACTION = "Action";                   ///< String: Action to be performed.
-auto constexpr INFO = "Info";                       ///< String: Details about action.
 auto constexpr TURN_CLIENT_ID = "TurnClientID";     ///< String: Client ID with current turn.
 auto constexpr GAME_FINISHED = "GameFinished";      ///< Boolean: True if game has finished.
 auto constexpr PLAYERS_INFO = "PlayersInfo";        ///< Array of objects: List of players' info.
@@ -36,6 +40,60 @@ auto constexpr PLAYER_INFO_ID = "ID";               ///< String: Player's ID.
 auto constexpr PLAYER_INFO_POINTS = "Points";       ///< Number: Player's points.
 auto constexpr EVENTS = "Events";                   ///< Array of objects: Events that should be displayed in EventLog.
 auto constexpr EVENTS_EVENT_STRING = "EventString"; ///< String: Event string.
+
+
+//////////////////////////////////////
+// [SECTION] Game Specific Requests //
+//////////////////////////////////////
+/*!
+ * @brief Object Pressed action request
+ * This request is used whenever a clickable object (entity, button, etc.)
+ * is pressed.
+ *
+ * Request fields:
+ *  - ID - unique object ID
+ *
+ * @{
+ */
+auto constexpr ACTION_OBJECT_PRESSED = "ObjectPressed";   ///< Action name
+auto constexpr ACTION_OBJECT_PRESSED_OBJECT_ID = "ID";           ///< String: Object's ID that has been pressed.
+/*! @} */
+
+
+/////////////////////////////////////
+// [SECTION] Game Specific Replies //
+/////////////////////////////////////
+/*!
+ * @brief Set Texture reply
+ * This reply is received when client should update entity's
+ * texture.
+ *
+ * Reply fields:
+ *  - Entity - entity's ID
+ *  - Texture - new texture name
+ *
+ * @{
+ */
+auto constexpr ACTION_SET_TEXTURE = "SetTexture";       ///< Action name
+auto constexpr ACTION_SET_TEXTURE_ENTITY_ID = "ID";     ///< String: Entity's ID that should have updated texture.
+auto constexpr ACTION_SET_TEXTURE_TEXTURE = "Texture";  ///< String: Texture name (filename).
+/*! @} */
+
+/*!
+ * @brief Set Object's Visibility reply
+ * This reply is received when client should update object's
+ * visibility. Non-visible objects are not rendered in scene.
+ *
+ * Reply fields:
+ *  - ID - object's ID
+ *  - Visibility - whether object should be visible or not
+ *
+ * @{
+ */
+auto constexpr ACTION_SET_VISIBILITY = "SetVisibility";           ///< Action name
+auto constexpr ACTION_SET_VISIBILITY_OBJECT_ID = "ID";            ///< String: Object's ID that should have visibility updated.
+auto constexpr ACTION_SET_VISIBILITY_VISIBILITY = "Visibility";   ///< Boolean: Wheter object should be visible or not.
+/*! @} */
 }
 
 enum class PacketType : uint8_t
@@ -90,7 +148,7 @@ struct Reply
  */
 enum class SupportedAssetExtension
 {
-  // TODO
+  // @TODO
 };
 
 } // namespaces

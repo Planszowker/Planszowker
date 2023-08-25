@@ -6,20 +6,21 @@
 
 namespace pla::games {
 
-struct EntityFields {
-  std::string id;
-  std::string texture;
-  std::string positionAsDestinationPoint;
-  sf::Vector2f size;
-  bool visible;
+struct EntityFields : public ObjectFields{
+  std::string texture;                      ///< Optional, default: ""
+  std::string positionAsDestinationPoint;   ///< Optional, default: "Init"
+  sf::Vector2f size;                        ///< Optional, default: (0.0, 0.0)
+  bool visible;                             ///< Optional, default: false
+  bool clickable;                           ///< Optional, default: false
 };
 
 class Entity : public Object {
 public:
   explicit Entity(nlohmann::json json);
 
-  EntityFields getParams() { return m_fields; }
+  ObjectFields* getParams() final { return &m_fields; }
 
+  void setVisibility(bool visibility) final { m_fields.visible = visibility; }
   void updateTexture(const std::string& texture) { m_fields.texture = texture; }
 private:
   EntityFields m_fields;

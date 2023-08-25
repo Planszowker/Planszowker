@@ -3,6 +3,7 @@
 #include <Games/Objects/ActionButton.h>
 #include <Games/Objects/DestinationPoint.h>
 #include <Games/Objects/Entity.h>
+#include <Games/Objects/Tile.h>
 
 #include <easylogging++.h>
 #include <memory>
@@ -20,7 +21,7 @@ BoardParser::BoardParser(nlohmann::json json)
   try {
     for (const auto& actionBarEntry : m_boardJson[ACTION_BAR]) {
       auto actionButton = std::make_shared<ActionButton>(actionBarEntry);
-      std::string id = actionButton->getParams().id;
+      std::string id = actionButton->getParams()->id;
       m_actionButtons.emplace(id, std::move(actionButton));
     }
   } catch (std::exception& e) {
@@ -29,9 +30,15 @@ BoardParser::BoardParser(nlohmann::json json)
 
   // Parse DestinationPoints
   try {
+    // We add artificial `Init` Destination Point for these Entities that do not specify it.
+    auto initDestinationPointJson = nlohmann::json::parse(R"({
+      "ID": "Init",
+      "Position": "0.0x0.0"
+    })");
+    m_boardJson[DESTINATION_POINTS].push_back(initDestinationPointJson);
     for (const auto& destinationPointEntry : m_boardJson[DESTINATION_POINTS]) {
       auto destinationPoint = std::make_shared<DestinationPoint>(destinationPointEntry);
-      std::string id = destinationPoint->getParams().id;
+      std::string id = destinationPoint->getParams()->id;
       m_destinationPoints.emplace(id, std::move(destinationPoint));
     }
   } catch (std::exception& e) {
@@ -42,11 +49,22 @@ BoardParser::BoardParser(nlohmann::json json)
   try {
     for (const auto& entityEntry : m_boardJson[ENTITIES]) {
       auto entity = std::make_shared<Entity>(entityEntry);
-      std::string id = entity->getParams().id;
+      std::string id = entity->getParams()->id;
       m_entities.emplace(id, std::move(entity));
     }
   } catch (std::exception& e) {
     LOG(INFO) << "This game does not contain any Entities entries!";
+  }
+
+  // Parse Tiles
+  try {
+    for (const auto& tileEntry : m_boardJson[TILES]) {
+      auto tile = std::make_shared<Tile>(tileEntry);
+      std::string id = tile->getParams()->id;
+      m_tiles.emplace(id, std::move(tile));
+    }
+  } catch (std::exception& e) {
+    LOG(INFO) << "This game does not contain any Tiles entries!";
   }
 }
 
@@ -82,8 +100,8 @@ void BoardParser::updateObjects(const nlohmann::json& updateJson) {
         // Setting new texture has to have these fields defined:
         //  > Entity - entity id to which new texture should be applied,
         //  > Texture - texture name (file name) to be applied.
-        auto entity = actionEntry.at(ACTION_ENTITY_ID).get<std::string>();
-        auto texture = actionEntry.at(ACTION_TEXTURE).get<std::string>();
+        auto entity = actionEntry.at(ACTION_SET_TEXTURE_ENTITY_ID).get<std::string>();
+        auto texture = actionEntry.at(ACTION_SET_TEXTURE_TEXTURE).get<std::string>();
 
         auto entityIt = m_entities.find(entity);
         if (entityIt != m_entities.end()) {
@@ -95,8 +113,8 @@ void BoardParser::updateObjects(const nlohmann::json& updateJson) {
         // Setting object's visibility has to have these fields defined:
         //  > ObjectID - object's unique ID,
         //  > Visibility - boolean value whether the object should be visible.
-        auto button = actionEntry.at(ACTION_OBJECT_ID).get<std::string>();
-        auto visible = actionEntry.at(ACTION_VISIBILITY).get<bool>();
+        auto button = actionEntry.at(ACTION_SET_VISIBILITY_OBJECT_ID).get<std::string>();
+        auto visible = actionEntry.at(ACTION_SET_VISIBILITY_VISIBILITY).get<bool>();
 
         auto buttonIt = m_actionButtons.find(button);
         if (buttonIt != m_actionButtons.end()) {
@@ -120,12 +138,10 @@ void BoardParser::performUpdateAndSendToServer(network::ClientPacketHandler& pac
   nlohmann::json requestJson;
 
   switch (updateAction) {
-    case UpdateActions::ButtonPressed:
-      auto buttonPtr = dynamic_pointer_cast<ActionButton>(objectPtr);
-      auto params = buttonPtr->getParams();
+    case UpdateActions::ObjectPressed:
       requestJson[ACTIONS].push_back({
-        {ACTION, BUTTON_PRESSED_UPDATE},
-        {INFO, params.id}
+        {ACTION, ACTION_OBJECT_PRESSED},
+        {ACTION_OBJECT_PRESSED_OBJECT_ID, objectPtr->getParams()->id}
       });
       break;
   }

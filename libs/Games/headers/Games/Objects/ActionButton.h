@@ -4,9 +4,8 @@
 
 namespace pla::games {
 
-struct ActionButtonFields {
+struct ActionButtonFields : public ObjectFields {
   std::string type;
-  std::string id;
   std::string displayName;
   bool visible {false};
 };
@@ -15,9 +14,9 @@ class ActionButton : public Object {
 public:
   explicit ActionButton(nlohmann::json json);
 
-  ActionButtonFields getParams() { return m_fields; }
+  ObjectFields* getParams() final { return &m_fields; }
 
-  void setVisibility(bool visibility) { m_fields.visible = visibility; }
+  void setVisibility(bool visibility) final { m_fields.visible = visibility; }
 private:
   ActionButtonFields m_fields;
 };
