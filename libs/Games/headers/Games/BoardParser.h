@@ -40,7 +40,6 @@ auto constexpr BOUNDARY_Y_END = "y_end";
 
 enum class UpdateActions {
   ObjectPressed,
-  GetPossibleAttachmentPoints
 };
 
 class BoardParser {

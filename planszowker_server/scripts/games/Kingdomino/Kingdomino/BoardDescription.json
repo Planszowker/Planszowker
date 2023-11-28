@@ -12,6 +12,10 @@
       "Position": "0.4x0.4"
     },
     {
+      "ID": "DominoChooseTop",
+      "Position": "0.4x0.2"
+    },
+    {
       "ID": "DominoChoose1",
       "Position": "0.8x0.1"
     },
@@ -595,7 +599,7 @@
             "y_start": "0.0",
             "y_end": "1.0"
           }
-        }    
+        }
       ]
     },
     {
