@@ -26,7 +26,7 @@ StateMachine = Machine.create(
 Entities = GameObjects.Entities
 
 -- We want to use server's RNG, thus we need to create one.
-DiceRng = Rng.new(1,6)
+DiceRng = Rng.new(1, 6)
 
 --[[
   Rolled dice are stored in global variable to be accessible between callbacks. This table's value is then read in the
@@ -45,7 +45,6 @@ end
   Function to update Action Bar buttons' visibility depending
   on possible state change.
 ]]--
-local inspect = require('scripts.core.debug.inspect')
 function _updateButtonVisibility()
   for eventName, _ in pairs(StateMachine.events) do
     -- We remove `Event` from event's name - this gives us the button's name

@@ -95,6 +95,16 @@ public:
   };
 
   /**
+   * Get Tiles.
+   *
+   * @return Map with object's ID and shared pointer to object.
+   */
+  ObjectContainer getTiles() {
+    std::scoped_lock lock{m_mutex};
+    return m_tiles;
+  }
+
+  /**
    * Mark that board's update has been consumed.
    */
   void markBoardUpdated() { m_boardUpdate = false; }

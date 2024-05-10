@@ -62,7 +62,9 @@ Logic::Logic(std::vector<size_t>& clientIds, const std::string& gameName, networ
     m_luaVM.script("Entity = require('scripts.core.objects.entity')");
     m_luaVM.script("DestinationPoint = require('scripts.core.objects.destination-point')");
     m_luaVM.script("ActionButton = require('scripts.core.objects.action-button')");
-    m_luaVM.script("GameObjects = require('scripts.core.lua-game-objects')"); // Game Objects
+    m_luaVM.script("Tile = require('scripts.core.objects.tile')");
+    m_luaVM.script("Grid = require('scripts.core.objects.grid')");
+    m_luaVM.script("GameObjects = require('scripts.core.lua-game-objects')");
 
     // Make necessary utils visible in LUA
     auto rng = m_luaVM.new_usertype<rng::RandomGenerator>("Rng",

@@ -11,12 +11,13 @@
 
 
 ## Board Description JSON
-Describes how game's board is defined. This JSON contains informations about board itself, required entities and fixed points, and other game specific objects.
+Describes how game's board is defined. This JSON contains information about board itself, required entities and fixed points, and other game specific objects.
 
 ### Fields
 
 #### Board
 Describes board's background. If not specified, `default` is implicitly used.
+**TBD**
 
 #### PlayersView
 Describes players' view. If game need to be able to view other players' views, one can define where this view is located and how big it is.
@@ -30,12 +31,12 @@ Size of players' view in format `<X>x<Y>` (e.g. `1.0x0.4`), where:
 
 #### Destination Points
 To be considered as fixed points.
-TODO
+**TODO**
 
 #### Entities
 To be considered as sprites with given texture.
-TODO
+**TODO**
 
 #### Tiles
 To be considered as not-so-fixed points. Can be attached to other objects.
-TODO
+**TODO**

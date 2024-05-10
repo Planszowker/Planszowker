@@ -6,6 +6,8 @@
 
   @see Grid
 
+  @note Tile 3x2 means 3 columns (across X-axis) and 2 rows (across Y-axis) a.k.a. tile is column-wise.
+
   @future Other tile types
 ]]
 
@@ -16,7 +18,7 @@ local Tile = {}
 
   @param[in] size Size table (with indexes 'x' and 'y')
 --]]
-function Tile:new(size)
+function Tile:New(size)
   local tile = {}
   local metatable = {
     __index = self,
@@ -24,8 +26,11 @@ function Tile:new(size)
   }
   setmetatable(tile, metatable)
 
-  tile._size.x = size.x
-  tile._size.y = size.y
+  tile._size = {}
+  tile._size.width = size.width
+  tile._size.height = size.height
+  tile._rotation = 0
+  tile._rotable = false
 
   return tile
 end
@@ -35,6 +40,25 @@ end
 ---------------------
 function Tile:GetSize()
   return self._size
+end
+
+function Tile:SetRotation(rotation)
+  -- Accept only values divisible by 90 deg
+  if rotation % 90 == 0 and self._rotable then
+    self._rotation = rotation
+  end
+end
+
+function Tile:GetRotation()
+  return self._rotation
+end
+
+function Tile:SetRotable(rotable)
+  self._rotable = rotable
+end
+
+function Tile:IsRotable()
+  return self._rotable
 end
 
 return Tile

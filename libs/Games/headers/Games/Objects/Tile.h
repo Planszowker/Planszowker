@@ -16,7 +16,7 @@ struct TileFields : public ObjectFields {
   bool attachable;                                            ///< Optional, default: false
   sf::Vector2f size;                                          ///< Optional, default: (0.0, 0.0)
   bool rotable;                                               ///< Optional, default: false
-  int initialRotate;                                          ///< Optionalm default: 0
+  int initialRotate;                                          ///< Optional, default: 0
   std::vector<AttachableSideAreaFields> attachableSideAreas;  ///< Optional, default: {}
 };
 

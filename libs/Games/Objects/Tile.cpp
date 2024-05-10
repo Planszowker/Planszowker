@@ -14,7 +14,7 @@ Tile::Tile(nlohmann::json json)
 {
   try{
     m_fields.id = m_json.at(ID).get<std::string>();
-    m_fields.attachable = m_json.value(TEXTURE, false);
+    m_fields.attachable = m_json.value(ATTACHABLE, false);
     m_fields.rotable = m_json.value(ROTABLE, false);
     m_fields.initialRotate = m_json.value(INITIAL_ROTATE, 0);
 
