@@ -31,7 +31,7 @@ file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
         PATTERN "scripts/games/**" EXCLUDE)
 
 add_custom_target(PackGames ALL
-        COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/../python/pack_games.py ${CMAKE_CURRENT_BINARY_DIR}/scripts/games
+        COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/../python/pack_games.py ${CMAKE_CURRENT_BINARY_DIR}/scripts/games
         COMMENT "Packing games into .plagame files"
         DEPEND always_rebuild
         VERBATIM

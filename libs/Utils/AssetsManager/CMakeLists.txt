@@ -16,8 +16,7 @@ target_link_libraries(${LIB_NAME}
                         PRIVATE GamesServer
                         PRIVATE EasyLogging
                         PRIVATE Base64
-
-                        PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
+                        PRIVATE ZipLib
                       )
 
 target_include_directories(${LIB_NAME}

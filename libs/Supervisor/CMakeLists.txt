@@ -19,8 +19,7 @@ target_link_libraries(${LIB_NAME}
                         PUBLIC ThreadSafeQueue
                         PUBLIC GamesServer
                         PUBLIC TickThread
-
-                        PRIVATE ${ZIPLIB} ${ZIPLIB_BZIP2} ${ZIPLIB_LZMA} ${ZIPLIB_ZLIB}
+                        PUBLIC ZipLib
                       )
 
 target_include_directories(${LIB_NAME}

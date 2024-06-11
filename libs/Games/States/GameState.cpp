@@ -182,7 +182,7 @@ void GameState::_actionAreaDisplay()
       }
 
       ImGui::SameLine();
-      if (params->visible && ImGui::Button(params->displayName.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth() / actionButtonsSize, -FLT_MIN))) {
+      if (params->visible && ImGui::Button(params->displayName.c_str(), ImVec2(ImGui::GetContentRegionAvail().x / actionButtonsSize, -FLT_MIN))) {
         m_boardParser->performUpdateAndSendToServer(*m_controller.getPacketHandler(), actionButtonPtr, UpdateActions::ObjectPressed);
       }
 
