@@ -22,6 +22,13 @@ Then, install all required libs by running
 ./vcpkg/vcpkg install
 ```
 
+Incorporate changes made by `VCPKG` by running:
+```
+./vcpkg/vcpkg integrate install
+```
+
+Also, you may be interested in setting `VCPKG_ROOT` env variable to tell CMake where `VCPKG`'s toolchain file is located.
+
 ### Building with Ninja
 #### Configure
 ```sh

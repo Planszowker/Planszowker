@@ -30,7 +30,6 @@ public:
   explicit Controller(sf::TcpSocket& serverSocket);
 
   void run();
-  void viewCallback(std::any& object);
 
   GraphicalView* getView()
   {

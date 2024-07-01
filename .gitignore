@@ -11,3 +11,4 @@ latex/*
 */.idea/*
 cmake-build-debug/**
 vcpkg_installed/**
+build/**
